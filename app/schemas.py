@@ -1,8 +1,46 @@
 """Pydantic schemas for SitePulse AI request and response models."""
 
-from typing import List, Optional, Literal, Dict, Any
-from pydantic import BaseModel, Field, HttpUrl, field_validator
+from typing import List, Optional, Literal, Dict, Any, Union
+from pydantic import BaseModel, Field, HttpUrl, field_validator, model_validator
 from app.utils.validators import validate_url_security
+
+
+def ensure_list_of_strings(v: Any) -> List[str]:
+    """
+    Robustly normalizes arbitrary input into a clean list of non-empty strings.
+    Handles None, single strings, comma/newline-separated strings, numbers, and lists.
+    """
+    if v is None:
+        return []
+    if isinstance(v, str):
+        v_stripped = v.strip()
+        if not v_stripped:
+            return []
+        # Check for newline-delimited or comma-delimited strings
+        if "\n" in v_stripped:
+            return [line.strip().lstrip("•-*0123456789. ") for line in v_stripped.split("\n") if line.strip()]
+        if "," in v_stripped and not v_stripped.startswith("http"):
+            return [part.strip().lstrip("•-*0123456789. ") for part in v_stripped.split(",") if part.strip()]
+        return [v_stripped]
+    if isinstance(v, (list, tuple, set)):
+        result = []
+        for item in v:
+            if item is None:
+                continue
+            if isinstance(item, str):
+                s = item.strip().lstrip("•-*0123456789. ")
+                if s:
+                    result.append(s)
+            elif isinstance(item, (int, float)):
+                result.append(str(item))
+            elif isinstance(item, dict):
+                # If an item inside a string list is a dict, extract text value if possible
+                val = next((str(val).strip() for val in item.values() if isinstance(val, str) and val.strip()), "")
+                if val:
+                    result.append(val)
+        return result
+    s = str(v).strip()
+    return [s] if s else []
 
 
 # ==========================================
@@ -67,6 +105,43 @@ class BrandOverview(BaseModel):
     market_positioning: str = Field(..., description="Current strategic positioning in the market")
     improvement_opportunities: List[str] = Field(default_factory=list, description="Immediate strategic growth areas")
 
+    @model_validator(mode="before")
+    @classmethod
+    def normalize_brand_overview(cls, data: Any) -> Any:
+        if not isinstance(data, dict):
+            return data
+        normalized = dict(data)
+        normalized["name"] = normalized.get("name") or normalized.get("brand_name") or normalized.get("brand") or "Analyzed Brand"
+        normalized["business_overview"] = (
+            normalized.get("business_overview")
+            or normalized.get("overview")
+            or normalized.get("summary")
+            or normalized.get("description")
+            or "Business operations overview."
+        )
+        normalized["main_category"] = (
+            normalized.get("main_category")
+            or normalized.get("category")
+            or normalized.get("industry")
+            or "Commercial Enterprise"
+        )
+        normalized["target_market"] = (
+            normalized.get("target_market")
+            or normalized.get("market")
+            or normalized.get("target_audience")
+            or "Global & Regional Markets"
+        )
+        normalized["market_positioning"] = (
+            normalized.get("market_positioning")
+            or normalized.get("positioning")
+            or normalized.get("market_position")
+            or "Strategic Market Presence"
+        )
+        normalized["products_and_services"] = ensure_list_of_strings(normalized.get("products_and_services"))
+        normalized["competitive_advantages"] = ensure_list_of_strings(normalized.get("competitive_advantages"))
+        normalized["improvement_opportunities"] = ensure_list_of_strings(normalized.get("improvement_opportunities"))
+        return normalized
+
 
 class CompetitorItem(BaseModel):
     """Individual competitor profile with verification status."""
@@ -84,14 +159,36 @@ class CompetitorItem(BaseModel):
     )
     is_verified: bool = Field(..., description="True if verified via external search API")
 
-    @field_validator("verification_status", mode="before")
+    @model_validator(mode="before")
     @classmethod
-    def normalize_verification_status(cls, v: Any) -> str:
-        if isinstance(v, str):
-            v_lower = v.lower()
-            if "external" in v_lower or (v_lower.startswith("verified") and "unverified" not in v_lower):
-                return "verified_external_search"
-        return "ai_generated_unverified"
+    def normalize_competitor_fields(cls, data: Any) -> Any:
+        if not isinstance(data, dict):
+            return data
+        normalized = dict(data)
+        normalized["name"] = normalized.get("name") or normalized.get("competitor_name") or normalized.get("company_name") or "Industry Peer"
+        raw_url = normalized.get("website_url")
+        if raw_url is not None:
+            raw_url_str = str(raw_url).strip()
+            if raw_url_str.lower() in ("none", "null", "n/a", "", "undefined"):
+                normalized["website_url"] = None
+            else:
+                normalized["website_url"] = raw_url_str
+        normalized["category"] = normalized.get("category") or normalized.get("industry") or "Industry Competitor"
+        normalized["comparison"] = normalized.get("comparison") or normalized.get("details") or normalized.get("head_to_head") or "Direct industry competitor"
+        normalized["evidence_or_source"] = normalized.get("evidence_or_source") or normalized.get("source") or normalized.get("evidence") or "AI inference"
+        normalized["main_services"] = ensure_list_of_strings(normalized.get("main_services"))
+        normalized["strengths"] = ensure_list_of_strings(normalized.get("strengths"))
+        normalized["weaknesses"] = ensure_list_of_strings(normalized.get("weaknesses"))
+
+        # Verification status normalization
+        raw_status = str(normalized.get("verification_status", "")).lower()
+        if "external" in raw_status or (raw_status.startswith("verified") and "unverified" not in raw_status):
+            normalized["verification_status"] = "verified_external_search"
+            normalized["is_verified"] = True
+        else:
+            normalized["verification_status"] = "ai_generated_unverified"
+            normalized["is_verified"] = False
+        return normalized
 
 
 class CompetitorAnalysis(BaseModel):
@@ -109,6 +206,11 @@ class CompetitorAnalysis(BaseModel):
         default_factory=list,
         description="Market positioning opportunities where competitors are weak"
     )
+
+    @field_validator("strengths", "opportunities", mode="before")
+    @classmethod
+    def normalize_lists(cls, v: Any) -> List[str]:
+        return ensure_list_of_strings(v)
 
 
 # ==========================================
@@ -130,6 +232,33 @@ class SearchQueryItem(BaseModel):
         description="Data provenance label"
     )
 
+    @model_validator(mode="before")
+    @classmethod
+    def normalize_query_item(cls, data: Any) -> Any:
+        if not isinstance(data, dict):
+            return data
+        normalized = dict(data)
+        normalized["query"] = normalized.get("query") or normalized.get("search_query") or normalized.get("keyword") or normalized.get("term") or "High-intent search query"
+        platforms = ensure_list_of_strings(normalized.get("recommended_platforms"))
+        normalized["recommended_platforms"] = platforms if platforms else ["Google"]
+        normalized["search_intent"] = normalized.get("search_intent") or normalized.get("intent") or "Commercial"
+        normalized["business_relevance"] = (
+            normalized.get("business_relevance")
+            or normalized.get("relevance")
+            or normalized.get("why")
+            or "Targets prospective customers with high purchase or engagement intent."
+        )
+        normalized["target_audience"] = (
+            normalized.get("target_audience")
+            or normalized.get("audience")
+            or "Target Prospects & Buyers"
+        )
+        normalized["source_type"] = (
+            normalized.get("source_type")
+            or "AI-generated query recommendation (non-benchmark)"
+        )
+        return normalized
+
 
 # ==========================================
 # Module 3: SEO Improvement Recommendations
@@ -141,6 +270,18 @@ class SupportingContentItem(BaseModel):
     topic: str = Field(..., description="Proposed page title or topic focus")
     target_keyword: str = Field(..., description="Primary target keyword for this content")
     purpose: str = Field(..., description="Strategic intent and conversion value")
+
+    @model_validator(mode="before")
+    @classmethod
+    def normalize_content_item(cls, data: Any) -> Any:
+        if not isinstance(data, dict):
+            return data
+        normalized = dict(data)
+        normalized["content_type"] = normalized.get("content_type") or normalized.get("type") or "Service Landing Page"
+        normalized["topic"] = normalized.get("topic") or normalized.get("title") or "High-Value Topic"
+        normalized["target_keyword"] = normalized.get("target_keyword") or normalized.get("keyword") or normalized.get("primary_keyword") or "Target Keyword"
+        normalized["purpose"] = normalized.get("purpose") or normalized.get("objective") or normalized.get("intent") or "Capture relevant search traffic."
+        return normalized
 
 
 class TechnicalSeoHealth(BaseModel):
@@ -179,6 +320,35 @@ class SeoImprovements(BaseModel):
         description="Measured HTML technical signals from extraction"
     )
 
+    @model_validator(mode="before")
+    @classmethod
+    def normalize_seo_improvements(cls, data: Any) -> Any:
+        if not isinstance(data, dict):
+            return data
+        normalized = dict(data)
+        normalized["primary_keyword"] = normalized.get("primary_keyword") or normalized.get("main_keyword") or "Primary Target Keyword"
+        normalized["recommended_title"] = (
+            normalized.get("recommended_title")
+            or normalized.get("title_recommendation")
+            or normalized.get("title")
+            or "Optimized Brand SEO Title"
+        )
+        normalized["title_improvement_reason"] = (
+            normalized.get("title_improvement_reason")
+            or normalized.get("title_reason")
+            or "Optimized keyword density and character length for search visibility."
+        )
+        normalized["meta_description"] = (
+            normalized.get("meta_description")
+            or normalized.get("recommended_meta_description")
+            or "Optimized meta description highlighting core offerings and call to action."
+        )
+        normalized["secondary_keywords"] = ensure_list_of_strings(normalized.get("secondary_keywords"))
+        normalized["long_tail_keywords"] = ensure_list_of_strings(normalized.get("long_tail_keywords"))
+        normalized["relevant_keywords"] = ensure_list_of_strings(normalized.get("relevant_keywords"))
+        normalized["seo_observations"] = ensure_list_of_strings(normalized.get("seo_observations"))
+        return normalized
+
 
 # ==========================================
 # Module 4: Top 5 Business Services
@@ -197,12 +367,52 @@ class BusinessServiceItem(BaseModel):
         description="'extracted' if directly observed on website; 'inferred' if recommended by AI"
     )
 
-    @field_validator("identification_type", mode="before")
+    @model_validator(mode="before")
     @classmethod
-    def normalize_identification_type(cls, v: Any) -> str:
-        if isinstance(v, str) and "extract" in v.lower():
-            return "extracted"
-        return "inferred"
+    def normalize_service_item(cls, data: Any) -> Any:
+        if not isinstance(data, dict):
+            return data
+        normalized = dict(data)
+        normalized["service_name"] = (
+            normalized.get("service_name")
+            or normalized.get("name")
+            or normalized.get("title")
+            or normalized.get("service")
+            or "Core Business Service"
+        )
+        normalized["description"] = (
+            normalized.get("description")
+            or normalized.get("details")
+            or normalized.get("summary")
+            or "Comprehensive offering tailored to client requirements."
+        )
+        normalized["target_industry"] = (
+            normalized.get("target_industry")
+            or normalized.get("industry")
+            or "Relevant Commercial Sector"
+        )
+        normalized["target_customer"] = (
+            normalized.get("target_customer")
+            or normalized.get("customer")
+            or normalized.get("target_audience")
+            or "Key Decision Makers"
+        )
+        normalized["main_benefit"] = (
+            normalized.get("main_benefit")
+            or normalized.get("benefit")
+            or normalized.get("value_prop")
+            or "Improves operational performance and delivers measurable value."
+        )
+        normalized["source_evidence"] = (
+            normalized.get("source_evidence")
+            or normalized.get("evidence")
+            or normalized.get("source")
+            or "Identified from website content."
+        )
+
+        id_type = str(normalized.get("identification_type", "")).lower()
+        normalized["identification_type"] = "extracted" if "extract" in id_type else "inferred"
+        return normalized
 
 
 # ==========================================
@@ -230,12 +440,89 @@ class MarketingSegmentItem(BaseModel):
         description="True if deduced via AI reasoning rather than explicit user survey data"
     )
 
-    @field_validator("segment_type", mode="before")
+    @model_validator(mode="before")
     @classmethod
-    def normalize_segment_type(cls, v: Any) -> str:
-        if isinstance(v, str) and "second" in v.lower():
-            return "secondary"
-        return "primary"
+    def normalize_marketing_segment(cls, data: Any) -> Any:
+        """
+        Accepts:
+        - Plain string (Format A from Gemini) e.g. "Engineering Aspirants (B.Tech Applicants)"
+        - Object with segment/description keys (Format B)
+        - Full or partially formed dictionaries with alias keys
+        """
+        if isinstance(data, str):
+            s = data.strip().lstrip("•-*0123456789. ")
+            if not s:
+                raise ValueError("Marketing segment string cannot be empty")
+            return {
+                "audience_name": s,
+                "business_type": "B2B / B2C",
+                "industry": "Target Industry",
+                "main_requirements": [],
+                "problems_faced": [],
+                "business_relevance": f"Direct relevant audience segment for {s}.",
+                "suggested_marketing_channel": "Digital Outreach, Search & Social Media",
+                "segment_type": "primary",
+                "is_inferred": True,
+            }
+
+        if not isinstance(data, dict):
+            # If unexpected type (e.g. number), try converting to string if non-empty
+            s = str(data).strip()
+            if s and s != "None":
+                return cls.normalize_marketing_segment(s)
+            raise ValueError(f"Invalid input type for MarketingSegmentItem: {type(data)}")
+
+        normalized = dict(data)
+        # Handle aliases for audience_name
+        name = (
+            normalized.get("audience_name")
+            or normalized.get("segment")
+            or normalized.get("name")
+            or normalized.get("title")
+            or normalized.get("audience")
+            or normalized.get("segment_name")
+            or normalized.get("marketing_segment")
+        )
+        if isinstance(name, str):
+            name = name.strip().lstrip("•-*0123456789. ")
+        if not name:
+            # Check if there is any string value in the dict
+            fallback_val = next((str(v).strip() for v in normalized.values() if isinstance(v, str) and v.strip()), "")
+            if fallback_val:
+                name = fallback_val
+            else:
+                raise ValueError("Marketing segment object must have an audience or segment name")
+
+        normalized["audience_name"] = name
+        normalized["business_type"] = str(
+            normalized.get("business_type")
+            or normalized.get("type")
+            or "B2B / B2C"
+        )
+        normalized["industry"] = str(
+            normalized.get("industry")
+            or normalized.get("sector")
+            or "Target Industry"
+        )
+        normalized["business_relevance"] = str(
+            normalized.get("business_relevance")
+            or normalized.get("description")
+            or normalized.get("details")
+            or normalized.get("overview")
+            or f"Direct relevant audience segment for {name}."
+        )
+        normalized["suggested_marketing_channel"] = str(
+            normalized.get("suggested_marketing_channel")
+            or normalized.get("marketing_channel")
+            or normalized.get("channel")
+            or "Digital Outreach, Search & Social Media"
+        )
+        raw_segment_type = str(normalized.get("segment_type", "")).lower()
+        normalized["segment_type"] = "secondary" if "second" in raw_segment_type else "primary"
+        normalized["is_inferred"] = bool(normalized.get("is_inferred", True))
+        normalized["main_requirements"] = ensure_list_of_strings(normalized.get("main_requirements"))
+        normalized["problems_faced"] = ensure_list_of_strings(normalized.get("problems_faced"))
+        return normalized
 
 
 class TargetAudience(BaseModel):
@@ -254,6 +541,72 @@ class TargetAudience(BaseModel):
         description="Detailed segmented audience breakdowns"
     )
 
+    @field_validator(
+        "primary_audience",
+        "secondary_audience",
+        "industries",
+        "business_types",
+        "customer_profiles",
+        "geographical_focus",
+        "customer_needs",
+        "customer_challenges",
+        "potential_interests",
+        mode="before"
+    )
+    @classmethod
+    def normalize_string_lists(cls, v: Any) -> List[str]:
+        return ensure_list_of_strings(v)
+
+    @field_validator("marketing_segments", mode="before")
+    @classmethod
+    def normalize_marketing_segments(cls, v: Any) -> List[Any]:
+        """
+        Defensively normalizes marketing_segments before Pydantic model validation.
+        Supports:
+        - None or empty input -> []
+        - Single string or comma/newline-separated strings
+        - List of strings (Format A)
+        - List of dicts (Format B or standard schema)
+        - Mixed list containing strings and dicts
+        - Drops None, whitespace-only, numbers, or unconvertible items safely
+        """
+        if v is None:
+            return []
+
+        # If a single string is passed
+        if isinstance(v, str):
+            v_stripped = v.strip()
+            if not v_stripped:
+                return []
+            if "\n" in v_stripped:
+                items = [line.strip().lstrip("•-*0123456789. ") for line in v_stripped.split("\n") if line.strip()]
+            elif "," in v_stripped:
+                items = [p.strip().lstrip("•-*0123456789. ") for p in v_stripped.split(",") if p.strip()]
+            else:
+                items = [v_stripped]
+            return items
+
+        if not isinstance(v, (list, tuple, set)):
+            return []
+
+        cleaned_items = []
+        for item in v:
+            if item is None:
+                continue
+            if isinstance(item, str):
+                s = item.strip().lstrip("•-*0123456789. ")
+                if s:
+                    cleaned_items.append(s)
+            elif isinstance(item, dict):
+                # Ensure the dict has some meaningful content
+                if any(v for v in item.values() if v is not None and str(v).strip()):
+                    cleaned_items.append(item)
+            elif isinstance(item, MarketingSegmentItem):
+                cleaned_items.append(item)
+            # Numbers, booleans, and nulls without context are safely skipped
+
+        return cleaned_items
+
 
 # ==========================================
 # Aggregate API Response Schemas (Section 7)
@@ -264,6 +617,28 @@ class BrandSummaryInfo(BaseModel):
     name: str = Field(..., description="Detected business or brand name")
     category: str = Field(..., description="Detected business category")
     summary: str = Field(..., description="Concise business overview")
+
+    @model_validator(mode="before")
+    @classmethod
+    def normalize_brand_summary(cls, data: Any) -> Any:
+        if not isinstance(data, dict):
+            return data
+        normalized = dict(data)
+        normalized["name"] = normalized.get("name") or normalized.get("brand_name") or normalized.get("brand") or "Analyzed Business"
+        normalized["category"] = (
+            normalized.get("category")
+            or normalized.get("main_category")
+            or normalized.get("industry")
+            or "Commercial Enterprise"
+        )
+        normalized["summary"] = (
+            normalized.get("summary")
+            or normalized.get("business_overview")
+            or normalized.get("overview")
+            or normalized.get("description")
+            or "Business summary and positioning analysis."
+        )
+        return normalized
 
 
 class AnalysisContainer(BaseModel):
@@ -305,4 +680,4 @@ class ErrorResponse(BaseModel):
     success: bool = False
     error: str = Field(..., description="Human-readable error description")
     error_code: str = Field(..., description="Machine-readable error identifier")
-    detail: Optional[str] = None
+    detail: Optional[Any] = None

@@ -49,6 +49,14 @@ class LLMRateLimitError(LLMServiceError):
         super().__init__(message, status_code=429)
 
 
+class AIOutputValidationError(LLMServiceError):
+    """Raised when Gemini output fails schema validation even after repair."""
+    def __init__(self, message: str, detail: Optional[str] = None):
+        super().__init__(message, status_code=502)
+        self.error_code = "AI_OUTPUT_VALIDATION_ERROR"
+        self.detail = detail or "The AI generated an invalid data format that could not be repaired."
+
+
 class LLMService:
     """Service wrapper for Google Gemini API."""
 
@@ -121,6 +129,17 @@ STRICT INSTRUCTIONS:
 4. Exactly 5 items for 'target_search_queries' covering platforms: Google, Facebook, Instagram, LinkedIn, and X (Twitter).
 5. Exactly 5 items for 'top_services'. Prioritize offerings explicitly mentioned on the website. If fewer than 5 exist, clearly label the remaining as identification_type='inferred'.
 6. In 'competitors', provide at least 3 relevant competitors.{external_comp_note}
+7. In 'target_audience.marketing_segments', you MUST return a list of JSON OBJECTS (NEVER plain strings).
+   Each object MUST have:
+   - "audience_name": name of the audience persona / segment (string)
+   - "business_type": e.g. "B2B", "B2C", "Enterprise", "Students" (string)
+   - "industry": target sector (string)
+   - "main_requirements": list of strings
+   - "problems_faced": list of strings
+   - "business_relevance": why this business solves their need (string)
+   - "suggested_marketing_channel": acquisition channel (string)
+   - "segment_type": "primary" or "secondary"
+   - "is_inferred": boolean (true/false)
 
 WEBSITE EXTRACTED DATA:
 - Target URL: {extracted.url}
@@ -252,6 +271,62 @@ You must return a JSON object with this exact top-level structure:
 """
         return prompt
 
+    def _execute_gemini_call(self, prompt: str) -> str:
+        """Executes Gemini API call with transient error retry."""
+        sdk_type, handler = self._get_client_or_model()
+        max_attempts = 2
+        for attempt in range(max_attempts):
+            try:
+                if sdk_type == "genai_client":
+                    response = handler.models.generate_content(
+                        model=self.model_name,
+                        contents=prompt,
+                        config={"response_mime_type": "application/json"}
+                    )
+                    return response.text or ""
+                else:
+                    response = handler.generate_content(prompt)
+                    return response.text or ""
+            except Exception as exc:
+                err_msg = str(exc)
+                if "429" in err_msg or "ResourceExhausted" in err_msg or "quota" in err_msg.lower():
+                    raise LLMRateLimitError(f"Gemini API rate limit or quota exceeded: {err_msg}")
+                if "API_KEY_INVALID" in err_msg or "401" in err_msg or "403" in err_msg:
+                    raise LLMConfigurationError(f"Gemini API key is invalid or unauthorized: {err_msg}")
+                if attempt < max_attempts - 1:
+                    logger.warning(
+                        f"Transient error calling Gemini (attempt {attempt + 1}/{max_attempts}): {err_msg}. "
+                        f"Retrying in 1s..."
+                    )
+                    time.sleep(1.0)
+                    continue
+                raise LLMServiceError(f"Gemini generation error: {err_msg}")
+        return ""
+
+    def _inject_technical_and_external(
+        self,
+        analysis_dict: Dict[str, Any],
+        technical_health: TechnicalSeoHealth,
+        external_competitors: Optional[list] = None,
+    ) -> None:
+        """Injects technical SEO measurements and verified external competitors."""
+        seo_dict = analysis_dict.setdefault("seo_improvements", {})
+        existing_obs = seo_dict.get("seo_observations", [])
+        if not isinstance(existing_obs, list):
+            existing_obs = [str(existing_obs)]
+        for note in technical_health.notes:
+            if note not in existing_obs:
+                existing_obs.append(note)
+        seo_dict["seo_observations"] = existing_obs
+        seo_dict["technical_health"] = technical_health.model_dump()
+
+        if external_competitors:
+            comp_analysis = analysis_dict.setdefault("competitor_analysis", {})
+            current_comps = comp_analysis.get("competitors", [])
+            if not isinstance(current_comps, list):
+                current_comps = []
+            comp_analysis["competitors"] = [c.model_dump() for c in external_competitors] + current_comps[:2]
+
     async def generate_analysis(
         self,
         extracted: ExtractedWebsiteData,
@@ -260,54 +335,102 @@ You must return a JSON object with this exact top-level structure:
     ) -> Tuple[BrandSummaryInfo, AnalysisContainer, Dict[str, Any]]:
         """
         Calls Google Gemini API, validates output against Pydantic schemas,
+        implements a controlled single-repair attempt on validation failure,
         and computes estimated token usage and costs.
         """
-        sdk_type, handler = self._get_client_or_model()
         prompt = self.build_prompt(extracted, technical_health, external_competitors)
-
         start_time = time.time()
-        response_text = ""
-
-        try:
-            if sdk_type == "genai_client":
-                response = handler.models.generate_content(
-                    model=self.model_name,
-                    contents=prompt,
-                    config={"response_mime_type": "application/json"}
-                )
-                response_text = response.text or ""
-            else:
-                response = handler.generate_content(prompt)
-                response_text = response.text or ""
-
-        except Exception as exc:
-            err_msg = str(exc)
-            if "429" in err_msg or "ResourceExhausted" in err_msg or "quota" in err_msg.lower():
-                raise LLMRateLimitError(f"Gemini API rate limit or quota exceeded: {err_msg}")
-            if "API_KEY_INVALID" in err_msg or "401" in err_msg or "403" in err_msg:
-                raise LLMConfigurationError(f"Gemini API key is invalid or unauthorized: {err_msg}")
-            raise LLMServiceError(f"Gemini generation error: {err_msg}")
-
+        response_text = self._execute_gemini_call(prompt)
         elapsed_time = round(time.time() - start_time, 2)
 
-        # Clean JSON fences if model included them
-        clean_json_str = response_text.strip()
-        if clean_json_str.startswith("```"):
-            clean_json_str = re.sub(r"^```(?:json)?\s*", "", clean_json_str)
-            clean_json_str = re.sub(r"\s*```$", "", clean_json_str)
+        def _clean_and_parse_json(raw_text: str) -> Dict[str, Any]:
+            clean_str = raw_text.strip()
+            if clean_str.startswith("```"):
+                clean_str = re.sub(r"^```(?:json)?\s*", "", clean_str)
+                clean_str = re.sub(r"\s*```$", "", clean_str)
+            return json.loads(clean_str)
+
+        parsed_json = None
+        parse_or_val_error = None
+        analysis_container = None
 
         try:
-            parsed_json = json.loads(clean_json_str)
-        except json.JSONDecodeError as jde:
-            logger.error(f"Failed to parse Gemini output as JSON: {jde}. Raw text: {response_text[:300]}")
-            raise LLMServiceError(
-                f"Gemini returned invalid JSON structure: {str(jde)}",
-                status_code=502
+            parsed_json = _clean_and_parse_json(response_text)
+        except Exception as e:
+            parse_or_val_error = f"JSON decoding error: {str(e)}"
+
+        if parsed_json is not None:
+            try:
+                analysis_dict = parsed_json.get("analysis", {})
+                self._inject_technical_and_external(analysis_dict, technical_health, external_competitors)
+                analysis_container = self._repair_and_validate(analysis_dict, extracted, technical_health)
+            except Exception as e:
+                parse_or_val_error = f"Schema validation error: {str(e)}"
+                parsed_json = None
+
+        # Controlled Repair Attempt if initial response failed parsing or schema validation
+        if parsed_json is None or analysis_container is None:
+            logger.warning(
+                f"Initial Gemini output failed validation: {parse_or_val_error}. "
+                f"Triggering controlled repair prompt..."
             )
+            repair_prompt = f"""You previously returned an analysis that failed validation against our strict schema:
+ERROR:
+{parse_or_val_error}
 
-        # Validate Brand info
+ORIGINAL EXTRACTED DATA SUMMARY:
+- Target URL: {extracted.url}
+- Title: {extracted.title}
+- Main Business: {extracted.business_name or extracted.title}
+
+CRITICAL SCHEMA REQUIREMENTS TO FIX:
+1. 'target_audience.marketing_segments' MUST be a JSON array of OBJECTS, NOT a list of plain strings.
+   Each object MUST have these exact fields:
+   - "audience_name": string (name of the segment)
+   - "business_type": string (e.g. "B2B", "B2C", "Enterprise", "Students")
+   - "industry": string
+   - "main_requirements": array of strings
+   - "problems_faced": array of strings
+   - "business_relevance": string
+   - "suggested_marketing_channel": string
+   - "segment_type": "primary" or "secondary"
+   - "is_inferred": boolean
+2. 'target_search_queries' MUST have exactly 5 items.
+3. 'top_services' MUST have exactly 5 items.
+4. 'competitors' MUST have at least 3 items.
+
+Return ONLY the complete, corrected, valid JSON conforming to the original schema:
+{{
+  "brand": {{ "name": "...", "category": "...", "summary": "..." }},
+  "analysis": {{
+    "competitor_analysis": {{ ... }},
+    "target_search_queries": [ ... 5 items ... ],
+    "seo_improvements": {{ ... }},
+    "top_services": [ ... 5 items ... ],
+    "target_audience": {{ ... "marketing_segments": [ ... objects ... ] }}
+  }}
+}}
+"""
+            try:
+                repaired_response_text = self._execute_gemini_call(repair_prompt)
+                parsed_json = _clean_and_parse_json(repaired_response_text)
+                analysis_dict = parsed_json.get("analysis", {})
+                self._inject_technical_and_external(analysis_dict, technical_health, external_competitors)
+                analysis_container = self._repair_and_validate(analysis_dict, extracted, technical_health)
+                response_text += "\n" + repaired_response_text
+                logger.info("Successfully repaired AI analysis output on controlled retry.")
+            except Exception as repair_err:
+                clean_err_msg = str(repair_err).split("\n")[0]
+                logger.error(f"Controlled repair attempt failed: {clean_err_msg}")
+                raise AIOutputValidationError(
+                    message="Failed to validate AI analysis schema",
+                    detail=f"The AI output could not be validated against the required schema after repair: {clean_err_msg}"
+                )
+
+        # Validate Brand info safely
+        brand_raw = parsed_json.get("brand", {}) if isinstance(parsed_json, dict) else {}
         try:
-            brand_info = BrandSummaryInfo(**parsed_json.get("brand", {}))
+            brand_info = BrandSummaryInfo(**brand_raw)
         except Exception as e:
             logger.warning(f"Failed to parse BrandSummaryInfo: {e}. Falling back to extracted data.")
             brand_info = BrandSummaryInfo(
@@ -316,36 +439,7 @@ You must return a JSON object with this exact top-level structure:
                 summary=extracted.meta_description or "Website analyzed by SitePulse AI",
             )
 
-        # Validate Analysis container
-        analysis_dict = parsed_json.get("analysis", {})
-
-        # Ensure Technical SEO observations from extractor are merged into seo_improvements
-        seo_dict = analysis_dict.get("seo_improvements", {})
-        existing_obs = seo_dict.get("seo_observations", [])
-        for note in technical_health.notes:
-            if note not in existing_obs:
-                existing_obs.append(note)
-        seo_dict["seo_observations"] = existing_obs
-        seo_dict["technical_health"] = technical_health.model_dump()
-        analysis_dict["seo_improvements"] = seo_dict
-
-        # If external competitors were verified, inject them
-        if external_competitors:
-            comp_analysis = analysis_dict.get("competitor_analysis", {})
-            current_comps = comp_analysis.get("competitors", [])
-            # Prepend verified competitors
-            comp_analysis["competitors"] = [c.model_dump() for c in external_competitors] + current_comps[:2]
-            analysis_dict["competitor_analysis"] = comp_analysis
-
-        # Validate and defensively repair any minor schema discrepancies
-        try:
-            analysis_container = self._repair_and_validate(analysis_dict, extracted, technical_health)
-        except Exception as val_err:
-            logger.error(f"Pydantic validation failed for AnalysisContainer: {val_err}")
-            raise LLMServiceError(f"Failed to validate AI analysis schema: {str(val_err)}", status_code=502)
-
         # Estimate tokens and cost
-        # Gemini approximation: ~4 characters per token
         input_tokens = len(prompt) // 4
         output_tokens = len(response_text) // 4
         total_tokens = input_tokens + output_tokens
@@ -375,19 +469,22 @@ You must return a JSON object with this exact top-level structure:
     ) -> AnalysisContainer:
         """
         Defensive fallback: Ensures exactly 5 search queries, 5 services,
-        and at least 3 properly structured competitors are present so validation succeeds.
+        at least 3 competitors, and valid target audience structures so validation succeeds.
         """
         # Ensure competitor structure
         comp_analysis = analysis_dict.setdefault("competitor_analysis", {})
         competitors = comp_analysis.get("competitors", [])
+        if not isinstance(competitors, list):
+            competitors = []
         for comp in competitors:
-            status = str(comp.get("verification_status", "")).lower()
-            if "external" in status or (status.startswith("verified") and "unverified" not in status):
-                comp["verification_status"] = "verified_external_search"
-                comp["is_verified"] = True
-            else:
-                comp["verification_status"] = "ai_generated_unverified"
-                comp["is_verified"] = False
+            if isinstance(comp, dict):
+                status = str(comp.get("verification_status", "")).lower()
+                if "external" in status or (status.startswith("verified") and "unverified" not in status):
+                    comp["verification_status"] = "verified_external_search"
+                    comp["is_verified"] = True
+                else:
+                    comp["verification_status"] = "ai_generated_unverified"
+                    comp["is_verified"] = False
 
         if len(competitors) < 3:
             for i in range(len(competitors), 3):
@@ -407,6 +504,8 @@ You must return a JSON object with this exact top-level structure:
 
         # Ensure 5 search queries
         queries = analysis_dict.get("target_search_queries", [])
+        if not isinstance(queries, list):
+            queries = []
         if len(queries) < 5:
             platforms = ["Google", "LinkedIn", "Facebook", "Instagram", "X"]
             for i in range(len(queries), 5):
@@ -424,9 +523,12 @@ You must return a JSON object with this exact top-level structure:
 
         # Ensure 5 services
         services = analysis_dict.get("top_services", [])
+        if not isinstance(services, list):
+            services = []
         for s in services:
-            id_type = str(s.get("identification_type", "")).lower()
-            s["identification_type"] = "extracted" if "extract" in id_type else "inferred"
+            if isinstance(s, dict):
+                id_type = str(s.get("identification_type", "")).lower()
+                s["identification_type"] = "extracted" if "extract" in id_type else "inferred"
 
         if len(services) < 5:
             for i in range(len(services), 5):
@@ -442,5 +544,26 @@ You must return a JSON object with this exact top-level structure:
         elif len(services) > 5:
             services = services[:5]
         analysis_dict["top_services"] = services
+
+        # Ensure target_audience & marketing_segments
+        target_aud = analysis_dict.setdefault("target_audience", {})
+        if isinstance(target_aud, dict):
+            marketing_segments = target_aud.get("marketing_segments")
+            if not marketing_segments:
+                primary = target_aud.get("primary_audience", [])
+                p_name = primary[0] if (isinstance(primary, list) and primary) else (extracted.business_name or "Target Prospects")
+                target_aud["marketing_segments"] = [
+                    {
+                        "audience_name": str(p_name),
+                        "business_type": "B2B / B2C",
+                        "industry": comp_analysis.get("brand_overview", {}).get("main_category", "Target Industry"),
+                        "main_requirements": ["High-quality service delivery", "Reliable support"],
+                        "problems_faced": ["Identifying reputable and vetted service providers"],
+                        "business_relevance": f"Direct core audience for {extracted.business_name or 'the organization'}.",
+                        "suggested_marketing_channel": "Google Search & Direct Outreach",
+                        "segment_type": "primary",
+                        "is_inferred": True
+                    }
+                ]
 
         return AnalysisContainer(**analysis_dict)

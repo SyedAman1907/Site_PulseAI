@@ -1,29 +1,57 @@
-"""Website Content Extraction Engine using HTTPX and BeautifulSoup."""
+"""Website Content Extraction Engine using HTTPX and BeautifulSoup.
 
-import re
+Features:
+- Multi-stage extraction diagnostics:
+  URL_VALIDATION → DNS_VALIDATION → HTTP_REQUEST → REDIRECT_VALIDATION → HTML_VALIDATION → CONTENT_EXTRACTION
+- Strict SSRF and DNS security
+- Clean browser headers avoiding bot-block signatures
+- Granular error classification (DNS, Timeout, SSL, 403, 404, 429, Unsupported Content-Type)
+- Detection and graceful reporting of client-rendered JavaScript SPAs
+"""
+
 import json
 import logging
+import re
+import ssl
+import time
 from typing import Dict, List, Optional, Set, Tuple
 from urllib.parse import urljoin, urlparse
+
 import httpx
 from bs4 import BeautifulSoup, Comment
 
 from app.config import settings
 from app.schemas import ExtractedWebsiteData, TechnicalSeoHealth
-from app.utils.validators import validate_url_security, SSRFProtectionError, InvalidURLError, DNSResolutionError
+from app.utils.validators import (
+    DNSResolutionError as ValidatorDNSResolutionError,
+    InvalidURLError,
+    SSRFProtectionError,
+    validate_url_security,
+)
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("sitepulse.extractor")
 
-# Standard browser headers to avoid basic bot blocks while being polite
+# Standard desktop browser headers (mimics standard Chrome on Windows without scraper tokens)
+BROWSER_USER_AGENT = (
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+    "AppleWebKit/537.36 (KHTML, like Gecko) "
+    "Chrome/126.0.0.0 Safari/537.36"
+)
+
 DEFAULT_HEADERS = {
-    "User-Agent": (
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-        "AppleWebKit/537.36 (KHTML, like Gecko) "
-        "Chrome/124.0.0.0 Safari/537.36 (SitePulseAI Website Intelligence)"
-    ),
-    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    "User-Agent": BROWSER_USER_AGENT,
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
     "Accept-Language": "en-US,en;q=0.9",
-    "Cache-Control": "no-cache",
+    "Accept-Encoding": "gzip, deflate, br",
+    "Sec-Ch-Ua": '"Not/A)Brand";v="8", "Chromium";v="126", "Google Chrome";v="126"',
+    "Sec-Ch-Ua-Mobile": "?0",
+    "Sec-Ch-Ua-Platform": '"Windows"',
+    "Sec-Fetch-Dest": "document",
+    "Sec-Fetch-Mode": "navigate",
+    "Sec-Fetch-Site": "none",
+    "Sec-Fetch-User": "?1",
+    "Upgrade-Insecure-Requests": "1",
+    "Cache-Control": "max-age=0",
 }
 
 # Regex patterns for contact data
@@ -37,12 +65,105 @@ HIGH_VALUE_PATH_KEYWORDS = [
 ]
 
 
+# ==========================================
+# Extraction Exception Hierarchy
+# ==========================================
+
 class WebsiteExtractionError(Exception):
-    """Raised when website extraction fails due to network, HTTP, or parsing issues."""
-    def __init__(self, message: str, status_code: int = 502):
+    """Base exception for website extraction failures."""
+    def __init__(
+        self,
+        message: str,
+        status_code: int = 502,
+        error_code: str = "WEBSITE_EXTRACTION_ERROR",
+        detail: Optional[str] = None,
+    ):
         super().__init__(message)
         self.status_code = status_code
+        self.error_code = error_code
+        self.detail = detail or message
 
+
+class DNSResolutionError(WebsiteExtractionError):
+    """Raised when domain DNS lookup fails."""
+    def __init__(self, message: str, detail: Optional[str] = None):
+        super().__init__(
+            message=message,
+            status_code=400,
+            error_code="DNS_RESOLUTION_ERROR",
+            detail=detail or "Unable to resolve the provided hostname via DNS.",
+        )
+
+
+class ConnectionTimeoutError(WebsiteExtractionError):
+    """Raised when connection or data transfer times out."""
+    def __init__(self, message: str, detail: Optional[str] = None):
+        super().__init__(
+            message=message,
+            status_code=504,
+            error_code="CONNECTION_TIMEOUT",
+            detail=detail or "Connection to target website timed out.",
+        )
+
+
+class SSLVerificationError(WebsiteExtractionError):
+    """Raised when SSL/TLS certificate verification fails."""
+    def __init__(self, message: str, detail: Optional[str] = None):
+        super().__init__(
+            message=message,
+            status_code=502,
+            error_code="SSL_VERIFICATION_ERROR",
+            detail=detail or "SSL/TLS certificate verification failed for target website.",
+        )
+
+
+class Http403ForbiddenError(WebsiteExtractionError):
+    """Raised when target website returns HTTP 403 Forbidden."""
+    def __init__(self, message: str, detail: Optional[str] = None):
+        super().__init__(
+            message=message,
+            status_code=403,
+            error_code="HTTP_403_FORBIDDEN",
+            detail=detail or "Access forbidden. Target website blocks automated requests (HTTP 403).",
+        )
+
+
+class Http404NotFoundError(WebsiteExtractionError):
+    """Raised when target website returns HTTP 404 Not Found."""
+    def __init__(self, message: str, detail: Optional[str] = None):
+        super().__init__(
+            message=message,
+            status_code=404,
+            error_code="HTTP_404_NOT_FOUND",
+            detail=detail or "Target website URL was not found (HTTP 404).",
+        )
+
+
+class Http429RateLimitedError(WebsiteExtractionError):
+    """Raised when target website throttles requests with HTTP 429."""
+    def __init__(self, message: str, detail: Optional[str] = None):
+        super().__init__(
+            message=message,
+            status_code=429,
+            error_code="HTTP_429_RATE_LIMITED",
+            detail=detail or "Target website rate limit exceeded (HTTP 429).",
+        )
+
+
+class UnsupportedContentTypeError(WebsiteExtractionError):
+    """Raised when target URL does not return HTML content."""
+    def __init__(self, message: str, detail: Optional[str] = None):
+        super().__init__(
+            message=message,
+            status_code=415,
+            error_code="UNSUPPORTED_CONTENT_TYPE",
+            detail=detail or "Target URL did not return HTML content.",
+        )
+
+
+# ==========================================
+# Main Website Extractor Engine
+# ==========================================
 
 class WebsiteExtractor:
     """Robust, SSRF-safe website extractor that inspects and parses HTML content."""
@@ -54,80 +175,158 @@ class WebsiteExtractor:
     async def fetch_html(self, target_url: str) -> Tuple[str, str, int]:
         """
         Safely fetch HTML with SSRF checks on initial URL and on every redirect destination.
+
+        Diagnostics pipeline:
+        URL_VALIDATION → DNS_VALIDATION → HTTP_REQUEST → REDIRECT_VALIDATION → HTML_VALIDATION
+
         Returns: (html_text, final_effective_url, status_code)
         """
-        current_url = validate_url_security(target_url)
+        start_time = time.time()
+        current_stage = "URL_VALIDATION"
+
+        logger.info(f"[STAGE: {current_stage}] Validating input URL: '{target_url}'")
+        try:
+            current_url = validate_url_security(target_url)
+        except ValidatorDNSResolutionError as e:
+            logger.error(f"[EXTRACTION_FAILED at STAGE: DNS_VALIDATION] Hostname DNS resolution failed: {e}")
+            raise DNSResolutionError(f"DNS resolution failed for '{target_url}': {str(e)}")
+        except SSRFProtectionError as e:
+            logger.warning(f"[EXTRACTION_FAILED at STAGE: URL_VALIDATION] SSRF violation: {e}")
+            raise
+        except InvalidURLError as e:
+            logger.warning(f"[EXTRACTION_FAILED at STAGE: URL_VALIDATION] Malformed URL: {e}")
+            raise
+
         redirect_count = 0
 
-        # We manage redirects manually so we can enforce SSRF validation at every step
+        # Fine-grained timeouts: connection, read, write, pool
+        client_timeout = httpx.Timeout(
+            timeout=self.timeout,
+            connect=min(self.timeout, 10.0),
+            read=self.timeout,
+            write=10.0,
+            pool=10.0,
+        )
+        limits = httpx.Limits(max_keepalive_connections=5, max_connections=10)
+
+        # Manage redirects manually so we can enforce SSRF validation on every destination hop
         async with httpx.AsyncClient(
             headers=DEFAULT_HEADERS,
-            timeout=httpx.Timeout(self.timeout, connect=self.timeout),
+            timeout=client_timeout,
+            limits=limits,
             follow_redirects=False,
             verify=True,
         ) as client:
             while True:
+                current_stage = "HTTP_REQUEST"
+                logger.info(f"[STAGE: {current_stage}] Connecting to '{current_url}' (Timeout: {self.timeout}s)")
+                req_start = time.time()
+
                 try:
                     response = await client.get(current_url)
-                except httpx.TimeoutException:
-                    raise WebsiteExtractionError(
-                        f"Request to '{current_url}' timed out after {self.timeout}s.",
-                        status_code=504,
-                    )
+                    req_duration = round(time.time() - req_start, 2)
+                    logger.info(f"[STAGE: HTTP_REQUEST] Received response in {req_duration}s: HTTP {response.status_code}")
+                except httpx.ConnectTimeout as exc:
+                    elapsed = round(time.time() - start_time, 2)
+                    logger.error(f"[EXTRACTION_FAILED at STAGE: HTTP_REQUEST] Connection timeout after {elapsed}s for '{current_url}': {exc}")
+                    raise ConnectionTimeoutError(f"Connection to '{current_url}' timed out after {self.timeout}s.")
+                except (httpx.ReadTimeout, httpx.WriteTimeout, httpx.PoolTimeout) as exc:
+                    elapsed = round(time.time() - start_time, 2)
+                    logger.error(f"[EXTRACTION_FAILED at STAGE: HTTP_REQUEST] Read/stream timeout after {elapsed}s for '{current_url}': {exc}")
+                    raise ConnectionTimeoutError(f"Target website '{current_url}' took too long to send data (read timeout).")
+                except httpx.TimeoutException as exc:
+                    elapsed = round(time.time() - start_time, 2)
+                    logger.error(f"[EXTRACTION_FAILED at STAGE: HTTP_REQUEST] Request timeout after {elapsed}s for '{current_url}': {exc}")
+                    raise ConnectionTimeoutError(f"Request to '{current_url}' timed out after {self.timeout}s.")
+                except ssl.SSLError as exc:
+                    elapsed = round(time.time() - start_time, 2)
+                    logger.error(f"[EXTRACTION_FAILED at STAGE: HTTP_REQUEST] SSL error for '{current_url}' ({elapsed}s): {str(exc)}")
+                    raise SSLVerificationError(f"SSL/TLS certificate verification failed for '{current_url}': {str(exc)}")
                 except httpx.RequestError as exc:
+                    elapsed = round(time.time() - start_time, 2)
+                    err_str = str(exc)
+                    if "ssl" in err_str.lower() or "certificate" in err_str.lower():
+                        logger.error(f"[EXTRACTION_FAILED at STAGE: HTTP_REQUEST] SSL verification failed for '{current_url}': {err_str}")
+                        raise SSLVerificationError(f"SSL/TLS certificate verification failed for '{current_url}'.")
+                    logger.error(f"[EXTRACTION_FAILED at STAGE: HTTP_REQUEST] Connection failed for '{current_url}' ({elapsed}s): {err_str or type(exc).__name__}")
                     raise WebsiteExtractionError(
-                        f"Connection failed for '{current_url}': {str(exc)}",
+                        f"Connection failed for '{current_url}': {err_str or 'Remote host closed or refused connection'}",
                         status_code=502,
+                        error_code="WEBSITE_EXTRACTION_ERROR",
                     )
 
                 # Check redirect status
                 if response.is_redirect:
+                    current_stage = "REDIRECT_VALIDATION"
                     redirect_count += 1
                     if redirect_count > settings.MAX_REDIRECTS:
+                        logger.error(f"[EXTRACTION_FAILED at STAGE: REDIRECT_VALIDATION] Exceeded max redirects ({settings.MAX_REDIRECTS}) from '{current_url}'")
                         raise WebsiteExtractionError(
                             f"Too many redirects (limit is {settings.MAX_REDIRECTS}).",
                             status_code=400,
+                            error_code="WEBSITE_EXTRACTION_ERROR",
                         )
+
                     location = response.headers.get("location")
                     if not location:
-                        raise WebsiteExtractionError("Redirect response missing 'Location' header.", status_code=502)
+                        logger.error(f"[EXTRACTION_FAILED at STAGE: REDIRECT_VALIDATION] Missing Location header from '{current_url}'")
+                        raise WebsiteExtractionError(
+                            "Redirect response missing 'Location' header.",
+                            status_code=502,
+                            error_code="WEBSITE_EXTRACTION_ERROR",
+                        )
 
-                    # Build absolute redirect URL and validate SSRF
                     next_url = urljoin(current_url, location)
+                    logger.info(f"[STAGE: REDIRECT_VALIDATION] Hop #{redirect_count}: Redirecting to '{next_url}'")
+
                     try:
                         current_url = validate_url_security(next_url)
-                    except (SSRFProtectionError, InvalidURLError, DNSResolutionError) as err:
+                    except (SSRFProtectionError, InvalidURLError, ValidatorDNSResolutionError) as err:
+                        logger.error(f"[EXTRACTION_FAILED at STAGE: REDIRECT_VALIDATION] Disallowed redirect destination '{next_url}': {str(err)}")
                         raise WebsiteExtractionError(
                             f"Disallowed redirect destination '{next_url}': {str(err)}",
                             status_code=400,
+                            error_code="SSRF_PROTECTION_VIOLATION" if isinstance(err, SSRFProtectionError) else "WEBSITE_EXTRACTION_ERROR",
                         )
                     continue
 
                 # Process final response
-                if response.status_code == 404:
-                    raise WebsiteExtractionError(f"Target website returned 404 Not Found at '{current_url}'.", status_code=404)
+                current_stage = "HTML_VALIDATION"
+                logger.info(f"[STAGE: {current_stage}] Validating HTTP status {response.status_code} for '{current_url}'")
+
                 if response.status_code == 403:
-                    raise WebsiteExtractionError(f"Target website returned 403 Forbidden at '{current_url}'. Access denied.", status_code=403)
+                    logger.warning(f"[EXTRACTION_FAILED at STAGE: HTML_VALIDATION] HTTP 403 Forbidden at '{current_url}'")
+                    raise Http403ForbiddenError(f"Target website returned HTTP 403 Forbidden at '{current_url}'. Automated access was denied.")
+                if response.status_code == 404:
+                    logger.warning(f"[EXTRACTION_FAILED at STAGE: HTML_VALIDATION] HTTP 404 Not Found at '{current_url}'")
+                    raise Http404NotFoundError(f"Target website returned HTTP 404 Not Found at '{current_url}'.")
+                if response.status_code == 429:
+                    logger.warning(f"[EXTRACTION_FAILED at STAGE: HTML_VALIDATION] HTTP 429 Rate Limited at '{current_url}'")
+                    raise Http429RateLimitedError(f"Target website rate limit exceeded (HTTP 429) at '{current_url}'.")
                 if response.status_code >= 400:
+                    logger.warning(f"[EXTRACTION_FAILED at STAGE: HTML_VALIDATION] HTTP {response.status_code} at '{current_url}'")
                     raise WebsiteExtractionError(
                         f"Target website returned HTTP {response.status_code} at '{current_url}'.",
                         status_code=response.status_code,
+                        error_code="WEBSITE_EXTRACTION_ERROR",
                     )
 
                 # Check Content-Type
                 content_type = response.headers.get("content-type", "").lower()
                 if "text/html" not in content_type and "application/xhtml+xml" not in content_type:
-                    raise WebsiteExtractionError(
-                        f"URL did not return HTML content (Received Content-Type: '{content_type}').",
-                        status_code=415,
+                    logger.warning(f"[EXTRACTION_FAILED at STAGE: HTML_VALIDATION] Non-HTML Content-Type '{content_type}' at '{current_url}'")
+                    raise UnsupportedContentTypeError(
+                        f"URL did not return HTML content (Received Content-Type: '{content_type}')."
                     )
 
                 # Check content length
                 raw_bytes = response.content
                 if len(raw_bytes) > self.max_content_length:
+                    logger.warning(f"[EXTRACTION_FAILED at STAGE: HTML_VALIDATION] Response length {len(raw_bytes)} exceeds limit {self.max_content_length}")
                     raise WebsiteExtractionError(
                         f"Website response exceeded maximum size limit ({len(raw_bytes)} > {self.max_content_length} bytes).",
                         status_code=413,
+                        error_code="WEBSITE_EXTRACTION_ERROR",
                     )
 
                 # Decode HTML with fallback
@@ -138,15 +337,21 @@ class WebsiteExtractor:
                     html = raw_bytes.decode("utf-8", errors="replace")
 
                 if not html.strip():
-                    raise WebsiteExtractionError("Website returned completely empty content.", status_code=422)
+                    logger.warning(f"[EXTRACTION_FAILED at STAGE: HTML_VALIDATION] Empty content returned from '{current_url}'")
+                    raise WebsiteExtractionError("Website returned completely empty content.", status_code=422, error_code="WEBSITE_EXTRACTION_ERROR")
 
+                total_duration = round(time.time() - start_time, 2)
+                logger.info(f"[STAGE: HTML_VALIDATION] Successfully fetched {len(raw_bytes)} bytes in {total_duration}s from '{response.url}'")
                 return html, str(response.url), response.status_code
 
     def clean_and_extract_metadata(self, html: str, base_url: str) -> Tuple[ExtractedWebsiteData, TechnicalSeoHealth]:
         """
         Parse HTML, extract structured entities, compute technical SEO metrics,
-        and sanitize the text.
+        detect JavaScript Single-Page App (SPA) characteristics, and sanitize text.
+
+        Diagnostics stage: CONTENT_EXTRACTION
         """
+        logger.info(f"[STAGE: CONTENT_EXTRACTION] Sanitizing DOM and parsing metadata for '{base_url}'")
         soup = BeautifulSoup(html, "html.parser")
 
         # 1. Title
@@ -165,18 +370,16 @@ class WebsiteExtractor:
         if meta_kw_tag and meta_kw_tag.get("content"):
             meta_keywords = [k.strip() for k in meta_kw_tag["content"].split(",") if k.strip()]
 
-        # Brand name hints from OpenGraph or JSON-LD
+        # Brand name heuristics from OpenGraph or JSON-LD
         brand_name = ""
         og_site_name = soup.find("meta", attrs={"property": re.compile(r"^og:site_name$", re.I)})
         if og_site_name and og_site_name.get("content"):
             brand_name = og_site_name["content"].strip()
 
-        # Check Schema.org JSON-LD
         schema_location = ""
         for script_tag in soup.find_all("script", attrs={"type": "application/ld+json"}):
             try:
                 data = json.loads(script_tag.string or "")
-                # Handle @graph or direct object
                 items = data.get("@graph", [data]) if isinstance(data, dict) else [data]
                 for item in items:
                     if not isinstance(item, dict):
@@ -199,7 +402,6 @@ class WebsiteExtractor:
 
         # If brand name still empty, derive from title
         if not brand_name and title:
-            # Common patterns: "Company Name - Home" or "Product | Company Name"
             parts = re.split(r"[-|–—:]", title)
             if len(parts) > 1:
                 brand_name = parts[-1].strip() if len(parts[-1].strip()) < 30 else parts[0].strip()
@@ -262,20 +464,17 @@ class WebsiteExtractor:
         # 7. Contact Details and Social Links
         full_page_text = soup.get_text(" ")
         emails = list(set(EMAIL_REGEX.findall(full_page_text)))
-        # Filter obvious file extension matches that look like emails
         emails = [e for e in emails if not re.search(r"\.(png|jpg|jpeg|gif|svg|webp|css|js)$", e, re.I)][:5]
 
-        # Check mailto links too
         for a in soup.find_all("a", href=re.compile(r"^mailto:", re.I)):
             mail = a["href"].replace("mailto:", "").split("?")[0].strip()
             if mail and mail not in emails:
                 emails.append(mail)
 
-        # Phone numbers
         raw_phones = PHONE_REGEX.findall(full_page_text)
         phones: List[str] = []
         for p in soup.find_all("a", href=re.compile(r"^tel:", re.I)):
-            p_val = a_val = p["href"].replace("tel:", "").strip()
+            p_val = p["href"].replace("tel:", "").strip()
             if p_val and p_val not in phones:
                 phones.append(p_val)
         for rp in raw_phones:
@@ -315,7 +514,6 @@ class WebsiteExtractor:
         # Extract main text
         main_content = soup.find("main") or soup.find("article") or soup.find("body") or soup
         text_lines = [line.strip() for line in main_content.get_text("\n").splitlines()]
-        # Remove empty lines and obvious duplicate consecutive lines
         cleaned_lines: List[str] = []
         prev_line = ""
         for line in text_lines:
@@ -334,7 +532,7 @@ class WebsiteExtractor:
         if not title:
             seo_health_notes.append("Missing <title> tag on homepage.")
         elif len(title) < 20:
-            seo_health_notes.append(f"Title is very short ({len(title)} chars): '{title}'. Recommended length: 50-60 chars.")
+            seo_health_notes.append(f"Title is short ({len(title)} chars): '{title}'. Recommended length: 50-60 chars.")
         elif len(title) > 70:
             seo_health_notes.append(f"Title is long ({len(title)} chars): may be truncated in search results.")
 
@@ -355,6 +553,24 @@ class WebsiteExtractor:
 
         if len(internal_links) < 3:
             seo_health_notes.append("Low internal linking detected on homepage.")
+
+        # Check for JavaScript-heavy SPA markers
+        is_spa = False
+        if len(main_text) < 200:
+            is_spa = True
+        elif len(main_text) < 500 and soup.find("div", id=re.compile(r"^(root|app|__next)$", re.I)):
+            is_spa = True
+        elif re.search(r"enable javascript|javascript is disabled", full_page_text, re.I):
+            is_spa = True
+
+        if is_spa:
+            spa_note = (
+                "Notice: This website relies on client-side JavaScript rendering (SPA). "
+                "Static HTML contains minimal initial text; interactive dynamic components require a browser runtime."
+            )
+            seo_health_notes.append(spa_note)
+            main_text += f"\n\n[NOTICE: {spa_note}]"
+            logger.info(f"[STAGE: CONTENT_EXTRACTION] Client-side JavaScript SPA pattern detected for '{base_url}'")
 
         technical_health = TechnicalSeoHealth(
             missing_title=not bool(title),
@@ -423,7 +639,6 @@ class WebsiteExtractor:
                 sub_soup = BeautifulSoup(sub_html, "html.parser")
                 sub_title = sub_soup.find("title")
                 title_txt = sub_title.get_text(strip=True) if sub_title else ""
-                # Strip non-content
                 for el in sub_soup(["script", "style", "noscript", "svg", "nav", "footer"]):
                     el.decompose()
                 sub_text = " ".join([l.strip() for l in sub_soup.get_text("\n").splitlines() if l.strip()])

@@ -25,6 +25,9 @@ from app.schemas import (
     ExtractedWebsiteData,
     TechnicalSeoHealth,
     CompetitorItem,
+    TargetAudience,
+    MarketingSegmentItem,
+    SearchQueryItem,
 )
 from app.services.llm_service import (
     LLMConfigurationError,
@@ -59,22 +62,22 @@ MOCK_HTML_CONTENT = """
     <main>
         <h1>Next-Generation Enterprise Cloud Architecture</h1>
         <p>Accelerate your business with secure, scalable cloud infrastructure and CI/CD pipelines.</p>
-        
+
         <h2>Managed Kubernetes Infrastructure</h2>
         <p>Deploy production-ready Kubernetes clusters across AWS, GCP, and Azure with 99.99% uptime SLAs.</p>
-        
+
         <h2>Automated CI/CD DevOps Pipelines</h2>
         <p>Eliminate release bottlenecks with end-to-end automated pipelines, GitOps, and security scanning.</p>
-        
+
         <h2>Cloud Security & Compliance Audits</h2>
         <p>Ensure SOC2, HIPAA, and ISO27001 readiness with comprehensive cloud posture assessments.</p>
-        
+
         <h2>24/7 SRE Cloud Monitoring & Incident Response</h2>
         <p>Proactive observability, APM metrics, and immediate MTTR resolution for mission-critical apps.</p>
-        
+
         <h2>Legacy Migration & Microservices Modernization</h2>
         <p>Migrate monolithic architectures to cloud-native microservices seamlessly without downtime.</p>
-        
+
         <img src="/img/architecture.png" alt="Cloud Architecture Diagram">
         <img src="/img/unnamed.png">
     </main>
@@ -554,3 +557,259 @@ def test_gemini_config_error_handling(mock_llm, mock_fetch):
     err = response.json()
     assert err["success"] is False
     assert err["error_code"] == "LLM_CONFIGURATION_ERROR"
+
+
+# ==========================================
+# 11. Marketing Segments & Nested Model Validation Tests
+# ==========================================
+
+def test_marketing_segments_format_a_strings():
+    """Verify Gemini returning a list of strings (Format A) is correctly parsed into MarketingSegmentItem objects."""
+    raw_target_audience = {
+        "primary_audience": ["Students", "Aspirants"],
+        "marketing_segments": [
+            "Engineering Aspirants (B.Tech Applicants)",
+            "Management & Computer Applications (MBA/MCA) Applicants",
+            "Corporate Hiring Partners"
+        ]
+    }
+    audience = TargetAudience(**raw_target_audience)
+    assert len(audience.marketing_segments) == 3
+
+    seg1 = audience.marketing_segments[0]
+    assert seg1.audience_name == "Engineering Aspirants (B.Tech Applicants)"
+    assert seg1.business_type == "B2B / B2C"
+    assert seg1.industry == "Target Industry"
+    assert "Engineering Aspirants" in seg1.business_relevance
+    assert seg1.suggested_marketing_channel != ""
+    assert seg1.segment_type == "primary"
+    assert seg1.is_inferred is True
+
+    seg2 = audience.marketing_segments[1]
+    assert seg2.audience_name == "Management & Computer Applications (MBA/MCA) Applicants"
+
+    seg3 = audience.marketing_segments[2]
+    assert seg3.audience_name == "Corporate Hiring Partners"
+
+
+def test_marketing_segments_format_b_objects():
+    """Verify Gemini returning simplified objects with segment/description (Format B) is correctly normalized."""
+    raw_target_audience = {
+        "marketing_segments": [
+            {
+                "segment": "Engineering Aspirants",
+                "description": "Students exploring undergraduate engineering admissions."
+            },
+            {
+                "name": "MBA/MCA Applicants",
+                "description": "Applicants exploring management and computer applications."
+            },
+            {
+                "audience": "Corporate Hiring Partners",
+                "details": "Organizations interested in recruitment and institutional collaboration."
+            }
+        ]
+    }
+    audience = TargetAudience(**raw_target_audience)
+    assert len(audience.marketing_segments) == 3
+
+    assert audience.marketing_segments[0].audience_name == "Engineering Aspirants"
+    assert audience.marketing_segments[0].business_relevance == "Students exploring undergraduate engineering admissions."
+    assert audience.marketing_segments[1].audience_name == "MBA/MCA Applicants"
+    assert audience.marketing_segments[2].audience_name == "Corporate Hiring Partners"
+
+
+def test_marketing_segments_mixed_and_edge_cases():
+    """Verify mixed strings and objects, None, empty lists, whitespace, and numbers are handled defensively."""
+    # Test None
+    aud_none = TargetAudience(marketing_segments=None)
+    assert aud_none.marketing_segments == []
+
+    # Test empty list
+    aud_empty = TargetAudience(marketing_segments=[])
+    assert aud_empty.marketing_segments == []
+
+    # Test mixed list with whitespace, None, numbers, strings, and dicts
+    raw_mixed = {
+        "marketing_segments": [
+            "Valid String Segment",
+            "",
+            "   ",
+            None,
+            12345,
+            {
+                "audience_name": "Valid Dict Segment",
+                "business_type": "B2B",
+                "industry": "Education",
+                "business_relevance": "Direct recruitment match",
+                "suggested_marketing_channel": "LinkedIn"
+            }
+        ]
+    }
+    aud_mixed = TargetAudience(**raw_mixed)
+    # The valid string and valid dict should survive; empty strings and None should be stripped
+    assert len(aud_mixed.marketing_segments) >= 2
+    names = [s.audience_name for s in aud_mixed.marketing_segments]
+    assert "Valid String Segment" in names
+    assert "Valid Dict Segment" in names
+
+
+def test_string_to_list_normalization_across_nested_models():
+    """Verify comma-separated or single strings are normalized to List[str] across all schemas."""
+    # TargetAudience string lists
+    aud = TargetAudience(
+        primary_audience="Students, Faculty, Recruiters",
+        industries="Higher Education, EdTech",
+        customer_needs="Quality education"
+    )
+    assert aud.primary_audience == ["Students", "Faculty", "Recruiters"]
+    assert aud.industries == ["Higher Education", "EdTech"]
+    assert aud.customer_needs == ["Quality education"]
+
+    # SearchQueryItem platform list
+    query_item = SearchQueryItem(
+        query="btech computer science admissions",
+        recommended_platforms="Google, LinkedIn",
+        search_intent="Commercial",
+        business_relevance="Attracts prospective engineering applicants",
+        target_audience="High school graduates"
+    )
+    assert query_item.recommended_platforms == ["Google", "LinkedIn"]
+
+    # CompetitorItem lists
+    comp = CompetitorItem(
+        name="Peer University",
+        category="Higher Education",
+        main_services="Undergraduate Degrees, Postgraduate Programs",
+        strengths="Established alumni network",
+        weaknesses="Outdated campus infrastructure",
+        comparison="Comparable curriculum and fee structure",
+        evidence_or_source="AI inference",
+        verification_status="ai_generated_unverified",
+        is_verified=False
+    )
+    assert comp.main_services == ["Undergraduate Degrees", "Postgraduate Programs"]
+    assert comp.strengths == ["Established alumni network"]
+    assert comp.weaknesses == ["Outdated campus infrastructure"]
+
+
+def test_repair_and_validate_ensures_minimums():
+    """Verify _repair_and_validate pads fewer than 3 competitors, 5 queries, and 5 services."""
+    from app.services.llm_service import LLMService
+    llm = LLMService()
+
+    extracted = ExtractedWebsiteData(
+        url="https://example.edu",
+        final_url="https://example.edu",
+        title="Example College of Engineering",
+        business_name="Example College"
+    )
+    technical_health = TechnicalSeoHealth(notes=["Missing meta description"])
+
+    sparse_analysis = {
+        "competitor_analysis": {
+            "brand_overview": {
+                "name": "Example College",
+                "business_overview": "Autonomous engineering institution.",
+                "main_category": "Higher Education",
+                "target_market": "Regional",
+                "market_positioning": "Established Technical Institution"
+            },
+            "competitors": [
+                {
+                    "name": "Single Competitor",
+                    "category": "Higher Education",
+                    "comparison": "Competes in engineering degrees",
+                    "evidence_or_source": "AI inference",
+                    "verification_status": "ai_generated_unverified",
+                    "is_verified": False
+                }
+            ]
+        },
+        "target_search_queries": [
+            {
+                "query": "best engineering college admissions",
+                "recommended_platforms": ["Google"],
+                "search_intent": "Commercial",
+                "business_relevance": "Drives applicant inquiries",
+                "target_audience": "Prospective students"
+            }
+        ],
+        "seo_improvements": {
+            "primary_keyword": "engineering college",
+            "recommended_title": "Example College | Engineering Admissions 2026",
+            "meta_description": "Join Example College for premier B.Tech & MBA programs."
+        },
+        "top_services": [
+            {
+                "service_name": "B.Tech Computer Science",
+                "description": "4-year undergraduate degree in computer science.",
+                "target_industry": "Higher Education",
+                "target_customer": "Students",
+                "main_benefit": "Industry accredited degree",
+                "source_evidence": "Found on site",
+                "identification_type": "extracted"
+            }
+        ],
+        "target_audience": {
+            "primary_audience": ["Students"],
+            "marketing_segments": []
+        }
+    }
+
+    container = llm._repair_and_validate(sparse_analysis, extracted, technical_health)
+    assert len(container.competitor_analysis.competitors) >= 3
+    assert len(container.target_search_queries) == 5
+    assert len(container.top_services) == 5
+    assert len(container.target_audience.marketing_segments) >= 1
+
+
+@pytest.mark.anyio
+async def test_controlled_repair_loop_on_gemini_validation_failure():
+    """Verify controlled repair loop asks Gemini for correction if first response is invalid."""
+    from app.services.llm_service import LLMService
+    llm = LLMService()
+
+    extracted = ExtractedWebsiteData(
+        url="https://rgmcet.edu.in",
+        final_url="https://rgmcet.edu.in",
+        title="RGMCET - Rajeev Gandhi Memorial College",
+        business_name="RGMCET"
+    )
+    technical_health = TechnicalSeoHealth(notes=[])
+
+    # First call returns invalid JSON (missing required modules)
+    # Second call returns valid JSON
+    with patch.object(llm, "_execute_gemini_call") as mock_gemini:
+        mock_gemini.side_effect = [
+            "This is not JSON at all! Just raw text from LLM.",
+            json.dumps(MOCK_GEMINI_ANALYSIS_JSON)
+        ]
+
+        brand, analysis, meta = await llm.generate_analysis(extracted, technical_health)
+        assert brand.name == "Apex Cloud Solutions"
+        assert len(analysis.target_search_queries) == 5
+        assert mock_gemini.call_count == 2
+
+
+@patch("app.services.website_extractor.WebsiteExtractor.fetch_html")
+@patch("app.services.llm_service.LLMService._execute_gemini_call")
+def test_controlled_repair_loop_failure_returns_clean_error(mock_gemini, mock_fetch):
+    """Verify that if both initial and repair attempts fail, AI_OUTPUT_VALIDATION_ERROR is returned cleanly."""
+    mock_fetch.return_value = (MOCK_HTML_CONTENT, "https://example.com", 200)
+    # Both initial and repair return invalid unparseable text
+    mock_gemini.side_effect = [
+        "Unparseable non-json output 1",
+        "Unparseable non-json output 2"
+    ]
+
+    response = client.post("/link-analysis", json={"url": "https://example.com"})
+    assert response.status_code == 502
+    data = response.json()
+    assert data["success"] is False
+    assert data["error_code"] == "AI_OUTPUT_VALIDATION_ERROR"
+    assert "Failed to validate AI analysis schema" in data["error"]
+    # Verify no raw Python tracebacks (e.g. 'Traceback (most recent call last):')
+    assert "Traceback" not in data["error"]
+    if data.get("detail"):
+        assert "Traceback" not in str(data["detail"])

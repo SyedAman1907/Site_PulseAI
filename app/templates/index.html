@@ -1,14 +1,37 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en" data-theme="dark" class="dark">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SitePulse AI — Website Intelligence & Business Growth Advisor</title>
 
+    <!-- Immediate theme initialization to avoid flash of incorrect theme -->
+    <script>
+        (function () {
+            try {
+                const savedTheme = localStorage.getItem("sitepulse_theme");
+                const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+                const theme = savedTheme ? savedTheme : (prefersDark ? "dark" : "light");
+                document.documentElement.setAttribute("data-theme", theme);
+                if (theme === "dark") {
+                    document.documentElement.classList.add("dark");
+                } else {
+                    document.documentElement.classList.remove("dark");
+                }
+            } catch (e) {
+                document.documentElement.setAttribute("data-theme", "dark");
+                document.documentElement.classList.add("dark");
+            }
+        })();
+    </script>
+
     <!-- Google Fonts: Inter & Plus Jakarta Sans -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap"
+        rel="stylesheet">
 
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -16,43 +39,15 @@
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
 
-    <!-- Tailwind Config with Exact Dark Teal Palette -->
     <script>
         tailwind.config = {
-            darkMode: 'class',
+            darkMode: ['class', '[data-theme="dark"]'],
             theme: {
                 extend: {
-                    colors: {
-                        teal: {
-                            base: '#05161A',    // Main application background
-                            surface: '#072E33', // Sidebar, cards, secondary surfaces
-                            interactive: '#0C7075', // Primary interactive buttons & active states
-                            accent: '#0F969C',  // Accent color, button hover & active indicators
-                            highlight: '#6DA5C0', // Secondary highlights & data visualization
-                            muted: '#294D61',   // Borders, dividers, subtle surfaces
-                            text: '#F1F7F7',    // Primary text
-                            secondary: '#BDD7D8' // Secondary text
-                        },
-                        light: {
-                            bg: '#F1F7F7',
-                            surface: '#FFFFFF',
-                            card: '#D5E5E5',
-                            border: '#BDD7D8',
-                            text: '#05161A',
-                            secondary: '#5D6B6B',
-                            accent: '#0C7075'
-                        }
-                    },
                     fontFamily: {
                         sans: ['Inter', 'system-ui', 'sans-serif'],
                         display: ['"Plus Jakarta Sans"', 'Inter', 'sans-serif'],
                         mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace']
-                    },
-                    boxShadow: {
-                        'teal-sm': '0 2px 8px -1px rgba(5, 22, 26, 0.4), 0 1px 3px -1px rgba(12, 112, 117, 0.1)',
-                        'teal-md': '0 8px 24px -4px rgba(5, 22, 26, 0.6), 0 2px 8px -2px rgba(15, 150, 156, 0.15)',
-                        'teal-lg': '0 16px 36px -6px rgba(5, 22, 26, 0.8), 0 4px 16px -4px rgba(15, 150, 156, 0.25)',
-                        'teal-glow': '0 0 20px -3px rgba(15, 150, 156, 0.35)'
                     }
                 }
             }
@@ -60,173 +55,342 @@
     </script>
 
     <style>
-        /* Custom scrollbar matching dark teal palette */
+        /* ========================================================================= */
+        /* CSS THEME VARIABLES - PURE WHITE LIGHT THEME & DEEP BLACK DARK THEME */
+        /* ========================================================================= */
+        :root,
+        [data-theme="light"],
+        html:not(.dark) {
+            --bg-main: #FFFFFF;
+            --bg-secondary: #F8FAFC;
+            --bg-sidebar: #F1F5F9;
+            --bg-card: #FFFFFF;
+            --bg-card-elevated: #F8FAFC;
+            --bg-input: #F8FAFC;
+            --text-primary: #111827;
+            --text-secondary: #64748B;
+            --text-muted: #94A3B8;
+            --primary-accent: #0F969C;
+            --accent-hover: #0C7075;
+            --border-color: #E2E8F0;
+            --border-subtle: #CBD5E1;
+            --success: #16A34A;
+            --error: #DC2626;
+            --warning: #D97706;
+            --scrollbar-track: #FFFFFF;
+            --scrollbar-thumb: #CBD5E1;
+            --scrollbar-hover: #94A3B8;
+            --shadow-subtle: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.03);
+            --shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.03);
+            --shadow-elevated: 0 10px 15px -3px rgba(0, 0, 0, 0.06), 0 4px 6px -4px rgba(0, 0, 0, 0.03);
+            --nav-bg: rgba(255, 255, 255, 0.90);
+            --hero-bg: #FFFFFF;
+            --code-bg: #F8FAFC;
+            --active-tab-bg: #0F969C;
+            --active-tab-text: #FFFFFF;
+            --card-tag-bg: #F1F5F9;
+        }
+
+        [data-theme="dark"],
+        html.dark {
+            --bg-main: #050505;
+            --bg-secondary: #0A0A0A;
+            --bg-sidebar: #080808;
+            --bg-card: #111111;
+            --bg-card-elevated: #171717;
+            --bg-input: #111111;
+            --text-primary: #FFFFFF;
+            --text-secondary: #A1A1AA;
+            --text-muted: #71717A;
+            --primary-accent: #0F969C;
+            --accent-hover: #0C7075;
+            --border-color: #262626;
+            --border-subtle: #1F1F1F;
+            --success: #22C55E;
+            --error: #F87171;
+            --warning: #FBBF24;
+            --scrollbar-track: #050505;
+            --scrollbar-thumb: #262626;
+            --scrollbar-hover: #0C7075;
+            --shadow-subtle: 0 1px 3px 0 rgba(0, 0, 0, 0.5);
+            --shadow-card: 0 4px 12px 0 rgba(0, 0, 0, 0.7);
+            --shadow-elevated: 0 12px 28px -4px rgba(0, 0, 0, 0.85);
+            --nav-bg: rgba(8, 8, 8, 0.90);
+            --hero-bg: #111111;
+            --code-bg: #0A0A0A;
+            --active-tab-bg: #0F969C;
+            --active-tab-text: #FFFFFF;
+            --card-tag-bg: #171717;
+        }
+
+        /* Base Application Layout */
+        body {
+            background-color: var(--bg-main) !important;
+            color: var(--text-primary) !important;
+            transition: background-color 0.25s ease, color 0.25s ease;
+        }
+
+        /* Scrollbar */
         ::-webkit-scrollbar {
             width: 7px;
             height: 7px;
         }
+
         ::-webkit-scrollbar-track {
-            background: #05161A;
+            background: var(--scrollbar-track);
         }
+
         ::-webkit-scrollbar-thumb {
-            background: #294D61;
+            background: var(--scrollbar-thumb);
             border-radius: 4px;
         }
+
         ::-webkit-scrollbar-thumb:hover {
-            background: #0C7075;
+            background: var(--scrollbar-hover);
         }
 
-        /* Light theme overrides */
-        html:not(.dark) body {
-            background-color: #F1F7F7;
-            color: #05161A;
-        }
-        html:not(.dark) .theme-surface {
-            background-color: #FFFFFF !important;
-            border-color: #BDD7D8 !important;
-            color: #05161A !important;
-        }
-        html:not(.dark) .theme-card {
-            background-color: #FFFFFF !important;
-            border-color: #D5E5E5 !important;
-        }
-        html:not(.dark) .theme-text-primary {
-            color: #05161A !important;
-        }
-        html:not(.dark) .theme-text-secondary {
-            color: #5D6B6B !important;
-        }
-        html:not(.dark) .theme-border {
-            border-color: #D5E5E5 !important;
+        /* Semantic Theme Utility Classes */
+        .bg-theme-main {
+            background-color: var(--bg-main) !important;
         }
 
-        /* Micro-animations */
+        .bg-theme-secondary {
+            background-color: var(--bg-secondary) !important;
+        }
+
+        .bg-theme-sidebar {
+            background-color: var(--bg-sidebar) !important;
+        }
+
+        .bg-theme-card {
+            background-color: var(--bg-card) !important;
+        }
+
+        .bg-theme-elevated {
+            background-color: var(--bg-card-elevated) !important;
+        }
+
+        .bg-theme-input {
+            background-color: var(--bg-input) !important;
+        }
+
+        .text-theme-primary {
+            color: var(--text-primary) !important;
+        }
+
+        .text-theme-secondary {
+            color: var(--text-secondary) !important;
+        }
+
+        .text-theme-muted {
+            color: var(--text-muted) !important;
+        }
+
+        .border-theme {
+            border-color: var(--border-color) !important;
+        }
+
+        .border-theme-subtle {
+            border-color: var(--border-subtle) !important;
+        }
+
+        /* Legacy dark-teal class mapping to active theme */
+        .bg-\[\#05161A\] {
+            background-color: var(--bg-main) !important;
+        }
+
+        .bg-\[\#072E33\] {
+            background-color: var(--bg-card) !important;
+        }
+
+        .border-\[\#294D61\] {
+            border-color: var(--border-color) !important;
+        }
+
+        .text-\[\#F1F7F7\] {
+            color: var(--text-primary) !important;
+        }
+
+        .text-\[\#BDD7D8\] {
+            color: var(--text-secondary) !important;
+        }
+
+        .text-\[\#6DA5C0\] {
+            color: var(--primary-accent) !important;
+        }
+
+        /* Active Navigation & Tabs */
         .tab-btn.active {
-            background-color: #0C7075;
-            color: #F1F7F7;
-            border-color: #0F969C;
-            box-shadow: 0 0 12px rgba(15, 150, 156, 0.25);
-        }
-        .nav-item.active {
-            background-color: rgba(12, 112, 117, 0.25);
-            color: #F1F7F7;
-            border-left: 3px solid #0F969C;
+            background-color: var(--active-tab-bg) !important;
+            color: var(--active-tab-text) !important;
+            border-color: var(--primary-accent) !important;
+            box-shadow: 0 0 14px rgba(15, 150, 156, 0.35);
         }
 
-        @keyframes pulse-subtle {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.85; transform: scale(0.98); }
+        .nav-item.active {
+            background-color: rgba(15, 150, 156, 0.12) !important;
+            color: var(--text-primary) !important;
+            border-left: 3px solid var(--primary-accent);
         }
+
+        .btn-accent {
+            background-color: var(--primary-accent) !important;
+            color: #FFFFFF !important;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+        }
+
+        .btn-accent:hover {
+            background-color: var(--accent-hover) !important;
+        }
+
+        /* Subtle glow micro-animation */
+        @keyframes pulse-subtle {
+
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 0.85;
+                transform: scale(0.98);
+            }
+        }
+
         .animate-subtle {
             animation: pulse-subtle 3s ease-in-out infinite;
         }
     </style>
 </head>
-<body class="bg-[#05161A] text-[#F1F7F7] font-sans antialiased min-h-screen flex selection:bg-[#0C7075] selection:text-white transition-colors duration-200">
+
+<body
+    class="bg-theme-main text-theme-primary font-sans antialiased min-h-screen flex selection:bg-[#0F969C] selection:text-white transition-colors duration-250">
 
     <!-- Mobile Navigation Backdrop -->
-    <div id="mobileBackdrop" onclick="toggleSidebar(false)" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-40 hidden md:hidden transition-opacity"></div>
+    <div id="mobileBackdrop" onclick="toggleSidebar(false)"
+        class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 hidden md:hidden transition-opacity"></div>
 
     <!-- ========================================================================= -->
     <!-- 1. LEFT SIDEBAR -->
     <!-- ========================================================================= -->
-    <aside id="sidebar" class="fixed md:static inset-y-0 left-0 z-50 w-64 bg-[#072E33] border-r border-[#294D61] flex flex-col justify-between transition-all duration-300 transform -translate-x-full md:translate-x-0 shadow-teal-lg md:shadow-none">
-        
+    <aside id="sidebar"
+        class="fixed md:static inset-y-0 left-0 z-50 w-64 bg-theme-sidebar border-r border-theme flex flex-col justify-between transition-all duration-300 transform -translate-x-full md:translate-x-0 shadow-lg md:shadow-none">
+
         <!-- Sidebar Header -->
         <div>
-            <div class="h-16 px-5 border-b border-[#294D61] flex items-center justify-between">
+            <div class="h-16 px-5 border-b border-theme flex items-center justify-between">
                 <div class="flex items-center space-x-3 overflow-hidden">
-                    <div class="w-9 h-9 rounded-lg bg-[#0C7075] border border-[#0F969C] flex items-center justify-center shadow-teal-glow flex-shrink-0">
-                        <i data-lucide="activity" class="w-5 h-5 text-[#F1F7F7]"></i>
+                    <div
+                        class="w-9 h-9 rounded-lg bg-[#0F969C] border border-[#0F969C]/40 flex items-center justify-center shadow-md flex-shrink-0">
+                        <i data-lucide="activity" class="w-5 h-5 text-white"></i>
                     </div>
                     <div class="sidebar-text">
                         <div class="flex items-center space-x-1.5">
-                            <span class="font-display font-bold text-base tracking-tight text-[#F1F7F7]">SitePulse</span>
-                            <span class="text-xs px-1.5 py-0.2 rounded font-mono font-bold bg-[#0C7075]/40 text-[#6DA5C0] border border-[#0F969C]/40">AI</span>
+                            <span
+                                class="font-display font-bold text-base tracking-tight text-theme-primary">SitePulse</span>
+                            <span
+                                class="text-xs px-1.5 py-0.2 rounded font-mono font-bold bg-[#0F969C]/15 text-[#0F969C] border border-[#0F969C]/30">AI</span>
                         </div>
-                        <span class="text-[10px] text-[#BDD7D8] font-medium tracking-wide block uppercase">Intelligence Suite</span>
+                        <span
+                            class="text-[10px] text-theme-muted font-medium tracking-wide block uppercase">Intelligence
+                            Suite</span>
                     </div>
                 </div>
 
                 <!-- Collapse / Mobile Close Button -->
-                <button onclick="toggleSidebarCollapse()" class="hidden md:flex p-1.5 rounded-md text-[#BDD7D8] hover:text-[#F1F7F7] hover:bg-[#294D61]/50 transition" title="Toggle Sidebar">
+                <button onclick="toggleSidebarCollapse()"
+                    class="hidden md:flex p-1.5 rounded-md text-theme-secondary hover:text-theme-primary hover:bg-theme-card transition"
+                    title="Toggle Sidebar">
                     <i data-lucide="chevrons-left" id="collapseIcon" class="w-4 h-4"></i>
                 </button>
-                <button onclick="toggleSidebar(false)" class="md:hidden p-1.5 rounded-md text-[#BDD7D8] hover:text-[#F1F7F7] hover:bg-[#294D61]/50">
+                <button onclick="toggleSidebar(false)"
+                    class="md:hidden p-1.5 rounded-md text-theme-secondary hover:text-theme-primary hover:bg-theme-card">
                     <i data-lucide="x" class="w-5 h-5"></i>
                 </button>
             </div>
 
             <!-- Navigation Links -->
             <div class="p-3 space-y-1">
-                <div class="px-3 pt-3 pb-1 text-[11px] font-semibold text-[#6DA5C0] uppercase tracking-wider sidebar-text">Core Platform</div>
+                <div
+                    class="px-3 pt-3 pb-1 text-[11px] font-semibold text-theme-muted uppercase tracking-wider sidebar-text">
+                    Core Platform</div>
 
-                <a href="#dashboard" onclick="navigateToSection('dashboard')" id="nav-dashboard" class="nav-item active flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium text-[#F1F7F7] hover:bg-[#294D61]/40 transition group">
-                    <i data-lucide="layout-dashboard" class="w-4 h-4 text-[#0F969C] group-hover:scale-110 transition-transform"></i>
+                <a href="#dashboard" onclick="navigateToSection('dashboard')" id="nav-dashboard"
+                    class="nav-item active flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium text-theme-primary hover:bg-theme-elevated transition group">
+                    <i data-lucide="layout-dashboard"
+                        class="w-4 h-4 text-[#0F969C] group-hover:scale-110 transition-transform"></i>
                     <span class="sidebar-text">Dashboard</span>
                 </a>
 
-                <a href="#new-analysis" onclick="focusUrlInput()" id="nav-new" class="nav-item flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium text-[#BDD7D8] hover:text-[#F1F7F7] hover:bg-[#294D61]/40 transition group">
-                    <i data-lucide="plus-circle" class="w-4 h-4 text-[#6DA5C0] group-hover:scale-110 transition-transform"></i>
+                <a href="#new-analysis" onclick="focusUrlInput()" id="nav-new"
+                    class="nav-item flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium text-theme-secondary hover:text-theme-primary hover:bg-theme-elevated transition group">
+                    <i data-lucide="plus-circle"
+                        class="w-4 h-4 text-[#0F969C] group-hover:scale-110 transition-transform"></i>
                     <span class="sidebar-text">New Website Analysis</span>
                 </a>
 
-                <a href="#history" onclick="toggleHistoryDrawer(true)" id="nav-history" class="nav-item flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium text-[#BDD7D8] hover:text-[#F1F7F7] hover:bg-[#294D61]/40 transition group">
+                <a href="#history" onclick="toggleHistoryDrawer(true)" id="nav-history"
+                    class="nav-item flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium text-theme-secondary hover:text-theme-primary hover:bg-theme-elevated transition group">
                     <div class="flex items-center space-x-3">
-                        <i data-lucide="history" class="w-4 h-4 text-[#6DA5C0] group-hover:scale-110 transition-transform"></i>
+                        <i data-lucide="history"
+                            class="w-4 h-4 text-[#0F969C] group-hover:scale-110 transition-transform"></i>
                         <span class="sidebar-text">Analysis History</span>
                     </div>
-                    <span id="historyBadge" class="sidebar-text text-[10px] px-1.5 py-0.5 rounded-full bg-[#294D61] text-[#BDD7D8] font-mono">0</span>
+                    <span id="historyBadge"
+                        class="sidebar-text text-[10px] px-2 py-0.5 rounded-full bg-theme-elevated border border-theme text-theme-secondary font-mono font-semibold">0</span>
                 </a>
 
-                <div class="px-3 pt-5 pb-1 text-[11px] font-semibold text-[#6DA5C0] uppercase tracking-wider sidebar-text">Intelligence Modules</div>
+                <div
+                    class="px-3 pt-5 pb-1 text-[11px] font-semibold text-theme-muted uppercase tracking-wider sidebar-text">
+                    Intelligence Modules</div>
 
-                <a href="#results" onclick="switchTab('competitors')" id="nav-competitors" class="nav-item flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium text-[#BDD7D8] hover:text-[#F1F7F7] hover:bg-[#294D61]/40 transition group">
-                    <i data-lucide="swords" class="w-4 h-4 text-[#6DA5C0]"></i>
+                <a href="#results" onclick="switchTab('competitors')" id="nav-competitors"
+                    class="nav-item flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium text-theme-secondary hover:text-theme-primary hover:bg-theme-elevated transition group">
+                    <i data-lucide="swords" class="w-4 h-4 text-[#0F969C]"></i>
                     <span class="sidebar-text">Competitor Analysis</span>
                 </a>
 
-                <a href="#results" onclick="switchTab('seo')" id="nav-seo" class="nav-item flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium text-[#BDD7D8] hover:text-[#F1F7F7] hover:bg-[#294D61]/40 transition group">
-                    <i data-lucide="trending-up" class="w-4 h-4 text-[#6DA5C0]"></i>
+                <a href="#results" onclick="switchTab('seo')" id="nav-seo"
+                    class="nav-item flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium text-theme-secondary hover:text-theme-primary hover:bg-theme-elevated transition group">
+                    <i data-lucide="trending-up" class="w-4 h-4 text-[#0F969C]"></i>
                     <span class="sidebar-text">SEO Intelligence</span>
                 </a>
 
-                <a href="#results" onclick="switchTab('queries')" id="nav-queries" class="nav-item flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium text-[#BDD7D8] hover:text-[#F1F7F7] hover:bg-[#294D61]/40 transition group">
-                    <i data-lucide="search" class="w-4 h-4 text-[#6DA5C0]"></i>
+                <a href="#results" onclick="switchTab('queries')" id="nav-queries"
+                    class="nav-item flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium text-theme-secondary hover:text-theme-primary hover:bg-theme-elevated transition group">
+                    <i data-lucide="search" class="w-4 h-4 text-[#0F969C]"></i>
                     <span class="sidebar-text">Search Query Research</span>
                 </a>
 
-                <a href="#results" onclick="switchTab('services')" id="nav-services" class="nav-item flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium text-[#BDD7D8] hover:text-[#F1F7F7] hover:bg-[#294D61]/40 transition group">
-                    <i data-lucide="briefcase" class="w-4 h-4 text-[#6DA5C0]"></i>
+                <a href="#results" onclick="switchTab('services')" id="nav-services"
+                    class="nav-item flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium text-theme-secondary hover:text-theme-primary hover:bg-theme-elevated transition group">
+                    <i data-lucide="briefcase" class="w-4 h-4 text-[#0F969C]"></i>
                     <span class="sidebar-text">Business Services</span>
                 </a>
 
-                <a href="#results" onclick="switchTab('audience')" id="nav-audience" class="nav-item flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium text-[#BDD7D8] hover:text-[#F1F7F7] hover:bg-[#294D61]/40 transition group">
-                    <i data-lucide="target" class="w-4 h-4 text-[#6DA5C0]"></i>
+                <a href="#results" onclick="switchTab('audience')" id="nav-audience"
+                    class="nav-item flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium text-theme-secondary hover:text-theme-primary hover:bg-theme-elevated transition group">
+                    <i data-lucide="target" class="w-4 h-4 text-[#0F969C]"></i>
                     <span class="sidebar-text">Audience Insights</span>
                 </a>
             </div>
         </div>
 
-        <!-- Sidebar Footer & System Status -->
-        <div class="p-4 border-t border-[#294D61] bg-[#072E33]/90 space-y-3">
-            <div class="sidebar-text p-2.5 rounded-lg bg-[#05161A] border border-[#294D61] text-xs">
-                <div class="flex items-center justify-between mb-1">
-                    <span class="text-[#BDD7D8] font-medium">Engine API</span>
-                    <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-[#0F969C]">
-                        <span class="w-2 h-2 rounded-full bg-[#0F969C] animate-pulse"></span> Operational
+        <!-- Sidebar Footer Status -->
+        <div class="p-3 border-t border-theme">
+            <div class="bg-theme-elevated rounded-xl p-3 border border-theme">
+                <div class="flex items-center justify-between text-xs mb-1">
+                    <span class="text-theme-muted font-medium">Engine Status</span>
+                    <span class="flex items-center gap-1.5 text-xs text-emerald-500 font-semibold">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Ready
                     </span>
                 </div>
-                <div class="text-[11px] text-[#6DA5C0] font-mono truncate" id="sidebarModelInfo">gemini-3.5-flash</div>
-            </div>
-
-            <div class="flex items-center justify-between text-xs text-[#BDD7D8] pt-1">
-                <a href="/docs" target="_blank" class="hover:text-[#F1F7F7] transition flex items-center gap-1 sidebar-text">
-                    <i data-lucide="book-open" class="w-3.5 h-3.5 text-[#6DA5C0]"></i> Swagger
-                </a>
-                <button onclick="toggleSettingsModal(true)" class="hover:text-[#F1F7F7] transition flex items-center gap-1" title="Platform Settings">
-                    <i data-lucide="settings" class="w-4 h-4 text-[#BDD7D8]"></i>
-                    <span class="sidebar-text">Settings</span>
+                <div class="sidebar-text text-[11px] text-theme-muted truncate" id="sidebarModelInfo">gemini-3.5-flash
+                </div>
+                <button onclick="toggleSettingsModal(true)"
+                    class="sidebar-text mt-2.5 w-full py-1.5 px-2 rounded-lg bg-theme-card hover:bg-theme-input text-theme-secondary hover:text-theme-primary text-xs font-medium border border-theme flex items-center justify-center gap-1.5 transition">
+                    <i data-lucide="settings" class="w-3.5 h-3.5"></i> Platform Config
                 </button>
             </div>
         </div>
@@ -238,37 +402,46 @@
     <div class="flex-1 flex flex-col min-w-0 overflow-y-auto">
 
         <!-- Top Navigation Bar -->
-        <header class="h-16 px-4 sm:px-8 border-b border-[#294D61] bg-[#072E33]/80 backdrop-blur-md sticky top-0 z-30 flex items-center justify-between">
+        <header
+            class="h-16 px-4 sm:px-8 border-b border-theme bg-[var(--nav-bg)] backdrop-blur-md sticky top-0 z-30 flex items-center justify-between transition-colors">
             <div class="flex items-center space-x-3 sm:space-x-4">
-                <button onclick="toggleSidebar()" class="md:hidden p-2 rounded-lg text-[#BDD7D8] hover:text-[#F1F7F7] hover:bg-[#294D61]/50 focus:outline-none">
+                <button onclick="toggleSidebar()"
+                    class="md:hidden p-2 rounded-lg text-theme-secondary hover:text-theme-primary hover:bg-theme-elevated focus:outline-none">
                     <i data-lucide="menu" class="w-5 h-5"></i>
                 </button>
-                <div class="flex items-center space-x-2 text-xs sm:text-sm text-[#BDD7D8]">
-                    <span class="font-medium text-[#6DA5C0]">SitePulse AI</span>
-                    <span class="text-[#294D61]">/</span>
-                    <span id="breadcrumbCurrent" class="text-[#F1F7F7] font-semibold">Dashboard Overview</span>
+                <div class="flex items-center space-x-2 text-xs sm:text-sm text-theme-secondary">
+                    <span class="font-medium text-[#0F969C]">SitePulse AI</span>
+                    <span class="text-theme-muted">/</span>
+                    <span id="breadcrumbCurrent" class="text-theme-primary font-semibold">Dashboard Overview</span>
                 </div>
-                <div id="activeDomainBadge" class="hidden text-xs px-2.5 py-1 rounded-full bg-[#0C7075]/25 border border-[#0F969C]/40 text-[#6DA5C0] font-mono items-center gap-1.5">
+                <div id="activeDomainBadge"
+                    class="hidden text-xs px-2.5 py-1 rounded-full bg-[#0F969C]/15 border border-[#0F969C]/30 text-[#0F969C] font-mono items-center gap-1.5 font-medium">
                     <i data-lucide="globe" class="w-3 h-3 text-[#0F969C]"></i>
                     <span id="activeDomainText"></span>
                 </div>
             </div>
 
-            <!-- Top Nav Actions -->
+            <!-- Top Nav Actions: Theme Toggle, Health Status, REST API Docs -->
             <div class="flex items-center space-x-2 sm:space-x-3 text-sm">
-                <!-- Theme Toggle Button -->
-                <button onclick="toggleTheme()" class="p-2 rounded-lg text-[#BDD7D8] hover:text-[#F1F7F7] hover:bg-[#294D61]/50 transition" title="Toggle Light/Dark Theme">
-                    <i data-lucide="moon" id="themeIcon" class="w-4 h-4"></i>
+
+                <!-- FUNCTIONAL THEME SWITCH (Sun / Moon) -->
+                <button onclick="toggleTheme()" id="themeToggleBtn" aria-label="Toggle Light and Dark Mode"
+                    title="Switch Theme (Light / Dark)"
+                    class="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-theme bg-theme-elevated hover:bg-theme-input text-theme-secondary hover:text-theme-primary transition shadow-sm cursor-pointer">
+                    <i data-lucide="moon" id="themeIcon" class="w-4 h-4 text-[#0F969C]"></i>
+                    <span id="themeToggleLabel" class="text-xs font-semibold hidden sm:inline">Dark</span>
                 </button>
 
                 <!-- Health Check Link -->
-                <a href="/health" target="_blank" class="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-[#294D61] bg-[#05161A] hover:bg-[#294D61]/40 text-xs text-[#BDD7D8] hover:text-[#F1F7F7] transition">
+                <a href="/health" target="_blank"
+                    class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-theme bg-theme-card hover:bg-theme-elevated text-xs font-medium text-theme-secondary hover:text-theme-primary transition shadow-sm">
                     <i data-lucide="shield-check" class="w-3.5 h-3.5 text-[#0F969C]"></i>
-                    <span>Health Status</span>
+                    <span>Health</span>
                 </a>
 
                 <!-- API Docs Link -->
-                <a href="/docs" target="_blank" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#0C7075] hover:bg-[#0F969C] text-xs font-semibold text-[#F1F7F7] shadow-teal-sm transition">
+                <a href="/docs" target="_blank"
+                    class="btn-accent flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold text-white shadow-sm transition">
                     <i data-lucide="code-2" class="w-3.5 h-3.5"></i>
                     <span class="hidden sm:inline">REST API Docs</span>
                 </a>
@@ -282,62 +455,65 @@
             <!-- 3. DASHBOARD HERO & URL ANALYZER INPUT -->
             <!-- ========================================================================= -->
             <section id="heroSection" class="relative">
-                <div class="bg-gradient-to-b from-[#072E33] to-[#072E33]/70 border border-[#294D61] rounded-2xl p-6 sm:p-10 shadow-teal-md relative overflow-hidden">
-                    
-                    <!-- Subtle background decoration lines -->
-                    <div class="absolute -right-20 -top-20 w-80 h-80 rounded-full bg-[#0C7075]/10 blur-3xl pointer-events-none"></div>
-                    <div class="absolute -left-20 -bottom-20 w-80 h-80 rounded-full bg-[#0F969C]/10 blur-3xl pointer-events-none"></div>
+                <div
+                    class="bg-theme-card border border-theme rounded-2xl p-6 sm:p-10 shadow-md relative overflow-hidden transition-colors">
 
                     <div class="max-w-3xl relative z-10">
-                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#05161A] border border-[#294D61] text-xs font-medium text-[#6DA5C0] mb-4">
+                        <div
+                            class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-theme-elevated border border-theme text-xs font-medium text-[#0F969C] mb-4">
                             <span class="w-2 h-2 rounded-full bg-[#0F969C] animate-ping"></span>
                             Live Multi-Page Extraction & LLM Synthesis
                         </div>
 
-                        <h1 class="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold text-[#F1F7F7] tracking-tight leading-tight mb-3">
+                        <h1
+                            class="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold text-theme-primary tracking-tight leading-tight mb-3">
                             Turn websites into <span class="text-[#0F969C]">business intelligence</span>.
                         </h1>
 
-                        <p class="text-[#BDD7D8] text-sm sm:text-base leading-relaxed mb-8 max-w-2xl">
-                            Discover competitors, uncover SEO opportunities, and understand your ideal customers using AI. Input any commercial website URL to generate deep, multi-vector growth intelligence.
+                        <p class="text-theme-secondary text-sm sm:text-base leading-relaxed mb-8 max-w-2xl">
+                            Discover competitors, uncover SEO opportunities, and understand your ideal customers using
+                            AI. Input any commercial website URL to generate deep, multi-vector growth intelligence.
                         </p>
 
                         <!-- URL Input Form Component -->
                         <form id="analyzeForm" class="space-y-4">
                             <div class="flex flex-col sm:flex-row gap-3">
                                 <div class="relative flex-1">
-                                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-[#6DA5C0]">
-                                        <i data-lucide="globe" class="w-5 h-5"></i>
+                                    <div
+                                        class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-theme-muted">
+                                        <i data-lucide="globe" class="w-5 h-5 text-[#0F969C]"></i>
                                     </div>
-                                    <input 
-                                        type="url" 
-                                        id="urlInput" 
-                                        required 
-                                        placeholder="Enter your website URL (https://example.com)" 
+                                    <input type="url" id="urlInput" required
+                                        placeholder="Enter your website URL (https://example.com)"
                                         value="https://example.com"
-                                        class="w-full pl-11 pr-10 py-3.5 bg-[#05161A] border border-[#294D61] rounded-xl text-[#F1F7F7] placeholder-[#6DA5C0]/60 text-sm font-medium focus:outline-none focus:border-[#0F969C] focus:ring-2 focus:ring-[#0C7075]/30 transition shadow-inner"
-                                    >
-                                    <button type="button" onclick="clearInput()" id="clearInputBtn" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-[#6DA5C0] hover:text-[#F1F7F7] transition" title="Clear input">
-                                        <i data-lucide="x" class="w-4 h-4"></i>
+                                        class="w-full pl-11 pr-10 py-3.5 bg-theme-input border border-theme rounded-xl text-theme-primary placeholder-theme-muted text-sm font-medium focus:outline-none focus:border-[#0F969C] focus:ring-2 focus:ring-[#0F969C]/20 transition shadow-inner">
+                                    <button type="button" onclick="clearInput()" id="clearInputBtn"
+                                        class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-theme-muted hover:text-theme-primary transition"
+                                        title="Clear input">
+                                        <i data-lucide="x-circle" class="w-4 h-4"></i>
                                     </button>
                                 </div>
-                                <button 
-                                    type="submit" 
-                                    id="submitBtn"
-                                    class="px-7 py-3.5 bg-[#0C7075] hover:bg-[#0F969C] text-[#F1F7F7] font-semibold text-sm rounded-xl shadow-teal-md hover:shadow-teal-glow transition-all flex items-center justify-center gap-2.5 whitespace-nowrap active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-                                >
+                                <button type="submit" id="submitBtn"
+                                    class="btn-accent px-7 py-3.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 shadow-md cursor-pointer transition active:scale-[0.99] flex-shrink-0">
                                     <i data-lucide="sparkles" class="w-4 h-4"></i>
                                     <span>Analyze Website</span>
                                 </button>
                             </div>
 
-                            <!-- Sample Quick Pills -->
-                            <div class="flex flex-wrap items-center gap-2 pt-1 text-xs text-[#BDD7D8]">
-                                <span class="text-[#6DA5C0] font-medium">Try verified sample:</span>
-                                <button type="button" onclick="setSample('https://example.com')" class="px-2.5 py-1 bg-[#05161A] hover:bg-[#294D61]/50 border border-[#294D61] text-[#F1F7F7] rounded-lg transition">example.com</button>
-                                <button type="button" onclick="setSample('https://stripe.com')" class="px-2.5 py-1 bg-[#05161A] hover:bg-[#294D61]/50 border border-[#294D61] text-[#F1F7F7] rounded-lg transition">stripe.com</button>
-                                <button type="button" onclick="setSample('https://github.com')" class="px-2.5 py-1 bg-[#05161A] hover:bg-[#294D61]/50 border border-[#294D61] text-[#F1F7F7] rounded-lg transition">github.com</button>
-                                <button type="button" onclick="setSample('https://linear.app')" class="px-2.5 py-1 bg-[#05161A] hover:bg-[#294D61]/50 border border-[#294D61] text-[#F1F7F7] rounded-lg transition">linear.app</button>
+                            <!-- Sample Demo Links for instant testing -->
+                            <div class="flex flex-wrap items-center gap-2 text-xs pt-1">
+                                <span class="text-theme-muted font-medium">Quick Test:</span>
+                                <button type="button" onclick="setSample('https://www.rgmcet.edu.in/')"
+                                    class="px-2.5 py-1 rounded-lg bg-theme-elevated border border-theme text-theme-secondary hover:text-theme-primary hover:border-[#0F969C] transition">RGMCET
+                                    Edu</button>
+                                <button type="button" onclick="setSample('https://example.com')"
+                                    class="px-2.5 py-1 rounded-lg bg-theme-elevated border border-theme text-theme-secondary hover:text-theme-primary hover:border-[#0F969C] transition">Example.com</button>
+                                <button type="button" onclick="setSample('https://github.com')"
+                                    class="px-2.5 py-1 rounded-lg bg-theme-elevated border border-theme text-theme-secondary hover:text-theme-primary hover:border-[#0F969C] transition">GitHub</button>
+                                <button type="button" onclick="setSample('https://stripe.com')"
+                                    class="px-2.5 py-1 rounded-lg bg-theme-elevated border border-theme text-theme-secondary hover:text-theme-primary hover:border-[#0F969C] transition">Stripe</button>
+                                <button type="button" onclick="setSample('https://linear.app')"
+                                    class="px-2.5 py-1 rounded-lg bg-theme-elevated border border-theme text-theme-secondary hover:text-theme-primary hover:border-[#0F969C] transition">Linear</button>
                             </div>
                         </form>
                     </div>
@@ -345,99 +521,122 @@
             </section>
 
             <!-- ========================================================================= -->
-            <!-- 4. KEY SUMMARY METRICS CARDS (Always visible) -->
+            <!-- 4. ARCHITECTURAL HIGHLIGHTS & STATS BAR -->
             <!-- ========================================================================= -->
             <section class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                <div class="bg-[#072E33] border border-[#294D61] p-4 sm:p-5 rounded-xl shadow-teal-sm">
-                    <div class="flex items-center justify-between text-[#6DA5C0] mb-2">
+                <div class="bg-theme-card border border-theme p-4 sm:p-5 rounded-xl shadow-sm transition-colors">
+                    <div class="flex items-center justify-between text-theme-muted mb-2">
                         <span class="text-xs font-semibold uppercase tracking-wider">AI Intelligence</span>
                         <i data-lucide="cpu" class="w-4 h-4 text-[#0F969C]"></i>
                     </div>
-                    <div class="text-xl sm:text-2xl font-bold font-display text-[#F1F7F7]" id="statModelName">Gemini Flash</div>
-                    <p class="text-xs text-[#BDD7D8] mt-1">Multi-turn structured reasoning</p>
+                    <div class="text-xl sm:text-2xl font-bold font-display text-theme-primary" id="statModelName">Gemini
+                        Flash</div>
+                    <p class="text-xs text-theme-secondary mt-1">Multi-turn structured reasoning</p>
                 </div>
 
-                <div class="bg-[#072E33] border border-[#294D61] p-4 sm:p-5 rounded-xl shadow-teal-sm">
-                    <div class="flex items-center justify-between text-[#6DA5C0] mb-2">
+                <div class="bg-theme-card border border-theme p-4 sm:p-5 rounded-xl shadow-sm transition-colors">
+                    <div class="flex items-center justify-between text-theme-muted mb-2">
                         <span class="text-xs font-semibold uppercase tracking-wider">Security Layer</span>
                         <i data-lucide="shield" class="w-4 h-4 text-[#0F969C]"></i>
                     </div>
-                    <div class="text-xl sm:text-2xl font-bold font-display text-[#F1F7F7]">SSRF Shield</div>
-                    <p class="text-xs text-[#BDD7D8] mt-1">Private IP & DNS verified</p>
+                    <div class="text-xl sm:text-2xl font-bold font-display text-theme-primary">SSRF Shield</div>
+                    <p class="text-xs text-theme-secondary mt-1">Private IP & DNS verified</p>
                 </div>
 
-                <div class="bg-[#072E33] border border-[#294D61] p-4 sm:p-5 rounded-xl shadow-teal-sm">
-                    <div class="flex items-center justify-between text-[#6DA5C0] mb-2">
+                <div class="bg-theme-card border border-theme p-4 sm:p-5 rounded-xl shadow-sm transition-colors">
+                    <div class="flex items-center justify-between text-theme-muted mb-2">
                         <span class="text-xs font-semibold uppercase tracking-wider">Growth Vectors</span>
                         <i data-lucide="layers" class="w-4 h-4 text-[#0F969C]"></i>
                     </div>
-                    <div class="text-xl sm:text-2xl font-bold font-display text-[#F1F7F7]">5 Modules</div>
-                    <p class="text-xs text-[#BDD7D8] mt-1">Competitors, SEO, Queries, ICP</p>
+                    <div class="text-xl sm:text-2xl font-bold font-display text-theme-primary">5 Modules</div>
+                    <p class="text-xs text-theme-secondary mt-1">Competitors, SEO, Queries, ICP</p>
                 </div>
 
-                <div class="bg-[#072E33] border border-[#294D61] p-4 sm:p-5 rounded-xl shadow-teal-sm">
-                    <div class="flex items-center justify-between text-[#6DA5C0] mb-2">
+                <div class="bg-theme-card border border-theme p-4 sm:p-5 rounded-xl shadow-sm transition-colors">
+                    <div class="flex items-center justify-between text-theme-muted mb-2">
                         <span class="text-xs font-semibold uppercase tracking-wider">Cache Layer</span>
                         <i data-lucide="database" class="w-4 h-4 text-[#0F969C]"></i>
                     </div>
-                    <div class="text-xl sm:text-2xl font-bold font-display text-[#F1F7F7]">TTL 3600s</div>
-                    <p class="text-xs text-[#BDD7D8] mt-1">In-memory instant recall</p>
+                    <div class="text-xl sm:text-2xl font-bold font-display text-theme-primary">TTL 3600s</div>
+                    <p class="text-xs text-theme-secondary mt-1">In-memory instant recall</p>
                 </div>
             </section>
 
             <!-- ========================================================================= -->
-            <!-- 5. WEBSITE ANALYSIS LOADING EXPERIENCE (Section 4 Requirements) -->
+            <!-- 5. WEBSITE ANALYSIS LOADING EXPERIENCE -->
             <!-- ========================================================================= -->
-            <section id="loadingState" class="hidden bg-[#072E33] border border-[#294D61] rounded-2xl p-8 sm:p-12 shadow-teal-md text-center max-w-2xl mx-auto">
+            <section id="loadingState"
+                class="hidden bg-theme-card border border-theme rounded-2xl p-8 sm:p-12 shadow-md text-center max-w-2xl mx-auto transition-colors">
                 <div class="relative w-20 h-20 mx-auto mb-6">
-                    <!-- Concentric animated spinners -->
-                    <div class="absolute inset-0 rounded-full border-4 border-[#294D61]"></div>
-                    <div class="absolute inset-0 rounded-full border-4 border-[#0F969C] border-t-transparent animate-spin"></div>
-                    <div class="absolute inset-3 rounded-full bg-[#05161A] flex items-center justify-center">
+                    <div class="absolute inset-0 rounded-full border-4 border-theme"></div>
+                    <div
+                        class="absolute inset-0 rounded-full border-4 border-[#0F969C] border-t-transparent animate-spin">
+                    </div>
+                    <div class="absolute inset-3 rounded-full bg-theme-elevated flex items-center justify-center">
                         <i data-lucide="scan" class="w-6 h-6 text-[#0F969C] animate-pulse"></i>
                     </div>
                 </div>
 
-                <h3 class="font-display text-xl font-bold text-[#F1F7F7] mb-2" id="loadingStageTitle">Validating website URL...</h3>
-                <p class="text-sm text-[#BDD7D8] mb-6 max-w-md mx-auto" id="loadingStageSubtext">Running security heuristics and inspecting DNS resolution...</p>
+                <h3 class="font-display text-xl font-bold text-theme-primary mb-2" id="loadingStageTitle">Validating
+                    website URL...</h3>
+                <p class="text-sm text-theme-secondary mb-6 max-w-md mx-auto" id="loadingStageSubtext">Running security
+                    heuristics and inspecting DNS resolution...</p>
 
                 <!-- Animated Progress Bar -->
-                <div class="w-full bg-[#05161A] h-2.5 rounded-full overflow-hidden border border-[#294D61] mb-6">
-                    <div id="loadingProgressBar" class="h-full bg-gradient-to-r from-[#0C7075] via-[#0F969C] to-[#6DA5C0] transition-all duration-500 rounded-full" style="width: 14%;"></div>
+                <div class="w-full bg-theme-elevated h-2.5 rounded-full overflow-hidden border border-theme mb-6">
+                    <div id="loadingProgressBar"
+                        class="h-full bg-gradient-to-r from-[#0C7075] via-[#0F969C] to-[#0F969C] transition-all duration-500 rounded-full"
+                        style="width: 14%;"></div>
                 </div>
 
                 <!-- 7 Meaningful Progress Stages Checklist -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-left max-w-lg mx-auto text-xs" id="stagesChecklist">
-                    <div id="stage-1" class="flex items-center gap-2 text-[#0F969C] font-medium"><i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin"></i> 1. Validating website URL</div>
-                    <div id="stage-2" class="flex items-center gap-2 text-[#294D61]"><i data-lucide="circle" class="w-3.5 h-3.5"></i> 2. Extracting website content</div>
-                    <div id="stage-3" class="flex items-center gap-2 text-[#294D61]"><i data-lucide="circle" class="w-3.5 h-3.5"></i> 3. Understanding business info</div>
-                    <div id="stage-4" class="flex items-center gap-2 text-[#294D61]"><i data-lucide="circle" class="w-3.5 h-3.5"></i> 4. Identifying competitors</div>
-                    <div id="stage-5" class="flex items-center gap-2 text-[#294D61]"><i data-lucide="circle" class="w-3.5 h-3.5"></i> 5. Generating SEO recommendations</div>
-                    <div id="stage-6" class="flex items-center gap-2 text-[#294D61]"><i data-lucide="circle" class="w-3.5 h-3.5"></i> 6. Identifying target customers</div>
-                    <div id="stage-7" class="flex items-center gap-2 text-[#294D61] sm:col-span-2"><i data-lucide="circle" class="w-3.5 h-3.5"></i> 7. Preparing final intelligence dossier</div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-left max-w-lg mx-auto text-xs"
+                    id="stagesChecklist">
+                    <div id="stage-1" class="flex items-center gap-2 text-[#0F969C] font-medium"><i
+                            data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin"></i> 1. Validating website URL</div>
+                    <div id="stage-2" class="flex items-center gap-2 text-theme-muted"><i data-lucide="circle"
+                            class="w-3.5 h-3.5"></i> 2. Extracting website content</div>
+                    <div id="stage-3" class="flex items-center gap-2 text-theme-muted"><i data-lucide="circle"
+                            class="w-3.5 h-3.5"></i> 3. Understanding business info</div>
+                    <div id="stage-4" class="flex items-center gap-2 text-theme-muted"><i data-lucide="circle"
+                            class="w-3.5 h-3.5"></i> 4. Identifying competitors</div>
+                    <div id="stage-5" class="flex items-center gap-2 text-theme-muted"><i data-lucide="circle"
+                            class="w-3.5 h-3.5"></i> 5. Generating SEO recommendations</div>
+                    <div id="stage-6" class="flex items-center gap-2 text-theme-muted"><i data-lucide="circle"
+                            class="w-3.5 h-3.5"></i> 6. Identifying target customers</div>
+                    <div id="stage-7" class="flex items-center gap-2 text-theme-muted sm:col-span-2"><i
+                            data-lucide="circle" class="w-3.5 h-3.5"></i> 7. Preparing final intelligence dossier</div>
                 </div>
             </section>
 
             <!-- ========================================================================= -->
             <!-- 6. ERROR STATE CARD -->
             <!-- ========================================================================= -->
-            <section id="errorState" class="hidden bg-[#072E33] border border-rose-900/60 rounded-2xl p-6 sm:p-8 text-rose-200 shadow-teal-md max-w-3xl mx-auto">
+            <section id="errorState"
+                class="hidden bg-theme-card border border-rose-500/40 rounded-2xl p-6 sm:p-8 text-rose-500 shadow-md max-w-3xl mx-auto transition-colors">
                 <div class="flex items-start gap-4">
-                    <div class="p-2.5 rounded-xl bg-rose-950/80 border border-rose-800 text-rose-400 flex-shrink-0">
+                    <div class="p-2.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-500 flex-shrink-0">
                         <i data-lucide="alert-octagon" class="w-6 h-6"></i>
                     </div>
                     <div class="flex-1 min-w-0">
                         <div class="flex items-center justify-between gap-2">
-                            <h4 class="font-display font-bold text-lg text-rose-300" id="errorTitle">Analysis Interrupted</h4>
-                            <span id="errorCodeBadge" class="text-[10px] font-mono px-2 py-0.5 rounded bg-rose-950 border border-rose-800 text-rose-300 uppercase"></span>
+                            <h4 class="font-display font-bold text-lg text-rose-500" id="errorTitle">Analysis
+                                Interrupted</h4>
+                            <span id="errorCodeBadge"
+                                class="text-[10px] font-mono px-2 py-0.5 rounded bg-rose-500/10 border border-rose-500/30 text-rose-500 uppercase font-semibold"></span>
                         </div>
-                        <p class="text-sm text-rose-200/90 mt-1.5 leading-relaxed" id="errorMessage">An unexpected error occurred while analyzing the target website.</p>
-                        <div id="errorTip" class="mt-4 text-xs bg-rose-950/60 p-3.5 rounded-xl border border-rose-800/50 text-rose-200 font-sans hidden"></div>
-                        <div class="mt-4 pt-3 border-t border-rose-900/40 flex items-center justify-between">
-                            <button onclick="dismissError()" class="text-xs font-semibold text-rose-300 hover:text-white transition flex items-center gap-1">
+                        <p class="text-sm text-theme-secondary mt-1.5 leading-relaxed" id="errorMessage">An unexpected
+                            error occurred while analyzing the target website.</p>
+                        <div id="errorTip"
+                            class="mt-4 text-xs bg-theme-elevated p-3.5 rounded-xl border border-theme text-theme-secondary font-sans hidden">
+                        </div>
+                        <div class="mt-4 pt-3 border-t border-theme flex items-center justify-between">
+                            <button onclick="dismissError()"
+                                class="text-xs font-semibold text-rose-500 hover:text-rose-600 transition flex items-center gap-1 cursor-pointer">
                                 <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i> Dismiss & Try Another URL
                             </button>
-                            <a href="/docs" target="_blank" class="text-xs text-rose-400 hover:underline">API Error Codes Docs &rarr;</a>
+                            <a href="/docs" target="_blank" class="text-xs text-[#0F969C] hover:underline">API Error
+                                Codes Docs &rarr;</a>
                         </div>
                     </div>
                 </div>
@@ -449,68 +648,86 @@
             <section id="resultsSection" class="hidden space-y-8">
 
                 <!-- Brand Header Overview Banner -->
-                <div class="bg-[#072E33] border border-[#294D61] rounded-2xl p-6 sm:p-8 shadow-teal-md relative overflow-hidden">
-                    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6 border-b border-[#294D61] pb-6 mb-6">
+                <div
+                    class="bg-theme-card border border-theme rounded-2xl p-6 sm:p-8 shadow-md relative overflow-hidden transition-colors">
+                    <div
+                        class="flex flex-col lg:flex-row lg:items-center justify-between gap-6 border-b border-theme pb-6 mb-6">
                         <div>
                             <div class="flex flex-wrap items-center gap-3 mb-2">
-                                <h2 class="font-display text-2xl sm:text-3xl font-extrabold text-[#F1F7F7]" id="brandName">Example Brand</h2>
-                                <span class="text-xs px-3 py-1 rounded-full bg-[#0C7075]/30 text-[#6DA5C0] border border-[#0F969C]/40 font-semibold" id="brandCategory">Technology Services</span>
+                                <h2 class="font-display text-2xl sm:text-3xl font-extrabold text-theme-primary"
+                                    id="brandName">Example Brand</h2>
+                                <span
+                                    class="text-xs px-3 py-1 rounded-full bg-[#0F969C]/15 text-[#0F969C] border border-[#0F969C]/30 font-semibold"
+                                    id="brandCategory">Technology Services</span>
                             </div>
-                            <div class="flex items-center gap-2 text-xs sm:text-sm text-[#BDD7D8]">
+                            <div class="flex items-center gap-2 text-xs sm:text-sm text-theme-secondary">
                                 <i data-lucide="link-2" class="w-4 h-4 text-[#0F969C]"></i>
-                                <a id="analyzedWebsiteLink" href="#" target="_blank" class="hover:text-[#F1F7F7] hover:underline font-mono text-[#6DA5C0]">https://example.com</a>
-                                <span class="text-[#294D61]">•</span>
-                                <span id="analyzedTimestamp" class="text-xs text-[#BDD7D8]">Analyzed today</span>
+                                <a id="analyzedWebsiteLink" href="#" target="_blank"
+                                    class="hover:underline font-mono text-[#0F969C]">https://example.com</a>
+                                <span class="text-theme-muted">•</span>
+                                <span id="analyzedTimestamp" class="text-xs text-theme-muted">Analyzed today</span>
                             </div>
                         </div>
 
                         <!-- Run Metadata & Export -->
                         <div class="flex flex-wrap items-center gap-2.5">
-                            <span class="px-3 py-1.5 rounded-lg bg-[#05161A] border border-[#294D61] text-xs text-[#BDD7D8] flex items-center gap-1.5">
+                            <span
+                                class="px-3 py-1.5 rounded-lg bg-theme-elevated border border-theme text-xs text-theme-secondary flex items-center gap-1.5">
                                 <i data-lucide="cpu" class="w-3.5 h-3.5 text-[#0F969C]"></i>
                                 <span id="metaModel">gemini-3.5-flash</span>
                             </span>
-                            <span class="px-3 py-1.5 rounded-lg bg-[#05161A] border border-[#294D61] text-xs text-[#BDD7D8] flex items-center gap-1.5">
-                                <i data-lucide="layers" class="w-3.5 h-3.5 text-[#6DA5C0]"></i>
+                            <span
+                                class="px-3 py-1.5 rounded-lg bg-theme-elevated border border-theme text-xs text-theme-secondary flex items-center gap-1.5">
+                                <i data-lucide="layers" class="w-3.5 h-3.5 text-[#0F969C]"></i>
                                 <span id="metaPages">1 page</span>
                             </span>
-                            <span class="px-3 py-1.5 rounded-lg bg-[#05161A] border border-[#294D61] text-xs text-[#BDD7D8] flex items-center gap-1.5">
+                            <span
+                                class="px-3 py-1.5 rounded-lg bg-theme-elevated border border-theme text-xs text-theme-secondary flex items-center gap-1.5">
                                 <i data-lucide="timer" class="w-3.5 h-3.5 text-[#0F969C]"></i>
                                 <span id="metaTime">1.3s</span>
                             </span>
-                            <button onclick="copyRawJson()" class="px-3 py-1.5 rounded-lg bg-[#0C7075] hover:bg-[#0F969C] text-[#F1F7F7] text-xs font-semibold flex items-center gap-1.5 transition shadow-teal-sm">
-                                <i data-lucide="copy" class="w-3.5 h-3.5"></i> Copy JSON
+                            <button onclick="copyRawJson()"
+                                class="px-3 py-1.5 rounded-lg bg-theme-elevated hover:bg-theme-input text-theme-primary text-xs font-semibold flex items-center gap-1.5 transition border border-theme shadow-sm cursor-pointer">
+                                <i data-lucide="copy" class="w-3.5 h-3.5 text-[#0F969C]"></i> Copy JSON
                             </button>
                         </div>
                     </div>
 
                     <!-- Business Summary -->
-                    <p class="text-[#BDD7D8] text-sm sm:text-base leading-relaxed" id="brandSummary">
+                    <p class="text-theme-secondary text-sm sm:text-base leading-relaxed" id="brandSummary">
                         Business overview and positioning summary.
                     </p>
                 </div>
 
                 <!-- Navigation Tabs for Analysis Modules -->
-                <div class="border-b border-[#294D61] flex items-center space-x-1 sm:space-x-2 overflow-x-auto pb-1 text-sm font-semibold">
-                    <button onclick="switchTab('overview')" id="tabBtn-overview" class="tab-btn active px-4 py-2.5 rounded-xl transition flex items-center gap-2 text-xs sm:text-sm whitespace-nowrap cursor-pointer">
+                <div
+                    class="border-b border-theme flex items-center space-x-1 sm:space-x-2 overflow-x-auto pb-1 text-sm font-semibold">
+                    <button onclick="switchTab('overview')" id="tabBtn-overview"
+                        class="tab-btn active px-4 py-2.5 rounded-xl transition flex items-center gap-2 text-xs sm:text-sm whitespace-nowrap cursor-pointer">
                         <i data-lucide="layout-grid" class="w-4 h-4"></i> Overview
                     </button>
-                    <button onclick="switchTab('competitors')" id="tabBtn-competitors" class="tab-btn px-4 py-2.5 rounded-xl text-[#BDD7D8] hover:text-[#F1F7F7] hover:bg-[#072E33] transition flex items-center gap-2 text-xs sm:text-sm whitespace-nowrap cursor-pointer">
+                    <button onclick="switchTab('competitors')" id="tabBtn-competitors"
+                        class="tab-btn px-4 py-2.5 rounded-xl text-theme-secondary hover:text-theme-primary hover:bg-theme-elevated transition flex items-center gap-2 text-xs sm:text-sm whitespace-nowrap cursor-pointer">
                         <i data-lucide="swords" class="w-4 h-4"></i> Competitors
                     </button>
-                    <button onclick="switchTab('seo')" id="tabBtn-seo" class="tab-btn px-4 py-2.5 rounded-xl text-[#BDD7D8] hover:text-[#F1F7F7] hover:bg-[#072E33] transition flex items-center gap-2 text-xs sm:text-sm whitespace-nowrap cursor-pointer">
+                    <button onclick="switchTab('seo')" id="tabBtn-seo"
+                        class="tab-btn px-4 py-2.5 rounded-xl text-theme-secondary hover:text-theme-primary hover:bg-theme-elevated transition flex items-center gap-2 text-xs sm:text-sm whitespace-nowrap cursor-pointer">
                         <i data-lucide="trending-up" class="w-4 h-4"></i> SEO Intelligence
                     </button>
-                    <button onclick="switchTab('queries')" id="tabBtn-queries" class="tab-btn px-4 py-2.5 rounded-xl text-[#BDD7D8] hover:text-[#F1F7F7] hover:bg-[#072E33] transition flex items-center gap-2 text-xs sm:text-sm whitespace-nowrap cursor-pointer">
+                    <button onclick="switchTab('queries')" id="tabBtn-queries"
+                        class="tab-btn px-4 py-2.5 rounded-xl text-theme-secondary hover:text-theme-primary hover:bg-theme-elevated transition flex items-center gap-2 text-xs sm:text-sm whitespace-nowrap cursor-pointer">
                         <i data-lucide="search" class="w-4 h-4"></i> Target Queries (5)
                     </button>
-                    <button onclick="switchTab('services')" id="tabBtn-services" class="tab-btn px-4 py-2.5 rounded-xl text-[#BDD7D8] hover:text-[#F1F7F7] hover:bg-[#072E33] transition flex items-center gap-2 text-xs sm:text-sm whitespace-nowrap cursor-pointer">
+                    <button onclick="switchTab('services')" id="tabBtn-services"
+                        class="tab-btn px-4 py-2.5 rounded-xl text-theme-secondary hover:text-theme-primary hover:bg-theme-elevated transition flex items-center gap-2 text-xs sm:text-sm whitespace-nowrap cursor-pointer">
                         <i data-lucide="briefcase" class="w-4 h-4"></i> Top Services (5)
                     </button>
-                    <button onclick="switchTab('audience')" id="tabBtn-audience" class="tab-btn px-4 py-2.5 rounded-xl text-[#BDD7D8] hover:text-[#F1F7F7] hover:bg-[#072E33] transition flex items-center gap-2 text-xs sm:text-sm whitespace-nowrap cursor-pointer">
+                    <button onclick="switchTab('audience')" id="tabBtn-audience"
+                        class="tab-btn px-4 py-2.5 rounded-xl text-theme-secondary hover:text-theme-primary hover:bg-theme-elevated transition flex items-center gap-2 text-xs sm:text-sm whitespace-nowrap cursor-pointer">
                         <i data-lucide="target" class="w-4 h-4"></i> Target Audience
                     </button>
-                    <button onclick="switchTab('json')" id="tabBtn-json" class="tab-btn px-4 py-2.5 rounded-xl text-[#BDD7D8] hover:text-[#F1F7F7] hover:bg-[#072E33] transition flex items-center gap-2 text-xs sm:text-sm whitespace-nowrap cursor-pointer">
+                    <button onclick="switchTab('json')" id="tabBtn-json"
+                        class="tab-btn px-4 py-2.5 rounded-xl text-theme-secondary hover:text-theme-primary hover:bg-theme-elevated transition flex items-center gap-2 text-xs sm:text-sm whitespace-nowrap cursor-pointer">
                         <i data-lucide="terminal" class="w-4 h-4"></i> Raw JSON
                     </button>
                 </div>
@@ -521,37 +738,40 @@
                 <div id="tabContent-overview" class="tab-content space-y-6">
                     <!-- Brand Strategic Highlights -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="bg-[#072E33] border border-[#294D61] p-6 rounded-2xl shadow-teal-sm">
-                            <h4 class="text-xs font-bold uppercase tracking-wider text-[#0F969C] flex items-center gap-2 mb-4">
+                        <div class="bg-theme-card border border-theme p-6 rounded-2xl shadow-sm transition-colors">
+                            <h4
+                                class="text-xs font-bold uppercase tracking-wider text-[#0F969C] flex items-center gap-2 mb-4">
                                 <i data-lucide="award" class="w-4 h-4"></i> Competitive Advantages
                             </h4>
-                            <ul id="overviewAdvantages" class="space-y-2.5 text-sm text-[#BDD7D8]"></ul>
+                            <ul id="overviewAdvantages" class="space-y-2.5 text-sm text-theme-secondary"></ul>
                         </div>
-                        <div class="bg-[#072E33] border border-[#294D61] p-6 rounded-2xl shadow-teal-sm">
-                            <h4 class="text-xs font-bold uppercase tracking-wider text-[#6DA5C0] flex items-center gap-2 mb-4">
+                        <div class="bg-theme-card border border-theme p-6 rounded-2xl shadow-sm transition-colors">
+                            <h4
+                                class="text-xs font-bold uppercase tracking-wider text-[#0F969C] flex items-center gap-2 mb-4">
                                 <i data-lucide="lightbulb" class="w-4 h-4"></i> Market Positioning Opportunities
                             </h4>
-                            <ul id="overviewOpportunities" class="space-y-2.5 text-sm text-[#BDD7D8]"></ul>
+                            <ul id="overviewOpportunities" class="space-y-2.5 text-sm text-theme-secondary"></ul>
                         </div>
                     </div>
 
                     <!-- 4 Snapshot Cards -->
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                        <div class="bg-[#072E33] border border-[#294D61] p-5 rounded-xl">
-                            <div class="text-xs font-semibold text-[#6DA5C0] uppercase mb-1">Target Market</div>
-                            <div class="text-sm font-bold text-[#F1F7F7]" id="overviewTargetMarket">—</div>
+                        <div class="bg-theme-card border border-theme p-5 rounded-xl shadow-sm transition-colors">
+                            <div class="text-xs font-semibold text-theme-muted uppercase mb-1">Target Market</div>
+                            <div class="text-sm font-bold text-theme-primary" id="overviewTargetMarket">—</div>
                         </div>
-                        <div class="bg-[#072E33] border border-[#294D61] p-5 rounded-xl">
-                            <div class="text-xs font-semibold text-[#6DA5C0] uppercase mb-1">Primary Keyword</div>
-                            <div class="text-sm font-bold text-[#F1F7F7] truncate" id="overviewPrimaryKeyword">—</div>
+                        <div class="bg-theme-card border border-theme p-5 rounded-xl shadow-sm transition-colors">
+                            <div class="text-xs font-semibold text-theme-muted uppercase mb-1">Primary Keyword</div>
+                            <div class="text-sm font-bold text-theme-primary truncate" id="overviewPrimaryKeyword">—
+                            </div>
                         </div>
-                        <div class="bg-[#072E33] border border-[#294D61] p-5 rounded-xl">
-                            <div class="text-xs font-semibold text-[#6DA5C0] uppercase mb-1">Core Positioning</div>
-                            <div class="text-sm font-bold text-[#F1F7F7] truncate" id="overviewPositioning">—</div>
+                        <div class="bg-theme-card border border-theme p-5 rounded-xl shadow-sm transition-colors">
+                            <div class="text-xs font-semibold text-theme-muted uppercase mb-1">Core Positioning</div>
+                            <div class="text-sm font-bold text-theme-primary truncate" id="overviewPositioning">—</div>
                         </div>
-                        <div class="bg-[#072E33] border border-[#294D61] p-5 rounded-xl">
-                            <div class="text-xs font-semibold text-[#6DA5C0] uppercase mb-1">Primary ICP</div>
-                            <div class="text-sm font-bold text-[#F1F7F7] truncate" id="overviewPrimaryIcp">—</div>
+                        <div class="bg-theme-card border border-theme p-5 rounded-xl shadow-sm transition-colors">
+                            <div class="text-xs font-semibold text-theme-muted uppercase mb-1">Primary ICP</div>
+                            <div class="text-sm font-bold text-theme-primary truncate" id="overviewPrimaryIcp">—</div>
                         </div>
                     </div>
                 </div>
@@ -560,29 +780,31 @@
                 <!-- TAB 2: COMPETITOR INTELLIGENCE (Module 1) -->
                 <!-- ================================================================= -->
                 <div id="tabContent-competitors" class="tab-content hidden space-y-6">
-                    <!-- Brand Strengths vs Competitor Opportunities -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="bg-[#072E33] border border-[#294D61] p-6 rounded-2xl">
-                            <h4 class="text-xs font-bold uppercase tracking-wider text-[#0F969C] flex items-center gap-2 mb-3">
+                        <div class="bg-theme-card border border-theme p-6 rounded-2xl shadow-sm transition-colors">
+                            <h4
+                                class="text-xs font-bold uppercase tracking-wider text-[#0F969C] flex items-center gap-2 mb-3">
                                 <i data-lucide="shield-check" class="w-4 h-4"></i> Where Submitted Brand Outperforms
                             </h4>
-                            <ul id="brandStrengths" class="space-y-2 text-sm text-[#BDD7D8]"></ul>
+                            <ul id="brandStrengths" class="space-y-2 text-sm text-theme-secondary"></ul>
                         </div>
-                        <div class="bg-[#072E33] border border-[#294D61] p-6 rounded-2xl">
-                            <h4 class="text-xs font-bold uppercase tracking-wider text-[#6DA5C0] flex items-center gap-2 mb-3">
+                        <div class="bg-theme-card border border-theme p-6 rounded-2xl shadow-sm transition-colors">
+                            <h4
+                                class="text-xs font-bold uppercase tracking-wider text-[#0F969C] flex items-center gap-2 mb-3">
                                 <i data-lucide="compass" class="w-4 h-4"></i> Market Gaps & Positioning Opportunities
                             </h4>
-                            <ul id="brandOpportunities" class="space-y-2 text-sm text-[#BDD7D8]"></ul>
+                            <ul id="brandOpportunities" class="space-y-2 text-sm text-theme-secondary"></ul>
                         </div>
                     </div>
 
                     <!-- Competitor Cards -->
                     <div>
                         <div class="flex items-center justify-between mb-4">
-                            <h3 class="font-display text-lg font-bold text-[#F1F7F7] flex items-center gap-2">
+                            <h3 class="font-display text-lg font-bold text-theme-primary flex items-center gap-2">
                                 <i data-lucide="users" class="w-5 h-5 text-[#0F969C]"></i> Identified Competitors
                             </h3>
-                            <span class="text-xs text-[#6DA5C0]">Badges strictly differentiate verified vs. AI-suggested</span>
+                            <span class="text-xs text-theme-muted">Verified Search vs AI Inferences clearly
+                                labeled</span>
                         </div>
                         <div id="competitorsList" class="grid grid-cols-1 md:grid-cols-3 gap-5"></div>
                     </div>
@@ -594,58 +816,75 @@
                 <div id="tabContent-seo" class="tab-content hidden space-y-6">
                     <!-- Keywords Overview -->
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-                        <div class="bg-[#072E33] border border-[#294D61] p-5 rounded-2xl flex flex-col justify-between">
+                        <div
+                            class="bg-theme-card border border-theme p-5 rounded-2xl flex flex-col justify-between shadow-sm transition-colors">
                             <div>
-                                <span class="text-xs font-semibold uppercase tracking-wider text-[#0F969C]">Primary Target Keyword</span>
-                                <div class="mt-2 text-lg font-bold text-[#F1F7F7]" id="seoPrimaryKeyword">—</div>
+                                <span class="text-xs font-semibold uppercase tracking-wider text-[#0F969C]">Primary
+                                    Target Keyword</span>
+                                <div class="mt-2 text-lg font-bold text-theme-primary" id="seoPrimaryKeyword">—</div>
                             </div>
-                            <button onclick="copyElementText('seoPrimaryKeyword')" class="mt-4 px-3 py-1.5 bg-[#05161A] hover:bg-[#294D61]/50 border border-[#294D61] text-xs text-[#BDD7D8] hover:text-[#F1F7F7] rounded-lg flex items-center justify-center gap-1.5 transition">
-                                <i data-lucide="copy" class="w-3.5 h-3.5"></i> Copy Keyword
+                            <button onclick="copyElementText('seoPrimaryKeyword')"
+                                class="mt-4 px-3 py-1.5 bg-theme-elevated hover:bg-theme-input border border-theme text-xs text-theme-secondary hover:text-theme-primary rounded-lg flex items-center justify-center gap-1.5 transition cursor-pointer">
+                                <i data-lucide="copy" class="w-3.5 h-3.5 text-[#0F969C]"></i> Copy Keyword
                             </button>
                         </div>
-                        <div class="bg-[#072E33] border border-[#294D61] p-5 rounded-2xl md:col-span-2">
-                            <span class="text-xs font-semibold uppercase tracking-wider text-[#6DA5C0]">Secondary & Long-Tail Keywords</span>
+                        <div
+                            class="bg-theme-card border border-theme p-5 rounded-2xl md:col-span-2 shadow-sm transition-colors">
+                            <span class="text-xs font-semibold uppercase tracking-wider text-theme-muted">Secondary &
+                                Long-Tail Keywords</span>
                             <div class="mt-3 flex flex-wrap gap-2" id="seoKeywordsList"></div>
                         </div>
                     </div>
 
                     <!-- Title & Meta Recommendations -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="bg-[#072E33] border border-[#294D61] p-6 rounded-2xl space-y-3">
+                        <div
+                            class="bg-theme-card border border-theme p-6 rounded-2xl space-y-3 shadow-sm transition-colors">
                             <div class="flex items-center justify-between">
-                                <span class="text-xs font-bold uppercase tracking-wider text-[#0F969C]">Recommended SEO Title</span>
-                                <button onclick="copyElementText('recommendedTitle')" class="text-xs text-[#6DA5C0] hover:text-[#F1F7F7] flex items-center gap-1 transition">
-                                    <i data-lucide="copy" class="w-3.5 h-3.5"></i> Copy
+                                <span class="text-xs font-bold uppercase tracking-wider text-[#0F969C]">Recommended SEO
+                                    Title</span>
+                                <button onclick="copyElementText('recommendedTitle')"
+                                    class="text-xs text-theme-secondary hover:text-theme-primary flex items-center gap-1 transition cursor-pointer">
+                                    <i data-lucide="copy" class="w-3.5 h-3.5 text-[#0F969C]"></i> Copy
                                 </button>
                             </div>
-                            <div class="text-xs text-[#BDD7D8]">Existing Title: <span id="currentTitle" class="text-[#F1F7F7] font-mono">None</span></div>
-                            <div class="text-sm font-semibold text-[#F1F7F7] bg-[#05161A] p-3.5 rounded-xl border border-[#0F969C]/50" id="recommendedTitle"></div>
-                            <p class="text-xs text-[#BDD7D8] leading-relaxed" id="titleReason"></p>
+                            <div class="text-xs text-theme-muted">Existing Title: <span id="currentTitle"
+                                    class="text-theme-primary font-mono">None</span></div>
+                            <div class="text-sm font-semibold text-theme-primary bg-theme-elevated p-3.5 rounded-xl border border-[#0F969C]/40"
+                                id="recommendedTitle"></div>
+                            <p class="text-xs text-theme-secondary leading-relaxed" id="titleReason"></p>
                         </div>
 
-                        <div class="bg-[#072E33] border border-[#294D61] p-6 rounded-2xl space-y-3">
+                        <div
+                            class="bg-theme-card border border-theme p-6 rounded-2xl space-y-3 shadow-sm transition-colors">
                             <div class="flex items-center justify-between">
-                                <span class="text-xs font-bold uppercase tracking-wider text-[#0F969C]">Recommended Meta Description</span>
-                                <button onclick="copyElementText('recommendedMeta')" class="text-xs text-[#6DA5C0] hover:text-[#F1F7F7] flex items-center gap-1 transition">
-                                    <i data-lucide="copy" class="w-3.5 h-3.5"></i> Copy
+                                <span class="text-xs font-bold uppercase tracking-wider text-[#0F969C]">Recommended Meta
+                                    Description</span>
+                                <button onclick="copyElementText('recommendedMeta')"
+                                    class="text-xs text-theme-secondary hover:text-theme-primary flex items-center gap-1 transition cursor-pointer">
+                                    <i data-lucide="copy" class="w-3.5 h-3.5 text-[#0F969C]"></i> Copy
                                 </button>
                             </div>
-                            <div class="text-xs text-[#BDD7D8]">Existing Description: <span id="currentMeta" class="text-[#F1F7F7] font-mono">None</span></div>
-                            <div class="text-sm font-semibold text-[#F1F7F7] bg-[#05161A] p-3.5 rounded-xl border border-[#0F969C]/50" id="recommendedMeta"></div>
+                            <div class="text-xs text-theme-muted">Existing Description: <span id="currentMeta"
+                                    class="text-theme-primary font-mono">None</span></div>
+                            <div class="text-sm font-semibold text-theme-primary bg-theme-elevated p-3.5 rounded-xl border border-[#0F969C]/40"
+                                id="recommendedMeta"></div>
                         </div>
                     </div>
 
                     <!-- Deterministic SEO Health & Supporting Content Strategy -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="bg-[#072E33] border border-[#294D61] p-6 rounded-2xl">
-                            <h4 class="text-sm font-bold text-[#F1F7F7] mb-4 flex items-center gap-2">
-                                <i data-lucide="stethoscope" class="w-4 h-4 text-[#0F969C]"></i> Technical SEO Observations
+                        <div class="bg-theme-card border border-theme p-6 rounded-2xl shadow-sm transition-colors">
+                            <h4 class="text-sm font-bold text-theme-primary mb-4 flex items-center gap-2">
+                                <i data-lucide="stethoscope" class="w-4 h-4 text-[#0F969C]"></i> Technical SEO
+                                Observations
                             </h4>
-                            <ul id="seoObservationsList" class="space-y-2.5 text-xs text-[#BDD7D8]"></ul>
+                            <ul id="seoObservationsList" class="space-y-2.5 text-xs text-theme-secondary"></ul>
                         </div>
-                        <div class="bg-[#072E33] border border-[#294D61] p-6 rounded-2xl">
-                            <h4 class="text-sm font-bold text-[#F1F7F7] mb-4 flex items-center gap-2">
-                                <i data-lucide="file-plus-2" class="w-4 h-4 text-[#6DA5C0]"></i> Supporting Content Recommendations
+                        <div class="bg-theme-card border border-theme p-6 rounded-2xl shadow-sm transition-colors">
+                            <h4 class="text-sm font-bold text-theme-primary mb-4 flex items-center gap-2">
+                                <i data-lucide="file-plus-2" class="w-4 h-4 text-[#0F969C]"></i> Supporting Content
+                                Recommendations
                             </h4>
                             <div id="supportingContentList" class="space-y-3"></div>
                         </div>
@@ -656,9 +895,10 @@
                 <!-- TAB 4: TARGET SEARCH QUERIES (Module 2) -->
                 <!-- ================================================================= -->
                 <div id="tabContent-queries" class="tab-content hidden space-y-4">
-                    <div class="text-xs text-[#BDD7D8] flex items-center justify-between">
-                        <span>Exactly 5 multi-platform high-intent queries mapped across Google, LinkedIn, X, Instagram, and Facebook:</span>
-                        <span class="text-[#6DA5C0] font-mono">Non-benchmark AI recommendations</span>
+                    <div class="text-xs text-theme-secondary flex items-center justify-between">
+                        <span>Exactly 5 multi-platform high-intent queries mapped across Google, LinkedIn, X, Instagram,
+                            and Facebook:</span>
+                        <span class="text-theme-muted font-mono">AI-assisted recommendations</span>
                     </div>
                     <div id="queriesList" class="grid grid-cols-1 gap-4"></div>
                 </div>
@@ -667,7 +907,7 @@
                 <!-- TAB 5: BUSINESS SERVICES (Module 4) -->
                 <!-- ================================================================= -->
                 <div id="tabContent-services" class="tab-content hidden space-y-4">
-                    <div class="text-xs text-[#BDD7D8] flex items-center justify-between">
+                    <div class="text-xs text-theme-secondary flex items-center justify-between">
                         <span>Top 5 identified business offerings prioritized from actual site content:</span>
                         <span class="text-[#0F969C] font-semibold">Strict Extracted / Inferred Provenance</span>
                     </div>
@@ -679,39 +919,42 @@
                 <!-- ================================================================= -->
                 <div id="tabContent-audience" class="tab-content hidden space-y-6">
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-                        <div class="bg-[#072E33] border border-[#294D61] p-5 rounded-2xl">
-                            <span class="text-xs font-bold uppercase tracking-wider text-[#0F969C]">Primary Audience</span>
-                            <ul id="audiencePrimary" class="mt-3 space-y-1.5 text-sm text-[#F1F7F7]"></ul>
+                        <div class="bg-theme-card border border-theme p-5 rounded-2xl shadow-sm transition-colors">
+                            <span class="text-xs font-bold uppercase tracking-wider text-[#0F969C]">Primary
+                                Audience</span>
+                            <ul id="audiencePrimary" class="mt-3 space-y-1.5 text-sm text-theme-primary"></ul>
                         </div>
-                        <div class="bg-[#072E33] border border-[#294D61] p-5 rounded-2xl">
-                            <span class="text-xs font-bold uppercase tracking-wider text-[#6DA5C0]">Target Industries</span>
-                            <ul id="audienceIndustries" class="mt-3 space-y-1.5 text-sm text-[#F1F7F7]"></ul>
+                        <div class="bg-theme-card border border-theme p-5 rounded-2xl shadow-sm transition-colors">
+                            <span class="text-xs font-bold uppercase tracking-wider text-theme-muted">Target
+                                Industries</span>
+                            <ul id="audienceIndustries" class="mt-3 space-y-1.5 text-sm text-theme-primary"></ul>
                         </div>
-                        <div class="bg-[#072E33] border border-[#294D61] p-5 rounded-2xl">
-                            <span class="text-xs font-bold uppercase tracking-wider text-[#0F969C]">Geographical Focus</span>
-                            <ul id="audienceGeo" class="mt-3 space-y-1.5 text-sm text-[#F1F7F7]"></ul>
+                        <div class="bg-theme-card border border-theme p-5 rounded-2xl shadow-sm transition-colors">
+                            <span class="text-xs font-bold uppercase tracking-wider text-[#0F969C]">Geographical
+                                Focus</span>
+                            <ul id="audienceGeo" class="mt-3 space-y-1.5 text-sm text-theme-primary"></ul>
                         </div>
                     </div>
 
                     <!-- Customer Needs & Pain Points -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="bg-[#072E33] border border-[#294D61] p-6 rounded-2xl">
-                            <h4 class="text-sm font-bold text-[#0F969C] mb-3 flex items-center gap-2">
+                        <div class="bg-theme-card border border-theme p-6 rounded-2xl shadow-sm transition-colors">
+                            <h4 class="text-sm font-bold text-emerald-500 mb-3 flex items-center gap-2">
                                 <i data-lucide="check-circle-2" class="w-4 h-4"></i> Customer Needs Addressed
                             </h4>
-                            <ul id="customerNeeds" class="space-y-2 text-sm text-[#BDD7D8]"></ul>
+                            <ul id="customerNeeds" class="space-y-2 text-sm text-theme-secondary"></ul>
                         </div>
-                        <div class="bg-[#072E33] border border-[#294D61] p-6 rounded-2xl">
-                            <h4 class="text-sm font-bold text-rose-400 mb-3 flex items-center gap-2">
+                        <div class="bg-theme-card border border-theme p-6 rounded-2xl shadow-sm transition-colors">
+                            <h4 class="text-sm font-bold text-rose-500 mb-3 flex items-center gap-2">
                                 <i data-lucide="alert-circle" class="w-4 h-4"></i> Customer Pain Points Solved
                             </h4>
-                            <ul id="customerChallenges" class="space-y-2 text-sm text-[#BDD7D8]"></ul>
+                            <ul id="customerChallenges" class="space-y-2 text-sm text-theme-secondary"></ul>
                         </div>
                     </div>
 
                     <!-- Marketing Segments -->
-                    <div class="bg-[#072E33] border border-[#294D61] p-6 sm:p-8 rounded-2xl">
-                        <h3 class="font-display text-lg font-bold text-[#F1F7F7] mb-5 flex items-center gap-2">
+                    <div class="bg-theme-card border border-theme p-6 sm:p-8 rounded-2xl shadow-sm transition-colors">
+                        <h3 class="font-display text-lg font-bold text-theme-primary mb-5 flex items-center gap-2">
                             <i data-lucide="share-2" class="w-5 h-5 text-[#0F969C]"></i> Strategic Marketing Segments
                         </h3>
                         <div id="marketingSegmentsList" class="grid grid-cols-1 md:grid-cols-2 gap-5"></div>
@@ -722,14 +965,17 @@
                 <!-- TAB 7: RAW JSON -->
                 <!-- ================================================================= -->
                 <div id="tabContent-json" class="tab-content hidden">
-                    <div class="bg-[#05161A] border border-[#294D61] p-5 rounded-2xl relative shadow-inner">
-                        <div class="flex items-center justify-between mb-3 border-b border-[#294D61] pb-3">
-                            <span class="text-xs font-mono text-[#6DA5C0]">Structured JSON Payload (Section 7 Schema)</span>
-                            <button onclick="copyRawJson()" class="px-3 py-1 bg-[#072E33] hover:bg-[#294D61] text-xs font-medium text-[#F1F7F7] rounded-lg border border-[#294D61] flex items-center gap-1.5 transition">
-                                <i data-lucide="copy" class="w-3.5 h-3.5"></i> Copy JSON
+                    <div
+                        class="bg-theme-elevated border border-theme p-5 rounded-2xl relative shadow-inner transition-colors">
+                        <div class="flex items-center justify-between mb-3 border-b border-theme pb-3">
+                            <span class="text-xs font-mono text-theme-secondary">Structured JSON Payload</span>
+                            <button onclick="copyRawJson()"
+                                class="px-3 py-1 bg-theme-card hover:bg-theme-input text-xs font-medium text-theme-primary rounded-lg border border-theme flex items-center gap-1.5 transition cursor-pointer">
+                                <i data-lucide="copy" class="w-3.5 h-3.5 text-[#0F969C]"></i> Copy JSON
                             </button>
                         </div>
-                        <pre id="rawJsonBlock" class="p-2 text-xs font-mono text-[#BDD7D8] overflow-x-auto max-h-[600px] leading-relaxed"></pre>
+                        <pre id="rawJsonBlock"
+                            class="p-2 text-xs font-mono text-theme-secondary overflow-x-auto max-h-[600px] leading-relaxed"></pre>
                     </div>
                 </div>
 
@@ -738,83 +984,97 @@
         </main>
 
         <!-- Footer -->
-        <footer class="border-t border-[#294D61] bg-[#072E33]/60 py-6 px-4 text-center text-xs text-[#BDD7D8] mt-auto">
-            SitePulse AI • Enterprise Website Intelligence & Growth Advisor REST API • Powered by Google Gemini Flash & FastAPI
+        <footer
+            class="border-t border-theme bg-theme-sidebar py-6 px-4 text-center text-xs text-theme-muted mt-auto transition-colors">
+            SitePulse AI • Enterprise Website Intelligence & Growth Advisor REST API • Powered by Google Gemini Flash &
+            FastAPI
         </footer>
     </div>
 
     <!-- ========================================================================= -->
-    <!-- 8. ANALYSIS HISTORY DRAWER (Real browser-persisted history) -->
+    <!-- 8. ANALYSIS HISTORY DRAWER (Browser-persisted history) -->
     <!-- ========================================================================= -->
-    <div id="historyDrawer" class="fixed inset-y-0 right-0 z-50 w-80 bg-[#072E33] border-l border-[#294D61] shadow-teal-lg transform translate-x-full transition-transform duration-300 flex flex-col justify-between hidden">
-        <div class="p-5 border-b border-[#294D61] flex items-center justify-between">
+    <div id="historyDrawer"
+        class="fixed inset-y-0 right-0 z-50 w-80 bg-theme-card border-l border-theme shadow-2xl transform translate-x-full transition-transform duration-300 flex flex-col justify-between hidden">
+        <div class="p-5 border-b border-theme flex items-center justify-between">
             <div class="flex items-center gap-2">
                 <i data-lucide="history" class="w-5 h-5 text-[#0F969C]"></i>
-                <h3 class="font-display font-bold text-base text-[#F1F7F7]">Analysis History</h3>
+                <h3 class="font-display font-bold text-base text-theme-primary">Analysis History</h3>
             </div>
-            <button onclick="toggleHistoryDrawer(false)" class="p-1 rounded-md text-[#BDD7D8] hover:text-[#F1F7F7] hover:bg-[#294D61]/50">
+            <button onclick="toggleHistoryDrawer(false)"
+                class="p-1 rounded-md text-theme-secondary hover:text-theme-primary hover:bg-theme-elevated cursor-pointer">
                 <i data-lucide="x" class="w-5 h-5"></i>
             </button>
         </div>
 
         <div class="p-4 flex-1 overflow-y-auto space-y-3" id="historyListContainer">
-            <p class="text-xs text-[#BDD7D8] text-center py-8">No past analyses recorded on this device yet.</p>
+            <p class="text-xs text-theme-muted text-center py-8">No past analyses recorded on this device yet.</p>
         </div>
 
-        <div class="p-4 border-t border-[#294D61] bg-[#05161A] flex items-center justify-between">
-            <button onclick="clearHistory()" class="text-xs text-rose-400 hover:text-rose-300 flex items-center gap-1 transition">
+        <div class="p-4 border-t border-theme bg-theme-elevated flex items-center justify-between">
+            <button onclick="clearHistory()"
+                class="text-xs text-rose-500 hover:text-rose-600 flex items-center gap-1 transition cursor-pointer font-semibold">
                 <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Clear History
             </button>
-            <span class="text-[11px] text-[#6DA5C0]">Saved locally</span>
+            <span class="text-[11px] text-theme-muted">Saved locally</span>
         </div>
     </div>
 
     <!-- ========================================================================= -->
     <!-- 9. SETTINGS MODAL -->
     <!-- ========================================================================= -->
-    <div id="settingsModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-        <div class="bg-[#072E33] border border-[#294D61] rounded-2xl max-w-md w-full p-6 shadow-teal-lg space-y-5">
-            <div class="flex items-center justify-between border-b border-[#294D61] pb-4">
-                <h3 class="font-display font-bold text-lg text-[#F1F7F7] flex items-center gap-2">
+    <div id="settingsModal"
+        class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div
+            class="bg-theme-card border border-theme rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-5 transition-colors">
+            <div class="flex items-center justify-between border-b border-theme pb-4">
+                <h3 class="font-display font-bold text-lg text-theme-primary flex items-center gap-2">
                     <i data-lucide="sliders" class="w-5 h-5 text-[#0F969C]"></i> Platform Settings
                 </h3>
-                <button onclick="toggleSettingsModal(false)" class="text-[#BDD7D8] hover:text-[#F1F7F7]">
+                <button onclick="toggleSettingsModal(false)"
+                    class="text-theme-secondary hover:text-theme-primary cursor-pointer">
                     <i data-lucide="x" class="w-5 h-5"></i>
                 </button>
             </div>
 
-            <div class="space-y-4 text-xs text-[#BDD7D8]">
+            <div class="space-y-4 text-xs text-theme-secondary">
                 <div>
-                    <label class="block font-semibold text-[#F1F7F7] mb-1.5">Color Palette Theme</label>
+                    <label class="block font-semibold text-theme-primary mb-1.5">Color Palette Theme</label>
                     <div class="grid grid-cols-2 gap-2">
-                        <button onclick="setThemeMode('dark')" id="btnThemeDark" class="p-2.5 rounded-lg border border-[#0F969C] bg-[#0C7075]/30 text-[#F1F7F7] flex items-center justify-center gap-2 font-medium">
-                            <i data-lucide="moon" class="w-4 h-4"></i> Dark Teal (Default)
+                        <button onclick="setThemeMode('light')" id="btnThemeLight"
+                            class="p-2.5 rounded-lg border border-theme bg-theme-elevated text-theme-primary flex items-center justify-center gap-2 font-medium cursor-pointer transition">
+                            <i data-lucide="sun" class="w-4 h-4 text-amber-500"></i> Light Mode
                         </button>
-                        <button onclick="setThemeMode('light')" id="btnThemeLight" class="p-2.5 rounded-lg border border-[#294D61] bg-[#05161A] text-[#BDD7D8] flex items-center justify-center gap-2 font-medium">
-                            <i data-lucide="sun" class="w-4 h-4"></i> Light Palette
+                        <button onclick="setThemeMode('dark')" id="btnThemeDark"
+                            class="p-2.5 rounded-lg border border-theme bg-theme-elevated text-theme-primary flex items-center justify-center gap-2 font-medium cursor-pointer transition">
+                            <i data-lucide="moon" class="w-4 h-4 text-[#0F969C]"></i> Dark Mode
                         </button>
                     </div>
                 </div>
 
                 <div>
-                    <label class="block font-semibold text-[#F1F7F7] mb-1">Configured Gemini Model</label>
-                    <div class="p-2.5 rounded-lg bg-[#05161A] border border-[#294D61] font-mono text-xs text-[#6DA5C0] flex items-center justify-between">
+                    <label class="block font-semibold text-theme-primary mb-1">Configured Gemini Model</label>
+                    <div
+                        class="p-2.5 rounded-lg bg-theme-elevated border border-theme font-mono text-xs text-theme-secondary flex items-center justify-between">
                         <span id="settingsModelText">gemini-3.5-flash</span>
                         <span class="text-[10px] text-[#0F969C] uppercase font-semibold">Active</span>
                     </div>
-                    <span class="text-[10px] text-[#6DA5C0] mt-1 block">Configured via <code>GEMINI_MODEL</code> in <code>.env</code></span>
+                    <span class="text-[10px] text-theme-muted mt-1 block">Configured via <code>GEMINI_MODEL</code> in
+                        <code>.env</code></span>
                 </div>
 
                 <div>
-                    <label class="block font-semibold text-[#F1F7F7] mb-1">Server Endpoint</label>
-                    <div class="p-2.5 rounded-lg bg-[#05161A] border border-[#294D61] font-mono text-xs text-[#BDD7D8]">
+                    <label class="block font-semibold text-theme-primary mb-1">Server Endpoint</label>
+                    <div
+                        class="p-2.5 rounded-lg bg-theme-elevated border border-theme font-mono text-xs text-theme-secondary">
                         POST /link-analysis (Port 4000)
                     </div>
                 </div>
             </div>
 
-            <div class="pt-4 border-t border-[#294D61] flex justify-end">
-                <button onclick="toggleSettingsModal(false)" class="px-4 py-2 bg-[#0C7075] hover:bg-[#0F969C] text-[#F1F7F7] rounded-lg text-xs font-semibold transition">
+            <div class="pt-4 border-t border-theme flex justify-end">
+                <button onclick="toggleSettingsModal(false)"
+                    class="btn-accent px-4 py-2 rounded-lg text-xs font-semibold cursor-pointer transition">
                     Done
                 </button>
             </div>
@@ -824,7 +1084,8 @@
     <!-- ========================================================================= -->
     <!-- 10. TOAST NOTIFICATION COMPONENT -->
     <!-- ========================================================================= -->
-    <div id="toastNotification" class="fixed bottom-6 right-6 z-50 bg-[#072E33] border border-[#0F969C] text-[#F1F7F7] px-4 py-3 rounded-xl shadow-teal-glow text-xs font-semibold flex items-center gap-2.5 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
+    <div id="toastNotification"
+        class="fixed bottom-6 right-6 z-50 bg-theme-card border border-[#0F969C] text-theme-primary px-4 py-3 rounded-xl shadow-lg text-xs font-semibold flex items-center gap-2.5 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
         <i data-lucide="check-circle" class="w-4 h-4 text-[#0F969C]"></i>
         <span id="toastMessage">Copied to clipboard!</span>
     </div>
@@ -837,22 +1098,74 @@
         let isSidebarCollapsed = false;
         const HISTORY_KEY = "sitepulse_analysis_history";
 
-        // Initialize icons on DOM ready
+        // Initialize theme and icons on DOM ready
         document.addEventListener("DOMContentLoaded", () => {
+            syncThemeUI();
             lucide.createIcons();
             loadHistoryBadge();
             fetchServerHealth();
         });
 
+        // ==========================================
+        // Theme Switching & Persistence
+        // ==========================================
+        function syncThemeUI() {
+            const currentTheme = document.documentElement.getAttribute("data-theme") ||
+                (document.documentElement.classList.contains("dark") ? "dark" : "light");
+            const icon = document.getElementById("themeIcon");
+            const label = document.getElementById("themeToggleLabel");
+            const btnLight = document.getElementById("btnThemeLight");
+            const btnDark = document.getElementById("btnThemeDark");
+
+            if (currentTheme === "light") {
+                if (icon) icon.setAttribute("data-lucide", "sun");
+                if (label) label.textContent = "Light";
+                if (btnLight) btnLight.className = "p-2.5 rounded-lg border-2 border-[#0F969C] bg-[#0F969C]/10 text-theme-primary flex items-center justify-center gap-2 font-bold";
+                if (btnDark) btnDark.className = "p-2.5 rounded-lg border border-theme bg-theme-elevated text-theme-secondary flex items-center justify-center gap-2 font-medium";
+            } else {
+                if (icon) icon.setAttribute("data-lucide", "moon");
+                if (label) label.textContent = "Dark";
+                if (btnDark) btnDark.className = "p-2.5 rounded-lg border-2 border-[#0F969C] bg-[#0F969C]/15 text-theme-primary flex items-center justify-center gap-2 font-bold";
+                if (btnLight) btnLight.className = "p-2.5 rounded-lg border border-theme bg-theme-elevated text-theme-secondary flex items-center justify-center gap-2 font-medium";
+            }
+            lucide.createIcons();
+        }
+
+        function setThemeMode(mode) {
+            const html = document.documentElement;
+            if (mode === 'light') {
+                html.setAttribute("data-theme", "light");
+                html.classList.remove("dark");
+                localStorage.setItem("sitepulse_theme", "light");
+            } else {
+                html.setAttribute("data-theme", "dark");
+                html.classList.add("dark");
+                localStorage.setItem("sitepulse_theme", "dark");
+            }
+            syncThemeUI();
+        }
+
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute("data-theme") ||
+                (document.documentElement.classList.contains("dark") ? "dark" : "light");
+            setThemeMode(currentTheme === "dark" ? "light" : "dark");
+        }
+
+        // ==========================================
+        // Backend Health Probe
+        // ==========================================
         async function fetchServerHealth() {
             try {
                 const res = await fetch("/health");
                 if (res.ok) {
                     const h = await res.json();
                     if (h.ai_model) {
-                        document.getElementById("sidebarModelInfo").textContent = h.ai_model;
-                        document.getElementById("statModelName").textContent = h.ai_model.replace("gemini-", "").replace("-flash", " Flash");
-                        document.getElementById("settingsModelText").textContent = h.ai_model;
+                        const modelEl = document.getElementById("sidebarModelInfo");
+                        if (modelEl) modelEl.textContent = h.ai_model;
+                        const statModel = document.getElementById("statModelName");
+                        if (statModel) statModel.textContent = h.ai_model.replace("gemini-", "").replace("-flash", " Flash");
+                        const settingsModel = document.getElementById("settingsModelText");
+                        if (settingsModel) settingsModel.textContent = h.ai_model;
                     }
                 }
             } catch (e) {
@@ -860,6 +1173,9 @@
             }
         }
 
+        // ==========================================
+        // Sidebar Controls
+        // ==========================================
         function toggleSidebar(forceState) {
             const sidebar = document.getElementById("sidebar");
             const backdrop = document.getElementById("mobileBackdrop");
@@ -924,8 +1240,8 @@
         function switchTab(tabKey) {
             document.querySelectorAll(".tab-content").forEach(el => el.classList.add("hidden"));
             document.querySelectorAll(".tab-btn").forEach(btn => {
-                btn.classList.remove("active", "bg-[#0C7075]", "text-[#F1F7F7]", "border-[#0F969C]");
-                btn.classList.add("text-[#BDD7D8]");
+                btn.classList.remove("active");
+                btn.classList.add("text-theme-secondary");
             });
 
             const content = document.getElementById(`tabContent-${tabKey}`);
@@ -933,7 +1249,7 @@
             if (content && btn) {
                 content.classList.remove("hidden");
                 btn.classList.add("active");
-                btn.classList.remove("text-[#BDD7D8]");
+                btn.classList.remove("text-theme-secondary");
             }
 
             // Update breadcrumb
@@ -971,7 +1287,7 @@
             // Scroll to loader
             document.getElementById("loadingState").scrollIntoView({ behavior: 'smooth', block: 'center' });
 
-            // 7 Meaningful Progress Stages (Section 4)
+            // 7 Meaningful Progress Stages
             const stages = [
                 { id: "stage-1", title: "Validating website URL...", sub: "Verifying scheme, DNS resolution, and enforcing SSRF protection..." },
                 { id: "stage-2", title: "Extracting website content...", sub: "Fetching HTML, parsing headings, links, and subpages via HTTPX..." },
@@ -996,13 +1312,13 @@
                     const el = document.getElementById(st.id);
                     if (!el) return;
                     if (i < idx) {
-                        el.className = "flex items-center gap-2 text-emerald-400 font-medium";
+                        el.className = "flex items-center gap-2 text-emerald-500 font-medium";
                         el.innerHTML = `<i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i> ${el.textContent.trim().replace(/^[\d\.\s\w\W]+?\s/, '')}`;
                     } else if (i === idx) {
                         el.className = "flex items-center gap-2 text-[#0F969C] font-semibold";
                         el.innerHTML = `<i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin"></i> ${el.textContent.trim().replace(/^[\d\.\s\w\W]+?\s/, '')}`;
                     } else {
-                        el.className = "flex items-center gap-2 text-[#294D61]";
+                        el.className = "flex items-center gap-2 text-theme-muted";
                         el.innerHTML = `<i data-lucide="circle" class="w-3.5 h-3.5"></i> ${el.textContent.trim().replace(/^[\d\.\s\w\W]+?\s/, '')}`;
                     }
                 });
@@ -1065,17 +1381,41 @@
 
             errCode.textContent = data.error_code || "ERROR";
             errTitle.textContent = data.error_code ? data.error_code.replace(/_/g, ' ') : "Analysis Encountered an Error";
-            errMsg.textContent = data.error || data.detail || "Unable to complete website analysis.";
+            errMsg.textContent = data.error || (typeof data.detail === "string" ? data.detail : "") || "Unable to complete website analysis.";
 
             if (data.error_code === "SSRF_PROTECTION_VIOLATION") {
                 errTip.classList.remove("hidden");
                 errTip.innerHTML = "<strong>Security Guardrail:</strong> Target URL points to an internal, loopback (localhost), or private IP network address. Only public accessible web addresses are permitted.";
+            } else if (data.error_code === "DNS_RESOLUTION_ERROR" || data.error_code === "DNS_RESOLUTION_FAILED") {
+                errTip.classList.remove("hidden");
+                errTip.innerHTML = "<strong>DNS Resolution Error:</strong> The domain could not be resolved. Please verify the hostname spelling and ensure the site has active public DNS records.";
+            } else if (data.error_code === "CONNECTION_TIMEOUT") {
+                errTip.classList.remove("hidden");
+                errTip.innerHTML = "<strong>Connection Timeout:</strong> The target website took too long to respond or transmit content. The server may be under heavy load or throttling automated clients.";
+            } else if (data.error_code === "SSL_VERIFICATION_ERROR") {
+                errTip.classList.remove("hidden");
+                errTip.innerHTML = "<strong>SSL/TLS Certificate Error:</strong> The remote server presented an expired, self-signed, or untrusted certificate. HTTPS verification is enforced for security.";
+            } else if (data.error_code === "HTTP_403_FORBIDDEN") {
+                errTip.classList.remove("hidden");
+                errTip.innerHTML = "<strong>Access Forbidden (HTTP 403):</strong> The target website's Web Application Firewall (WAF) or security settings blocked automated HTML access.";
+            } else if (data.error_code === "HTTP_404_NOT_FOUND") {
+                errTip.classList.remove("hidden");
+                errTip.innerHTML = "<strong>Page Not Found (HTTP 404):</strong> The specified website page does not exist or has been relocated.";
+            } else if (data.error_code === "HTTP_429_RATE_LIMITED") {
+                errTip.classList.remove("hidden");
+                errTip.innerHTML = "<strong>Rate Limited (HTTP 429):</strong> The remote server is temporarily rate-limiting requests. Please wait a few moments before trying again.";
+            } else if (data.error_code === "UNSUPPORTED_CONTENT_TYPE") {
+                errTip.classList.remove("hidden");
+                errTip.innerHTML = "<strong>Non-HTML Content:</strong> The target URL returned non-HTML media (e.g. PDF, video, binary stream). SitePulse AI inspects HTML web pages.";
             } else if (data.error_code === "LLM_CONFIGURATION_ERROR") {
                 errTip.classList.remove("hidden");
                 errTip.innerHTML = "<strong>Configuration Notice:</strong> Gemini API key is missing or invalid. Verify <code>GEMINI_API_KEY</code> in your <code>.env</code> file.";
+            } else if (data.error_code === "AI_OUTPUT_VALIDATION_ERROR" || data.error_code === "AI_ANALYSIS_FAILED") {
+                errTip.classList.remove("hidden");
+                errTip.innerHTML = "<strong>AI Analysis Notice:</strong> The AI model output could not be validated against the required schema. You can retry the request.";
             } else if (data.error_code === "WEBSITE_EXTRACTION_ERROR") {
                 errTip.classList.remove("hidden");
-                errTip.innerHTML = "<strong>Extraction Notice:</strong> Target website could not be reached, returned an HTTP error, or blocked HTML access. Verify the URL is live and publicly accessible.";
+                errTip.innerHTML = "<strong>Extraction Notice:</strong> Target website could not be reached, returned an HTTP error, or reset the connection. Verify the URL is live and publicly accessible.";
             } else {
                 errTip.classList.add("hidden");
             }
@@ -1136,7 +1476,7 @@
             const oppOverList = document.getElementById("overviewOpportunities");
             oppOverList.innerHTML = (brandOverview.improvement_opportunities || []).map(opp => `
                 <li class="flex items-start gap-2.5">
-                    <i data-lucide="arrow-up-right" class="w-4 h-4 text-[#6DA5C0] mt-0.5 flex-shrink-0"></i>
+                    <i data-lucide="arrow-up-right" class="w-4 h-4 text-[#0F969C] mt-0.5 flex-shrink-0"></i>
                     <span>${opp}</span>
                 </li>
             `).join('');
@@ -1153,37 +1493,37 @@
             const oppList = document.getElementById("brandOpportunities");
             oppList.innerHTML = (comp.opportunities || []).map(o => `
                 <li class="flex items-start gap-2.5">
-                    <i data-lucide="lightbulb" class="w-4 h-4 text-[#6DA5C0] mt-0.5 flex-shrink-0"></i>
+                    <i data-lucide="lightbulb" class="w-4 h-4 text-[#0F969C] mt-0.5 flex-shrink-0"></i>
                     <span>${o}</span>
                 </li>
             `).join('');
 
             const compList = document.getElementById("competitorsList");
             compList.innerHTML = (comp.competitors || []).map((c, i) => `
-                <div class="bg-[#05161A] border border-[#294D61] rounded-xl p-5 flex flex-col justify-between hover:border-[#0F969C]/60 transition-colors shadow-teal-sm">
+                <div class="bg-theme-card border border-theme rounded-xl p-5 flex flex-col justify-between hover:border-[#0F969C]/60 transition shadow-sm">
                     <div>
                         <div class="flex items-center justify-between gap-2 mb-2">
-                            <h5 class="font-display font-bold text-base text-[#F1F7F7]">${c.name}</h5>
-                            <span class="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full ${c.is_verified ? 'bg-[#0C7075]/30 text-[#0F969C] border border-[#0F969C]/40' : 'bg-[#294D61]/50 text-[#BDD7D8] border border-[#294D61]'}">
+                            <h5 class="font-display font-bold text-base text-theme-primary">${c.name}</h5>
+                            <span class="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full ${c.is_verified ? 'bg-[#0F969C]/15 text-[#0F969C] border border-[#0F969C]/30' : 'bg-theme-elevated text-theme-muted border border-theme'}">
                                 ${c.verification_status === 'verified_external_search' ? 'Verified Search' : 'AI Suggested'}
                             </span>
                         </div>
                         <div class="text-xs text-[#0F969C] font-semibold mb-2.5">${c.category}</div>
-                        <p class="text-xs text-[#BDD7D8] leading-relaxed mb-3">${c.comparison}</p>
+                        <p class="text-xs text-theme-secondary leading-relaxed mb-3">${c.comparison}</p>
                     </div>
 
-                    <div class="pt-3 border-t border-[#294D61] space-y-2 text-xs">
+                    <div class="pt-3 border-t border-theme space-y-2 text-xs">
                         <div>
-                            <span class="text-[#6DA5C0] font-semibold">Strengths:</span> 
-                            <span class="text-[#BDD7D8]">${(c.strengths || []).slice(0, 2).join(', ')}</span>
+                            <span class="text-theme-muted font-semibold">Strengths:</span>
+                            <span class="text-theme-secondary">${(c.strengths || []).slice(0, 2).join(', ')}</span>
                         </div>
                         <div class="flex items-center justify-between pt-1">
                             ${c.website_url ? `
-                                <a href="${c.website_url}" target="_blank" class="text-xs text-[#6DA5C0] hover:text-[#F1F7F7] flex items-center gap-1">
+                                <a href="${c.website_url}" target="_blank" class="text-xs text-[#0F969C] hover:underline flex items-center gap-1 font-medium">
                                     <i data-lucide="external-link" class="w-3 h-3"></i> Visit site
                                 </a>
-                            ` : `<span class="text-[11px] text-[#6DA5C0]/60 italic">Domain unverified</span>`}
-                            <span class="text-[10px] text-[#6DA5C0] font-mono">Competitor #${i + 1}</span>
+                            ` : `<span class="text-[11px] text-theme-muted italic">Domain unverified</span>`}
+                            <span class="text-[10px] text-theme-muted font-mono">Competitor #${i + 1}</span>
                         </div>
                     </div>
                 </div>
@@ -1196,9 +1536,9 @@
             const kwList = document.getElementById("seoKeywordsList");
             const allKws = [...(seo.secondary_keywords || []), ...(seo.long_tail_keywords || [])];
             kwList.innerHTML = allKws.map(k => `
-                <button onclick="copyText('${k.replace(/'/g, "\\'")}')" class="text-xs px-2.5 py-1.5 rounded-lg bg-[#05161A] hover:bg-[#0C7075]/30 border border-[#294D61] hover:border-[#0F969C]/50 text-[#BDD7D8] hover:text-[#F1F7F7] flex items-center gap-1.5 transition">
+                <button onclick="copyText('${k.replace(/'/g, "\\'")}')" class="text-xs px-2.5 py-1.5 rounded-lg bg-theme-elevated hover:bg-[#0F969C]/10 border border-theme hover:border-[#0F969C]/40 text-theme-secondary hover:text-theme-primary flex items-center gap-1.5 transition cursor-pointer">
                     <span>${k}</span>
-                    <i data-lucide="copy" class="w-3 h-3 text-[#6DA5C0]"></i>
+                    <i data-lucide="copy" class="w-3 h-3 text-[#0F969C]"></i>
                 </button>
             `).join('');
 
@@ -1219,41 +1559,41 @@
 
             const suppList = document.getElementById("supportingContentList");
             suppList.innerHTML = (seo.supporting_content || []).map(sc => `
-                <div class="p-3 rounded-xl bg-[#05161A] border border-[#294D61] text-xs">
+                <div class="p-3 rounded-xl bg-theme-elevated border border-theme text-xs">
                     <div class="flex items-center justify-between gap-2 mb-1">
-                        <span class="font-bold text-[#F1F7F7]">${sc.topic}</span>
-                        <span class="text-[10px] px-2 py-0.5 rounded bg-[#0C7075]/30 text-[#6DA5C0] font-semibold">${sc.content_type}</span>
+                        <span class="font-bold text-theme-primary">${sc.topic}</span>
+                        <span class="text-[10px] px-2 py-0.5 rounded bg-[#0F969C]/15 text-[#0F969C] font-semibold">${sc.content_type}</span>
                     </div>
-                    <div class="text-[#BDD7D8] text-[11px]">${sc.purpose}</div>
-                    <div class="text-[10px] text-[#0F969C] mt-1 font-mono">Target: ${sc.target_keyword}</div>
+                    <div class="text-theme-secondary text-[11px]">${sc.purpose}</div>
+                    <div class="text-[10px] text-[#0F969C] mt-1 font-mono font-medium">Target: ${sc.target_keyword}</div>
                 </div>
             `).join('');
 
             // Tab 4: Search Queries (Exactly 5)
             const queriesList = document.getElementById("queriesList");
             queriesList.innerHTML = (a.target_search_queries || []).map((q, idx) => `
-                <div class="bg-[#072E33] border border-[#294D61] p-5 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-teal-sm">
+                <div class="bg-theme-card border border-theme p-5 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm transition-colors">
                     <div class="flex items-start gap-3.5">
-                        <span class="w-7 h-7 rounded-lg bg-[#0C7075] text-[#F1F7F7] font-bold text-xs flex items-center justify-center flex-shrink-0 mt-0.5 shadow-teal-sm">
+                        <span class="w-7 h-7 rounded-lg bg-[#0F969C] text-white font-bold text-xs flex items-center justify-center flex-shrink-0 mt-0.5 shadow-sm">
                             0${idx + 1}
                         </span>
                         <div>
-                            <div class="font-display font-bold text-base text-[#F1F7F7] flex items-center gap-2">
+                            <div class="font-display font-bold text-base text-theme-primary flex items-center gap-2">
                                 "${q.query}"
-                                <button onclick="copyText('${q.query.replace(/'/g, "\\'")}')" class="text-[#6DA5C0] hover:text-[#F1F7F7] transition" title="Copy query">
-                                    <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+                                <button onclick="copyText('${q.query.replace(/'/g, "\\'")}')" class="text-theme-muted hover:text-theme-primary transition cursor-pointer" title="Copy query">
+                                    <i data-lucide="copy" class="w-3.5 h-3.5 text-[#0F969C]"></i>
                                 </button>
                             </div>
-                            <div class="text-xs text-[#BDD7D8] mt-1 leading-relaxed">${q.business_relevance}</div>
-                            <div class="text-[11px] text-[#6DA5C0] mt-1">Target ICP: ${q.target_audience}</div>
+                            <div class="text-xs text-theme-secondary mt-1 leading-relaxed">${q.business_relevance}</div>
+                            <div class="text-[11px] text-theme-muted mt-1 font-medium">Target ICP: ${q.target_audience}</div>
                         </div>
                     </div>
 
                     <div class="flex flex-wrap items-center gap-2 self-start md:self-auto flex-shrink-0">
-                        <span class="text-xs px-2.5 py-1 rounded-md bg-[#05161A] border border-[#294D61] text-[#0F969C] font-semibold">${q.search_intent}</span>
+                        <span class="text-xs px-2.5 py-1 rounded-md bg-theme-elevated border border-theme text-[#0F969C] font-semibold">${q.search_intent}</span>
                         <div class="flex items-center gap-1.5 text-xs">
                             ${(q.recommended_platforms || []).map(p => `
-                                <span class="px-2 py-0.5 rounded bg-[#0C7075]/25 border border-[#0F969C]/40 text-[#6DA5C0] text-[11px] font-medium">${p}</span>
+                                <span class="px-2 py-0.5 rounded bg-theme-elevated border border-theme text-theme-secondary text-[11px] font-medium">${p}</span>
                             `).join('')}
                         </div>
                     </div>
@@ -1263,30 +1603,30 @@
             // Tab 5: Services (Exactly 5)
             const sList = document.getElementById("servicesList");
             sList.innerHTML = (a.top_services || []).map((s, idx) => `
-                <div class="bg-[#072E33] border border-[#294D61] p-6 rounded-2xl flex flex-col justify-between shadow-teal-sm">
+                <div class="bg-theme-card border border-theme p-6 rounded-2xl flex flex-col justify-between shadow-sm transition-colors">
                     <div>
                         <div class="flex items-center justify-between gap-2 mb-2">
-                            <h4 class="font-display text-base font-bold text-[#F1F7F7] flex items-center gap-2">
+                            <h4 class="font-display text-base font-bold text-theme-primary flex items-center gap-2">
                                 <span class="text-xs text-[#0F969C] font-mono font-bold">#${idx + 1}</span> ${s.service_name}
                             </h4>
-                            <span class="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full ${s.identification_type === 'extracted' ? 'bg-[#0C7075]/30 text-[#0F969C] border border-[#0F969C]/40' : 'bg-amber-950/40 text-amber-400 border border-amber-800/40'}">
+                            <span class="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full ${s.identification_type === 'extracted' ? 'bg-[#0F969C]/15 text-[#0F969C] border border-[#0F969C]/30' : 'bg-amber-500/15 text-amber-500 border border-amber-500/30'}">
                                 ${s.identification_type}
                             </span>
                         </div>
-                        <p class="text-xs text-[#BDD7D8] leading-relaxed mb-4">${s.description}</p>
+                        <p class="text-xs text-theme-secondary leading-relaxed mb-4">${s.description}</p>
                     </div>
 
-                    <div class="pt-3 border-t border-[#294D61] space-y-1.5 text-xs">
-                        <div class="flex items-center justify-between text-[#BDD7D8]">
-                            <span class="text-[#6DA5C0]">Target Industry:</span>
-                            <span class="font-medium text-[#F1F7F7]">${s.target_industry}</span>
+                    <div class="pt-3 border-t border-theme space-y-1.5 text-xs">
+                        <div class="flex items-center justify-between text-theme-secondary">
+                            <span class="text-theme-muted">Target Industry:</span>
+                            <span class="font-medium text-theme-primary">${s.target_industry}</span>
                         </div>
-                        <div class="flex items-center justify-between text-[#BDD7D8]">
-                            <span class="text-[#6DA5C0]">Core Benefit:</span>
-                            <span class="font-medium text-[#F1F7F7]">${s.main_benefit}</span>
+                        <div class="flex items-center justify-between text-theme-secondary">
+                            <span class="text-theme-muted">Core Benefit:</span>
+                            <span class="font-medium text-theme-primary">${s.main_benefit}</span>
                         </div>
-                        <div class="text-[11px] text-[#6DA5C0] pt-1 truncate">
-                            <span class="text-[#BDD7D8]">Evidence:</span> ${s.source_evidence}
+                        <div class="text-[11px] text-theme-muted pt-1 truncate">
+                            <span>Evidence:</span> ${s.source_evidence}
                         </div>
                     </div>
                 </div>
@@ -1300,28 +1640,28 @@
 
             document.getElementById("customerNeeds").innerHTML = (aud.customer_needs || []).map(n => `
                 <li class="flex items-start gap-2">
-                    <i data-lucide="check" class="w-4 h-4 text-[#0F969C] mt-0.5 flex-shrink-0"></i>
+                    <i data-lucide="check" class="w-4 h-4 text-emerald-500 mt-0.5 flex-shrink-0"></i>
                     <span>${n}</span>
                 </li>
             `).join('');
 
             document.getElementById("customerChallenges").innerHTML = (aud.customer_challenges || []).map(c => `
                 <li class="flex items-start gap-2">
-                    <i data-lucide="x" class="w-4 h-4 text-rose-400 mt-0.5 flex-shrink-0"></i>
+                    <i data-lucide="x" class="w-4 h-4 text-rose-500 mt-0.5 flex-shrink-0"></i>
                     <span>${c}</span>
                 </li>
             `).join('');
 
             const segList = document.getElementById("marketingSegmentsList");
             segList.innerHTML = (aud.marketing_segments || []).map(m => `
-                <div class="p-5 rounded-xl bg-[#05161A] border border-[#294D61]">
+                <div class="p-5 rounded-xl bg-theme-elevated border border-theme">
                     <div class="flex items-center justify-between gap-2 mb-2">
-                        <h5 class="font-bold text-[#F1F7F7] text-sm">${m.audience_name}</h5>
-                        <span class="text-[10px] px-2 py-0.5 rounded bg-[#0C7075]/30 text-[#6DA5C0] font-semibold">${m.business_type}</span>
+                        <h5 class="font-bold text-theme-primary text-sm">${m.audience_name}</h5>
+                        <span class="text-[10px] px-2 py-0.5 rounded bg-[#0F969C]/15 text-[#0F969C] font-semibold border border-[#0F969C]/30">${m.business_type}</span>
                     </div>
-                    <p class="text-xs text-[#BDD7D8] leading-relaxed mb-3">${m.business_relevance}</p>
-                    <div class="text-xs text-[#6DA5C0] pt-2 border-t border-[#294D61] flex items-center justify-between">
-                        <span>Channel: <strong class="text-[#0F969C]">${m.suggested_marketing_channel}</strong></span>
+                    <p class="text-xs text-theme-secondary leading-relaxed mb-3">${m.business_relevance}</p>
+                    <div class="text-xs text-theme-muted pt-2 border-t border-theme flex items-center justify-between">
+                        <span>Channel: <strong class="text-[#0F969C] font-semibold">${m.suggested_marketing_channel}</strong></span>
                         <span class="text-[10px] uppercase font-mono">${m.segment_type || 'primary'}</span>
                     </div>
                 </div>
@@ -1385,7 +1725,7 @@
                     category: category,
                     timestamp: new Date().toISOString()
                 });
-                history = history.slice(0, 15); // keep latest 15
+                history = history.slice(0, 15);
                 localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
                 loadHistoryBadge();
             } catch (e) {
@@ -1398,7 +1738,7 @@
                 const history = JSON.parse(localStorage.getItem(HISTORY_KEY) || "[]");
                 const badge = document.getElementById("historyBadge");
                 if (badge) badge.textContent = history.length;
-            } catch (e) {}
+            } catch (e) { }
         }
 
         function toggleHistoryDrawer(show) {
@@ -1408,14 +1748,14 @@
             if (show) {
                 const history = JSON.parse(localStorage.getItem(HISTORY_KEY) || "[]");
                 if (history.length === 0) {
-                    container.innerHTML = '<p class="text-xs text-[#BDD7D8] text-center py-8">No past analyses recorded on this device yet.</p>';
+                    container.innerHTML = '<p class="text-xs text-theme-muted text-center py-8">No past analyses recorded on this device yet.</p>';
                 } else {
                     container.innerHTML = history.map(item => `
-                        <div onclick="selectHistoryItem('${item.url}')" class="p-3 rounded-xl bg-[#05161A] hover:bg-[#294D61]/40 border border-[#294D61] cursor-pointer transition">
-                            <div class="font-bold text-sm text-[#F1F7F7] truncate">${item.brandName}</div>
-                            <div class="text-xs text-[#0F969C] truncate">${item.category}</div>
-                            <div class="text-[11px] font-mono text-[#6DA5C0] truncate mt-1">${item.url}</div>
-                            <div class="text-[10px] text-[#BDD7D8] mt-1">${new Date(item.timestamp).toLocaleDateString()}</div>
+                        <div onclick="selectHistoryItem('${item.url}')" class="p-3 rounded-xl bg-theme-elevated hover:bg-theme-input border border-theme cursor-pointer transition">
+                            <div class="font-bold text-sm text-theme-primary truncate">${item.brandName}</div>
+                            <div class="text-xs text-[#0F969C] truncate font-medium">${item.category}</div>
+                            <div class="text-[11px] font-mono text-theme-muted truncate mt-1">${item.url}</div>
+                            <div class="text-[10px] text-theme-muted mt-1">${new Date(item.timestamp).toLocaleDateString()}</div>
                         </div>
                     `).join('');
                 }
@@ -1442,7 +1782,7 @@
         }
 
         // ==========================================
-        // Settings Modal & Theme Switching
+        // Settings Modal
         // ==========================================
         function toggleSettingsModal(show) {
             const modal = document.getElementById("settingsModal");
@@ -1453,41 +1793,7 @@
             }
             lucide.createIcons();
         }
-
-        function setThemeMode(mode) {
-            const html = document.documentElement;
-            const btnDark = document.getElementById("btnThemeDark");
-            const btnLight = document.getElementById("btnThemeLight");
-            const icon = document.getElementById("themeIcon");
-
-            if (mode === 'light') {
-                html.classList.remove("dark");
-                btnLight.className = "p-2.5 rounded-lg border border-[#0C7075] bg-[#0C7075]/20 text-[#05161A] flex items-center justify-center gap-2 font-medium";
-                btnDark.className = "p-2.5 rounded-lg border border-[#D5E5E5] bg-[#FFFFFF] text-[#5D6B6B] flex items-center justify-center gap-2 font-medium";
-                icon.setAttribute("data-lucide", "sun");
-                localStorage.setItem("sitepulse_theme", "light");
-            } else {
-                html.classList.add("dark");
-                btnDark.className = "p-2.5 rounded-lg border border-[#0F969C] bg-[#0C7075]/30 text-[#F1F7F7] flex items-center justify-center gap-2 font-medium";
-                btnLight.className = "p-2.5 rounded-lg border border-[#294D61] bg-[#05161A] text-[#BDD7D8] flex items-center justify-center gap-2 font-medium";
-                icon.setAttribute("data-lucide", "moon");
-                localStorage.setItem("sitepulse_theme", "dark");
-            }
-            lucide.createIcons();
-        }
-
-        function toggleTheme() {
-            const isDark = document.documentElement.classList.contains("dark");
-            setThemeMode(isDark ? 'light' : 'dark');
-        }
-
-        // Initialize saved theme preference
-        (function() {
-            const savedTheme = localStorage.getItem("sitepulse_theme");
-            if (savedTheme === 'light') {
-                setThemeMode('light');
-            }
-        })();
     </script>
 </body>
+
 </html>

@@ -1,9 +1,12 @@
 """URL Validation and SSRF (Server-Side Request Forgery) Protection Module."""
 
 import ipaddress
+import logging
 import socket
 from urllib.parse import urlparse
 from typing import Tuple, List
+
+logger = logging.getLogger("sitepulse.validators")
 
 
 class SSRFProtectionError(ValueError):
@@ -83,6 +86,7 @@ def resolve_and_verify_dns(hostname: str, port: int = 443) -> List[str]:
     Resolve hostname to IP addresses and ensure none of them resolve to
     private, loopback, or internal networks.
     """
+    logger.info(f"[STAGE: DNS_VALIDATION] Resolving DNS for hostname '{hostname}:{port}'")
     try:
         addr_info = socket.getaddrinfo(
             hostname,
@@ -91,11 +95,14 @@ def resolve_and_verify_dns(hostname: str, port: int = 443) -> List[str]:
             type=socket.SOCK_STREAM,
         )
     except socket.gaierror as e:
+        logger.error(f"[EXTRACTION_FAILED at STAGE: DNS_VALIDATION] socket.gaierror for '{hostname}': {str(e)}")
         raise DNSResolutionError(f"DNS resolution failed for hostname '{hostname}': {str(e)}") from e
     except Exception as e:
+        logger.error(f"[EXTRACTION_FAILED at STAGE: DNS_VALIDATION] DNS error for '{hostname}': {str(e)}")
         raise DNSResolutionError(f"Unexpected error resolving hostname '{hostname}': {str(e)}") from e
 
     if not addr_info:
+        logger.error(f"[EXTRACTION_FAILED at STAGE: DNS_VALIDATION] No records found for '{hostname}'")
         raise DNSResolutionError(f"No DNS records found for hostname '{hostname}'.")
 
     resolved_ips: List[str] = []
@@ -106,10 +113,12 @@ def resolve_and_verify_dns(hostname: str, port: int = 443) -> List[str]:
 
         allowed, reason = is_ip_allowed(ip)
         if not allowed:
+            logger.warning(f"[EXTRACTION_FAILED at STAGE: DNS_VALIDATION] Disallowed IP destination for '{hostname}': {ip} - {reason}")
             raise SSRFProtectionError(
                 f"Security violation: Hostname '{hostname}' resolves to disallowed IP '{ip}'. {reason}"
             )
 
+    logger.info(f"[STAGE: DNS_VALIDATION] Successfully verified {len(resolved_ips)} IP addresses for '{hostname}'")
     return resolved_ips
 
 
@@ -125,6 +134,8 @@ def validate_url_security(url: str) -> str:
     cleaned_url = url.strip()
     if not cleaned_url:
         raise InvalidURLError("URL cannot be empty.")
+
+    logger.info(f"[STAGE: URL_VALIDATION] Validating scheme, credentials, and hostname for '{cleaned_url}'")
 
     # Parse URL
     try:

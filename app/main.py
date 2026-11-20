@@ -22,6 +22,7 @@ from app.schemas import (
 )
 from app.services.analysis_service import AnalysisService
 from app.services.llm_service import (
+    AIOutputValidationError,
     LLMConfigurationError,
     LLMRateLimitError,
     LLMServiceError,
@@ -113,12 +114,13 @@ async def invalid_url_handler(request: Request, exc: InvalidURLError):
 
 @app.exception_handler(DNSResolutionError)
 async def dns_resolution_handler(request: Request, exc: DNSResolutionError):
+    logger.warning(f"DNS resolution failure for request: {exc}")
     return JSONResponse(
         status_code=status.HTTP_400_BAD_REQUEST,
         content=ErrorResponse(
             success=False,
             error=str(exc),
-            error_code="DNS_RESOLUTION_FAILED",
+            error_code="DNS_RESOLUTION_ERROR",
             detail="Unable to resolve the provided hostname via DNS.",
         ).model_dump(),
     )
@@ -126,13 +128,16 @@ async def dns_resolution_handler(request: Request, exc: DNSResolutionError):
 
 @app.exception_handler(WebsiteExtractionError)
 async def website_extraction_handler(request: Request, exc: WebsiteExtractionError):
+    error_code = getattr(exc, "error_code", "WEBSITE_EXTRACTION_ERROR")
+    detail = getattr(exc, "detail", f"Failed to access or parse target website (HTTP {exc.status_code}).")
+    logger.error(f"Website extraction error [{error_code}] (HTTP {exc.status_code}): {exc}")
     return JSONResponse(
         status_code=exc.status_code,
         content=ErrorResponse(
             success=False,
             error=str(exc),
-            error_code="WEBSITE_EXTRACTION_ERROR",
-            detail=f"Failed to access or parse target website (HTTP {exc.status_code}).",
+            error_code=error_code,
+            detail=detail,
         ).model_dump(),
     )
 
@@ -163,13 +168,29 @@ async def llm_config_handler(request: Request, exc: LLMConfigurationError):
     )
 
 
-@app.exception_handler(LLMServiceError)
-async def llm_service_handler(request: Request, exc: LLMServiceError):
+@app.exception_handler(AIOutputValidationError)
+async def ai_output_validation_handler(request: Request, exc: AIOutputValidationError):
+    clean_error = str(exc).split("\n")[0]
+    logger.error(f"AI output validation error: {clean_error}")
     return JSONResponse(
         status_code=exc.status_code,
         content=ErrorResponse(
             success=False,
-            error=str(exc),
+            error=clean_error,
+            error_code=exc.error_code,
+            detail=exc.detail,
+        ).model_dump(),
+    )
+
+
+@app.exception_handler(LLMServiceError)
+async def llm_service_handler(request: Request, exc: LLMServiceError):
+    clean_error = str(exc).split("\n")[0]
+    return JSONResponse(
+        status_code=exc.status_code,
+        content=ErrorResponse(
+            success=False,
+            error=clean_error,
             error_code="AI_ANALYSIS_FAILED",
             detail="An error occurred during Gemini AI intelligence processing.",
         ).model_dump(),
