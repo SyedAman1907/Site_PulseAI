@@ -404,8 +404,11 @@ tests/test_link_analysis.py::test_successful_end_to_end_analysis PASSED         
 
 ## 14. Screenshots
 
-### Interactive Dashboard (Dual Theme)
-![SitePulse AI Dashboard](screenshots/dashboard.png)
+### Interactive Dashboard – Light Mode
+![SitePulse AI Light Dashboard](screenshots/dashboard-light.png)
+
+### Interactive Dashboard – Dark Mode
+![SitePulse AI Dark Dashboard](screenshots/dashboard-dark.png)
 
 ### Interactive OpenAPI Documentation
 ![Swagger Documentation](screenshots/swagger-docs.png)
@@ -413,17 +416,17 @@ tests/test_link_analysis.py::test_successful_end_to_end_analysis PASSED         
 ### Successful Analysis Execution
 ![Successful Website Analysis](screenshots/successful-analysis.png)
 
-### Competitor & Strategic Intelligence Dossier
-![Competitor & Strategic Intelligence](screenshots/analysis-results.png)
+### Competitor Intelligence
+![Competitor Analysis](screenshots/competitor-analysis.png)
 
-### SSRF Protection & Error Handling State
-![SSRF Protection & Error Handling](screenshots/error-handling.png)
+### SSRF Protection and Error Handling
+![Error Handling](screenshots/error-handling.png)
 
-### Automated Test Suite Execution
-![Automated Test Results](screenshots/test-results.png)
+### Automated Test Suite
+![Test Results](screenshots/test-results.png)
 
-### Service Health & Monitoring Status
-![Deployment & Health Status](screenshots/deployment.png)
+### Service Health
+![Service Health](screenshots/deployment.png)
 
 ---
 
