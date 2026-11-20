@@ -404,29 +404,35 @@ tests/test_link_analysis.py::test_successful_end_to_end_analysis PASSED         
 
 ## 14. Screenshots
 
-### Interactive Dashboard – Light Mode
-![SitePulse AI Light Dashboard](screenshots/dashboard-light.png)
+### Interactive Dashboard
+![SitePulse AI Dashboard](screenshots/dashborad.png)
 
-### Interactive Dashboard – Dark Mode
-![SitePulse AI Dark Dashboard](screenshots/dashboard-dark.png)
+### FastAPI Swagger Documentation
+![FastAPI Swagger Documentation](screenshots/REST%20API%20DOCS.png)
 
-### Interactive OpenAPI Documentation
-![Swagger Documentation](screenshots/swagger-docs.png)
-
-### Successful Analysis Execution
+### Successful Website Analysis
 ![Successful Website Analysis](screenshots/successful-analysis.png)
+
+### Analysis Overview & SEO Recommendations
+![SEO & Brand Analysis Overview](screenshots/analysis-result.png)
 
 ### Competitor Intelligence
 ![Competitor Analysis](screenshots/competitor-analysis.png)
 
-### SSRF Protection and Error Handling
-![Error Handling](screenshots/error-handling.png)
+### Search Query Intelligence
+![Target Search Queries](screenshots/target-queries.png)
 
-### Automated Test Suite
-![Test Results](screenshots/test-results.png)
+### Top Business Services Analysis
+![Business Services](screenshots/Top-services.png)
 
-### Service Health
-![Service Health](screenshots/deployment.png)
+### Target Audience & Marketing Segments
+![Target Audience Analysis](screenshots/target-audiance.png)
+
+### Service Health & Operational Monitoring
+![Service Health](screenshots/Health.png)
+
+### Automated Test Suite Execution
+![Automated Test Results](screenshots/test-results.png)
 
 ---
 
