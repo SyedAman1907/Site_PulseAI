@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SitePulse AI - Website Intelligence & Growth Advisor</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            900: '#1e1b4b',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .gradient-text {
+            background: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans selection:bg-indigo-500 selection:text-white">
+
+    <!-- Top Navigation -->
+    <nav class="border-b border-slate-800 bg-slate-900/60 sticky top-0 z-50 backdrop-blur-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+                    <i class="fa-solid fa-chart-line text-white text-lg"></i>
+                </div>
+                <div>
+                    <span class="text-xl font-bold tracking-tight text-white">SitePulse <span class="gradient-text font-extrabold">AI</span></span>
+                    <span class="ml-2 text-xs px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 font-medium">v1.0.0</span>
+                </div>
+            </div>
+            <div class="flex items-center space-x-4 text-sm font-medium">
+                <a href="/docs" target="_blank" class="text-slate-400 hover:text-white transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-book-open text-xs"></i> Swagger Docs
+                </a>
+                <a href="/health" target="_blank" class="text-slate-400 hover:text-white transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-heart-pulse text-xs text-emerald-400"></i> Health
+                </a>
+                <a href="https://github.com" target="_blank" class="text-slate-400 hover:text-white transition">
+                    <i class="fa-brands fa-github text-lg"></i>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Container -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10">
+
+        <!-- Hero Section -->
+        <div class="text-center max-w-3xl mx-auto mb-10">
+            <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-800/80 border border-slate-700 text-xs text-slate-300 mb-5">
+                <span class="flex h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                Real-Time Website Content Extraction & LLM Intelligence
+            </div>
+            <h1 class="text-4xl sm:text-5xl font-extrabold tracking-tight mb-4">
+                Turn Any Website URL into <br/><span class="gradient-text">Actionable Business Intelligence</span>
+            </h1>
+            <p class="text-slate-400 text-base sm:text-lg">
+                Extract live content, audit SEO health, identify competitors, discover target search queries, and uncover customer profiles in seconds.
+            </p>
+        </div>
+
+        <!-- Analyzer Input Form Card -->
+        <div class="max-w-3xl mx-auto glass-panel p-4 sm:p-6 rounded-2xl shadow-2xl shadow-indigo-950/40 mb-10">
+            <form id="analyzeForm" class="flex flex-col sm:flex-row gap-3">
+                <div class="relative flex-grow">
+                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-500">
+                        <i class="fa-solid fa-globe"></i>
+                    </div>
+                    <input 
+                        type="url" 
+                        id="urlInput" 
+                        required 
+                        placeholder="https://example.com" 
+                        value="https://example.com"
+                        class="w-full pl-11 pr-4 py-3.5 bg-slate-900 border border-slate-700 rounded-xl text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm transition"
+                    >
+                </div>
+                <button 
+                    type="submit" 
+                    id="submitBtn"
+                    class="px-6 py-3.5 bg-gradient-to-r from-indigo-600 via-indigo-500 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-semibold rounded-xl text-sm transition shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2 whitespace-nowrap active:scale-95"
+                >
+                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                    <span>Analyze Website</span>
+                </button>
+            </form>
+
+            <!-- Quick Pill Suggestions -->
+            <div class="mt-4 flex flex-wrap items-center gap-2 text-xs text-slate-400">
+                <span class="font-medium text-slate-500">Try sample:</span>
+                <button onclick="setSample('https://example.com')" class="px-2.5 py-1 bg-slate-800/80 hover:bg-slate-800 text-slate-300 rounded-lg border border-slate-700/60 transition">example.com</button>
+                <button onclick="setSample('https://stripe.com')" class="px-2.5 py-1 bg-slate-800/80 hover:bg-slate-800 text-slate-300 rounded-lg border border-slate-700/60 transition">stripe.com</button>
+                <button onclick="setSample('https://github.com')" class="px-2.5 py-1 bg-slate-800/80 hover:bg-slate-800 text-slate-300 rounded-lg border border-slate-700/60 transition">github.com</button>
+            </div>
+        </div>
+
+        <!-- Loading State -->
+        <div id="loadingState" class="hidden max-w-2xl mx-auto py-12 text-center">
+            <div class="inline-block relative w-16 h-16 mb-4">
+                <div class="absolute inset-0 rounded-full border-4 border-indigo-500/20"></div>
+                <div class="absolute inset-0 rounded-full border-4 border-indigo-500 border-t-transparent animate-spin"></div>
+            </div>
+            <h3 class="text-lg font-semibold text-white mb-2" id="loadingStage">Fetching website content...</h3>
+            <p class="text-sm text-slate-400" id="loadingSubtext">Performing SSRF security checks and parsing HTML DOM...</p>
+        </div>
+
+        <!-- Error State Banner -->
+        <div id="errorState" class="hidden max-w-3xl mx-auto mb-8 p-5 bg-rose-950/40 border border-rose-800/50 rounded-2xl text-rose-200">
+            <div class="flex items-start gap-3">
+                <i class="fa-solid fa-triangle-exclamation text-rose-400 text-xl mt-0.5"></i>
+                <div class="flex-grow">
+                    <h4 class="font-bold text-rose-300" id="errorTitle">Analysis Failed</h4>
+                    <p class="text-sm text-rose-200/90 mt-1" id="errorMessage"></p>
+                    <div id="errorTip" class="mt-3 text-xs bg-rose-900/30 p-2.5 rounded-lg border border-rose-800/40 text-rose-300 hidden"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div id="resultsSection" class="hidden space-y-8">
+
+            <!-- Brand Summary Banner -->
+            <div class="glass-panel p-6 sm:p-8 rounded-2xl border-l-4 border-l-indigo-500">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800 pb-6 mb-6">
+                    <div>
+                        <div class="flex items-center gap-3 mb-1">
+                            <h2 class="text-2xl sm:text-3xl font-extrabold text-white" id="brandName"></h2>
+                            <span class="text-xs px-2.5 py-1 rounded-full bg-indigo-500/10 text-indigo-300 border border-indigo-500/30 font-semibold" id="brandCategory"></span>
+                        </div>
+                        <p class="text-slate-400 text-sm mt-1" id="analyzedWebsite"></p>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-3 text-xs text-slate-400">
+                        <span class="px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 flex items-center gap-1.5">
+                            <i class="fa-solid fa-microchip text-indigo-400"></i> Model: <strong class="text-slate-200" id="metaModel"></strong>
+                        </span>
+                        <span class="px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 flex items-center gap-1.5">
+                            <i class="fa-solid fa-layer-group text-violet-400"></i> Pages: <strong class="text-slate-200" id="metaPages"></strong>
+                        </span>
+                        <span class="px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 flex items-center gap-1.5">
+                            <i class="fa-solid fa-bolt text-amber-400"></i> Time: <strong class="text-slate-200" id="metaTime"></strong>
+                        </span>
+                    </div>
+                </div>
+                <p class="text-slate-300 text-sm sm:text-base leading-relaxed" id="brandSummary"></p>
+            </div>
+
+            <!-- Tab Navigation for Modules -->
+            <div class="flex border-b border-slate-800 space-x-2 sm:space-x-4 overflow-x-auto pb-1 text-sm font-semibold">
+                <button onclick="switchTab('competitors')" id="tabBtn-competitors" class="tab-btn px-4 py-2.5 rounded-xl transition text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 flex items-center gap-2">
+                    <i class="fa-solid fa-chess text-xs"></i> 1. Competitors
+                </button>
+                <button onclick="switchTab('queries')" id="tabBtn-queries" class="tab-btn px-4 py-2.5 rounded-xl transition text-slate-400 hover:text-slate-200 flex items-center gap-2">
+                    <i class="fa-solid fa-magnifying-glass text-xs"></i> 2. Top Queries
+                </button>
+                <button onclick="switchTab('seo')" id="tabBtn-seo" class="tab-btn px-4 py-2.5 rounded-xl transition text-slate-400 hover:text-slate-200 flex items-center gap-2">
+                    <i class="fa-solid fa-arrow-trend-up text-xs"></i> 3. SEO Improvements
+                </button>
+                <button onclick="switchTab('services')" id="tabBtn-services" class="tab-btn px-4 py-2.5 rounded-xl transition text-slate-400 hover:text-slate-200 flex items-center gap-2">
+                    <i class="fa-solid fa-briefcase text-xs"></i> 4. Top 5 Services
+                </button>
+                <button onclick="switchTab('audience')" id="tabBtn-audience" class="tab-btn px-4 py-2.5 rounded-xl transition text-slate-400 hover:text-slate-200 flex items-center gap-2">
+                    <i class="fa-solid fa-bullseye text-xs"></i> 5. Target Audience
+                </button>
+                <button onclick="switchTab('json')" id="tabBtn-json" class="tab-btn px-4 py-2.5 rounded-xl transition text-slate-400 hover:text-slate-200 flex items-center gap-2">
+                    <i class="fa-solid fa-code text-xs"></i> Raw JSON
+                </button>
+            </div>
+
+            <!-- TAB 1: COMPETITOR ANALYSIS -->
+            <div id="tabContent-competitors" class="tab-content space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="glass-panel p-5 rounded-xl border border-emerald-500/20">
+                        <h4 class="text-sm font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-2 mb-3">
+                            <i class="fa-solid fa-shield-halved"></i> Brand Strengths
+                        </h4>
+                        <ul id="brandStrengths" class="space-y-2 text-sm text-slate-300"></ul>
+                    </div>
+                    <div class="glass-panel p-5 rounded-xl border border-indigo-500/20">
+                        <h4 class="text-sm font-bold uppercase tracking-wider text-indigo-400 flex items-center gap-2 mb-3">
+                            <i class="fa-solid fa-lightbulb"></i> Market Positioning Opportunities
+                        </h4>
+                        <ul id="brandOpportunities" class="space-y-2 text-sm text-slate-300"></ul>
+                    </div>
+                </div>
+
+                <div class="glass-panel p-6 rounded-2xl">
+                    <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-users-viewfinder text-indigo-400"></i> Identified Competitors
+                    </h3>
+                    <div id="competitorsList" class="grid grid-cols-1 md:grid-cols-3 gap-5"></div>
+                </div>
+            </div>
+
+            <!-- TAB 2: TARGET SEARCH QUERIES -->
+            <div id="tabContent-queries" class="tab-content hidden space-y-4">
+                <div class="text-sm text-slate-400 mb-2">Exactly 5 high-intent queries mapped across Google, LinkedIn, X, Instagram, and Facebook:</div>
+                <div id="queriesList" class="grid grid-cols-1 gap-4"></div>
+            </div>
+
+            <!-- TAB 3: SEO IMPROVEMENTS -->
+            <div id="tabContent-seo" class="tab-content hidden space-y-6">
+                <!-- Keywords & Headings -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                    <div class="glass-panel p-5 rounded-xl">
+                        <span class="text-xs font-semibold uppercase tracking-wider text-indigo-400">Primary Keyword</span>
+                        <div class="mt-2 text-lg font-bold text-white" id="seoPrimaryKeyword"></div>
+                    </div>
+                    <div class="glass-panel p-5 rounded-xl md:col-span-2">
+                        <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Secondary & Long-Tail Keywords</span>
+                        <div class="mt-2 flex flex-wrap gap-2" id="seoKeywordsList"></div>
+                    </div>
+                </div>
+
+                <!-- Title & Meta Comparison -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="glass-panel p-5 rounded-xl space-y-3">
+                        <span class="text-xs font-bold uppercase tracking-wider text-violet-400">SEO Title Recommendation</span>
+                        <div class="text-xs text-slate-400">Current: <span id="currentTitle" class="text-slate-300"></span></div>
+                        <div class="text-sm font-semibold text-emerald-400 bg-emerald-950/30 p-3 rounded-lg border border-emerald-800/40" id="recommendedTitle"></div>
+                        <p class="text-xs text-slate-400 leading-relaxed" id="titleReason"></p>
+                    </div>
+
+                    <div class="glass-panel p-5 rounded-xl space-y-3">
+                        <span class="text-xs font-bold uppercase tracking-wider text-violet-400">Meta Description Recommendation</span>
+                        <div class="text-xs text-slate-400">Current: <span id="currentMeta" class="text-slate-300"></span></div>
+                        <div class="text-sm font-semibold text-emerald-400 bg-emerald-950/30 p-3 rounded-lg border border-emerald-800/40" id="recommendedMeta"></div>
+                    </div>
+                </div>
+
+                <!-- SEO Health Observations & Content Strategy -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="glass-panel p-5 rounded-xl">
+                        <h4 class="text-sm font-bold text-white mb-3 flex items-center gap-2">
+                            <i class="fa-solid fa-stethoscope text-amber-400"></i> Technical SEO Observations
+                        </h4>
+                        <ul id="seoObservationsList" class="space-y-2 text-xs text-slate-300"></ul>
+                    </div>
+                    <div class="glass-panel p-5 rounded-xl">
+                        <h4 class="text-sm font-bold text-white mb-3 flex items-center gap-2">
+                            <i class="fa-solid fa-file-circle-plus text-indigo-400"></i> Recommended Supporting Content
+                        </h4>
+                        <div id="supportingContentList" class="space-y-3"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 4: TOP 5 SERVICES -->
+            <div id="tabContent-services" class="tab-content hidden space-y-4">
+                <div id="servicesList" class="grid grid-cols-1 md:grid-cols-2 gap-5"></div>
+            </div>
+
+            <!-- TAB 5: TARGET AUDIENCE -->
+            <div id="tabContent-audience" class="tab-content hidden space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                    <div class="glass-panel p-5 rounded-xl">
+                        <span class="text-xs font-bold uppercase tracking-wider text-indigo-400">Primary Audience</span>
+                        <ul id="audiencePrimary" class="mt-2 space-y-1.5 text-sm text-slate-200"></ul>
+                    </div>
+                    <div class="glass-panel p-5 rounded-xl">
+                        <span class="text-xs font-bold uppercase tracking-wider text-violet-400">Target Industries</span>
+                        <ul id="audienceIndustries" class="mt-2 space-y-1.5 text-sm text-slate-200"></ul>
+                    </div>
+                    <div class="glass-panel p-5 rounded-xl">
+                        <span class="text-xs font-bold uppercase tracking-wider text-pink-400">Geographical Focus</span>
+                        <ul id="audienceGeo" class="mt-2 space-y-1.5 text-sm text-slate-200"></ul>
+                    </div>
+                </div>
+
+                <!-- Customer Needs & Pain Points -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="glass-panel p-5 rounded-xl">
+                        <h4 class="text-sm font-bold text-emerald-400 mb-3 flex items-center gap-2">
+                            <i class="fa-solid fa-circle-check"></i> Customer Needs Addressed
+                        </h4>
+                        <ul id="customerNeeds" class="space-y-2 text-sm text-slate-300"></ul>
+                    </div>
+                    <div class="glass-panel p-5 rounded-xl">
+                        <h4 class="text-sm font-bold text-rose-400 mb-3 flex items-center gap-2">
+                            <i class="fa-solid fa-circle-exclamation"></i> Customer Pain Points Solved
+                        </h4>
+                        <ul id="customerChallenges" class="space-y-2 text-sm text-slate-300"></ul>
+                    </div>
+                </div>
+
+                <!-- Detailed Marketing Segments -->
+                <div class="glass-panel p-6 rounded-2xl">
+                    <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-bullhorn text-indigo-400"></i> Strategic Marketing Segments
+                    </h3>
+                    <div id="marketingSegmentsList" class="grid grid-cols-1 md:grid-cols-2 gap-5"></div>
+                </div>
+            </div>
+
+            <!-- TAB 6: RAW JSON -->
+            <div id="tabContent-json" class="tab-content hidden">
+                <div class="glass-panel p-4 rounded-2xl relative">
+                    <button onclick="copyJson()" class="absolute top-4 right-4 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs rounded-lg text-slate-300 flex items-center gap-1.5 border border-slate-700 transition">
+                        <i class="fa-regular fa-copy"></i> Copy JSON
+                    </button>
+                    <pre id="rawJsonBlock" class="p-4 text-xs font-mono text-emerald-400 overflow-x-auto max-h-[600px]"></pre>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-800 bg-slate-900/50 py-6 text-center text-xs text-slate-500">
+        SitePulse AI • Enterprise Website Intelligence & Growth Advisory REST API • Powered by Google Gemini Flash
+    </footer>
+
+    <!-- Client-side Logic -->
+    <script>
+        let currentAnalysisData = null;
+
+        function setSample(url) {
+            document.getElementById('urlInput').value = url;
+        }
+
+        function switchTab(tabKey) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('text-indigo-400', 'bg-indigo-500/10', 'border', 'border-indigo-500/20');
+                btn.classList.add('text-slate-400');
+            });
+
+            const content = document.getElementById(`tabContent-${tabKey}`);
+            const btn = document.getElementById(`tabBtn-${tabKey}`);
+            if (content && btn) {
+                content.classList.remove('hidden');
+                btn.classList.add('text-indigo-400', 'bg-indigo-500/10', 'border', 'border-indigo-500/20');
+                btn.classList.remove('text-slate-400');
+            }
+        }
+
+        document.getElementById('analyzeForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const url = document.getElementById('urlInput').value.trim();
+            if (!url) return;
+
+            // UI State
+            document.getElementById('resultsSection').classList.add('hidden');
+            document.getElementById('errorState').classList.add('hidden');
+            document.getElementById('loadingState').classList.remove('hidden');
+            document.getElementById('submitBtn').disabled = true;
+
+            const stages = [
+                { stage: "Inspecting URL & SSRF Security...", sub: "Validating against loopback, private IP, and DNS security..." },
+                { stage: "Extracting Website Content...", sub: "Fetching HTML, headings, meta tags, and subpages via HTTPX..." },
+                { stage: "Analyzing with Google Gemini Flash...", sub: "Reasoning over business model, SEO, competitors, and audiences..." }
+            ];
+
+            let stageIdx = 0;
+            const stageInterval = setInterval(() => {
+                stageIdx = (stageIdx + 1) % stages.length;
+                document.getElementById('loadingStage').textContent = stages[stageIdx].stage;
+                document.getElementById('loadingSubtext').textContent = stages[stageIdx].sub;
+            }, 1800);
+
+            try {
+                const response = await fetch('/link-analysis', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url: url })
+                });
+
+                const data = await response.json();
+                clearInterval(stageInterval);
+                document.getElementById('loadingState').classList.add('hidden');
+                document.getElementById('submitBtn').disabled = false;
+
+                if (!response.ok || !data.success) {
+                    showError(data);
+                    return;
+                }
+
+                currentAnalysisData = data;
+                renderResults(data);
+
+            } catch (err) {
+                clearInterval(stageInterval);
+                document.getElementById('loadingState').classList.add('hidden');
+                document.getElementById('submitBtn').disabled = false;
+                showError({ error: "Network connection error", detail: err.message });
+            }
+        });
+
+        function showError(data) {
+            const errBox = document.getElementById('errorState');
+            const errTitle = document.getElementById('errorTitle');
+            const errMsg = document.getElementById('errorMessage');
+            const errTip = document.getElementById('errorTip');
+
+            errTitle.textContent = data.error_code || "Analysis Error";
+            errMsg.textContent = data.error || data.detail || "Unable to complete website analysis.";
+            
+            if (data.error_code === "LLM_CONFIGURATION_ERROR") {
+                errTip.classList.remove('hidden');
+                errTip.innerHTML = "<strong>Tip:</strong> Add your Google Gemini API key to <code>.env</code> file: <br><code>GEMINI_API_KEY=your_key_here</code> then re-run.";
+            } else if (data.error_code === "SSRF_PROTECTION_VIOLATION" || data.error_code === "VALIDATION_ERROR") {
+                errTip.classList.remove('hidden');
+                errTip.innerHTML = "<strong>Security Notice:</strong> The requested URL was blocked because it resolves to an internal/private address or localhost.";
+            } else {
+                errTip.classList.add('hidden');
+            }
+
+            errBox.classList.remove('hidden');
+        }
+
+        function renderResults(data) {
+            const a = data.analysis;
+            const b = data.brand;
+            const m = data.metadata;
+
+            // Brand Banner
+            document.getElementById('brandName').textContent = b.name || "Analyzed Business";
+            document.getElementById('brandCategory').textContent = b.category || "General Business";
+            document.getElementById('analyzedWebsite').innerHTML = `<i class="fa-solid fa-link text-xs mr-1 text-slate-500"></i> ${data.website}`;
+            document.getElementById('brandSummary').textContent = b.summary || "";
+            document.getElementById('metaModel').textContent = m.ai_model || "Gemini Flash";
+            document.getElementById('metaPages').textContent = `${m.pages_analyzed} pages`;
+            document.getElementById('metaTime').textContent = `${m.execution_time_seconds || 1.2}s`;
+
+            // Tab 1: Competitors
+            const comp = a.competitor_analysis;
+            const strList = document.getElementById('brandStrengths');
+            strList.innerHTML = (comp.strengths || []).map(s => `<li class="flex items-start gap-2"><i class="fa-solid fa-check text-emerald-400 mt-1 text-xs"></i><span>${s}</span></li>`).join('');
+
+            const oppList = document.getElementById('brandOpportunities');
+            oppList.innerHTML = (comp.opportunities || []).map(o => `<li class="flex items-start gap-2"><i class="fa-solid fa-arrow-right text-indigo-400 mt-1 text-xs"></i><span>${o}</span></li>`).join('');
+
+            const compList = document.getElementById('competitorsList');
+            compList.innerHTML = (comp.competitors || []).map(c => `
+                <div class="p-4 rounded-xl bg-slate-900 border border-slate-800 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-1">
+                            <h5 class="font-bold text-white">${c.name}</h5>
+                            <span class="text-[10px] uppercase font-bold px-1.5 py-0.5 rounded ${c.is_verified ? 'bg-emerald-500/20 text-emerald-300' : 'bg-slate-800 text-slate-400'}">
+                                ${c.verification_status === 'verified_external_search' ? 'Verified Search' : 'AI Suggested'}
+                            </span>
+                        </div>
+                        <p class="text-xs text-indigo-400 font-medium mb-2">${c.category}</p>
+                        <p class="text-xs text-slate-300 mb-3">${c.comparison}</p>
+                    </div>
+                    <div class="pt-2 border-t border-slate-800 text-[11px] text-slate-400">
+                        ${c.website_url ? `<a href="${c.website_url}" target="_blank" class="text-indigo-400 hover:underline flex items-center gap-1"><i class="fa-solid fa-arrow-up-right-from-square text-[9px]"></i> ${c.website_url}</a>` : '<span>URL unverified</span>'}
+                    </div>
+                </div>
+            `).join('');
+
+            // Tab 2: Queries
+            const queriesList = document.getElementById('queriesList');
+            queriesList.innerHTML = (a.target_search_queries || []).map((q, idx) => `
+                <div class="glass-panel p-4 rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-3">
+                    <div class="flex items-start gap-3">
+                        <span class="w-6 h-6 rounded-full bg-indigo-500/20 text-indigo-400 font-bold text-xs flex items-center justify-center flex-shrink-0 mt-0.5">#${idx + 1}</span>
+                        <div>
+                            <div class="font-semibold text-white text-base">"${q.query}"</div>
+                            <div class="text-xs text-slate-400 mt-1">${q.business_relevance}</div>
+                        </div>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-2 self-start md:self-auto">
+                        <span class="text-xs px-2.5 py-1 rounded-md bg-slate-800 border border-slate-700 text-slate-300 font-medium">${q.search_intent}</span>
+                        <div class="flex items-center gap-1.5 text-xs text-slate-400">
+                            ${(q.recommended_platforms || []).map(p => `<span class="px-2 py-0.5 rounded bg-indigo-950/60 border border-indigo-800/50 text-indigo-300">${p}</span>`).join('')}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            // Tab 3: SEO
+            const seo = a.seo_improvements;
+            document.getElementById('seoPrimaryKeyword').textContent = seo.primary_keyword || "Not specified";
+            const kwList = document.getElementById('seoKeywordsList');
+            kwList.innerHTML = [...(seo.secondary_keywords || []), ...(seo.long_tail_keywords || [])].map(k => `
+                <span class="text-xs px-2.5 py-1 rounded-lg bg-slate-800 border border-slate-700 text-slate-300">${k}</span>
+            `).join('');
+
+            document.getElementById('currentTitle').textContent = seo.existing_title || "None detected";
+            document.getElementById('recommendedTitle').textContent = seo.recommended_title || "";
+            document.getElementById('titleReason').textContent = seo.title_improvement_reason || "";
+
+            document.getElementById('currentMeta').textContent = seo.existing_meta_description || "None detected";
+            document.getElementById('recommendedMeta').textContent = seo.meta_description || "";
+
+            const obsList = document.getElementById('seoObservationsList');
+            obsList.innerHTML = (seo.seo_observations || []).map(o => `<li class="flex items-start gap-2"><i class="fa-solid fa-circle-dot text-amber-400 mt-1 text-[8px]"></i><span>${o}</span></li>`).join('');
+
+            const suppList = document.getElementById('supportingContentList');
+            suppList.innerHTML = (seo.supporting_content || []).map(c => `
+                <div class="p-2.5 rounded-lg bg-slate-900 border border-slate-800 text-xs">
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="font-bold text-slate-200">${c.topic}</span>
+                        <span class="text-[10px] px-1.5 py-0.5 rounded bg-indigo-900/40 text-indigo-300">${c.content_type}</span>
+                    </div>
+                    <div class="text-slate-400">${c.purpose}</div>
+                </div>
+            `).join('');
+
+            // Tab 4: Top 5 Services
+            const sList = document.getElementById('servicesList');
+            sList.innerHTML = (a.top_services || []).map((s, idx) => `
+                <div class="glass-panel p-5 rounded-xl border border-slate-800 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <h4 class="text-base font-bold text-white flex items-center gap-2">
+                                <span class="text-xs text-indigo-400 font-mono font-bold">0${idx + 1}.</span> ${s.service_name}
+                            </h4>
+                            <span class="text-[10px] uppercase font-bold px-2 py-0.5 rounded ${s.identification_type === 'extracted' ? 'bg-emerald-500/20 text-emerald-300' : 'bg-amber-500/20 text-amber-300'}">
+                                ${s.identification_type}
+                            </span>
+                        </div>
+                        <p class="text-xs text-slate-300 mb-3 leading-relaxed">${s.description}</p>
+                    </div>
+                    <div class="pt-3 border-t border-slate-800/80 space-y-1.5 text-xs text-slate-400">
+                        <div><strong class="text-slate-300">Target Industry:</strong> ${s.target_industry}</div>
+                        <div><strong class="text-slate-300">Core Benefit:</strong> ${s.main_benefit}</div>
+                        <div class="text-[11px] text-slate-500 truncate"><strong class="text-slate-400">Evidence:</strong> ${s.source_evidence}</div>
+                    </div>
+                </div>
+            `).join('');
+
+            // Tab 5: Target Audience
+            const aud = a.target_audience;
+            document.getElementById('audiencePrimary').innerHTML = (aud.primary_audience || []).map(p => `<li>• ${p}</li>`).join('');
+            document.getElementById('audienceIndustries').innerHTML = (aud.industries || []).map(i => `<li>• ${i}</li>`).join('');
+            document.getElementById('audienceGeo').innerHTML = (aud.geographical_focus || []).map(g => `<li>• ${g}</li>`).join('');
+
+            document.getElementById('customerNeeds').innerHTML = (aud.customer_needs || []).map(n => `<li class="flex items-start gap-2"><i class="fa-solid fa-check text-emerald-400 mt-1 text-xs"></i><span>${n}</span></li>`).join('');
+            document.getElementById('customerChallenges').innerHTML = (aud.customer_challenges || []).map(c => `<li class="flex items-start gap-2"><i class="fa-solid fa-xmark text-rose-400 mt-1 text-xs"></i><span>${c}</span></li>`).join('');
+
+            const segList = document.getElementById('marketingSegmentsList');
+            segList.innerHTML = (aud.marketing_segments || []).map(m => `
+                <div class="p-4 rounded-xl bg-slate-900 border border-slate-800">
+                    <div class="flex items-center justify-between mb-2">
+                        <h5 class="font-bold text-white text-sm">${m.audience_name}</h5>
+                        <span class="text-[10px] px-2 py-0.5 rounded bg-violet-500/20 text-violet-300 font-semibold">${m.business_type}</span>
+                    </div>
+                    <p class="text-xs text-slate-300 mb-2">${m.business_relevance}</p>
+                    <div class="text-xs text-slate-400 pt-2 border-t border-slate-800">
+                        <strong class="text-indigo-400">Recommended Channel:</strong> ${m.suggested_marketing_channel}
+                    </div>
+                </div>
+            `).join('');
+
+            // Tab 6: Raw JSON
+            document.getElementById('rawJsonBlock').textContent = JSON.stringify(data, null, 2);
+
+            // Reveal results
+            document.getElementById('resultsSection').classList.remove('hidden');
+            switchTab('competitors');
+        }
+
+        function copyJson() {
+            if (!currentAnalysisData) return;
+            navigator.clipboard.writeText(JSON.stringify(currentAnalysisData, null, 2));
+            alert("Analysis JSON copied to clipboard!");
+        }
+    </script>
+</body>
+</html>
