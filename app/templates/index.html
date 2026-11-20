@@ -1,399 +1,1036 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SitePulse AI - Website Intelligence & Growth Advisor</title>
-    <!-- Tailwind CSS -->
+    <title>SitePulse AI — Website Intelligence & Business Growth Advisor</title>
+
+    <!-- Google Fonts: Inter & Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Tailwind Config with Exact Dark Teal Palette -->
     <script>
         tailwind.config = {
+            darkMode: 'class',
             theme: {
                 extend: {
                     colors: {
-                        brand: {
-                            50: '#eef2ff',
-                            100: '#e0e7ff',
-                            500: '#6366f1',
-                            600: '#4f46e5',
-                            700: '#4338ca',
-                            900: '#1e1b4b',
+                        teal: {
+                            base: '#05161A',    // Main application background
+                            surface: '#072E33', // Sidebar, cards, secondary surfaces
+                            interactive: '#0C7075', // Primary interactive buttons & active states
+                            accent: '#0F969C',  // Accent color, button hover & active indicators
+                            highlight: '#6DA5C0', // Secondary highlights & data visualization
+                            muted: '#294D61',   // Borders, dividers, subtle surfaces
+                            text: '#F1F7F7',    // Primary text
+                            secondary: '#BDD7D8' // Secondary text
+                        },
+                        light: {
+                            bg: '#F1F7F7',
+                            surface: '#FFFFFF',
+                            card: '#D5E5E5',
+                            border: '#BDD7D8',
+                            text: '#05161A',
+                            secondary: '#5D6B6B',
+                            accent: '#0C7075'
                         }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        display: ['"Plus Jakarta Sans"', 'Inter', 'sans-serif'],
+                        mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace']
+                    },
+                    boxShadow: {
+                        'teal-sm': '0 2px 8px -1px rgba(5, 22, 26, 0.4), 0 1px 3px -1px rgba(12, 112, 117, 0.1)',
+                        'teal-md': '0 8px 24px -4px rgba(5, 22, 26, 0.6), 0 2px 8px -2px rgba(15, 150, 156, 0.15)',
+                        'teal-lg': '0 16px 36px -6px rgba(5, 22, 26, 0.8), 0 4px 16px -4px rgba(15, 150, 156, 0.25)',
+                        'teal-glow': '0 0 20px -3px rgba(15, 150, 156, 0.35)'
                     }
                 }
             }
         }
     </script>
+
     <style>
-        .gradient-text {
-            background: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+        /* Custom scrollbar matching dark teal palette */
+        ::-webkit-scrollbar {
+            width: 7px;
+            height: 7px;
         }
-        .glass-panel {
-            background: rgba(30, 41, 59, 0.7);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
+        ::-webkit-scrollbar-track {
+            background: #05161A;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #294D61;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #0C7075;
+        }
+
+        /* Light theme overrides */
+        html:not(.dark) body {
+            background-color: #F1F7F7;
+            color: #05161A;
+        }
+        html:not(.dark) .theme-surface {
+            background-color: #FFFFFF !important;
+            border-color: #BDD7D8 !important;
+            color: #05161A !important;
+        }
+        html:not(.dark) .theme-card {
+            background-color: #FFFFFF !important;
+            border-color: #D5E5E5 !important;
+        }
+        html:not(.dark) .theme-text-primary {
+            color: #05161A !important;
+        }
+        html:not(.dark) .theme-text-secondary {
+            color: #5D6B6B !important;
+        }
+        html:not(.dark) .theme-border {
+            border-color: #D5E5E5 !important;
+        }
+
+        /* Micro-animations */
+        .tab-btn.active {
+            background-color: #0C7075;
+            color: #F1F7F7;
+            border-color: #0F969C;
+            box-shadow: 0 0 12px rgba(15, 150, 156, 0.25);
+        }
+        .nav-item.active {
+            background-color: rgba(12, 112, 117, 0.25);
+            color: #F1F7F7;
+            border-left: 3px solid #0F969C;
+        }
+
+        @keyframes pulse-subtle {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.85; transform: scale(0.98); }
+        }
+        .animate-subtle {
+            animation: pulse-subtle 3s ease-in-out infinite;
         }
     </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans selection:bg-indigo-500 selection:text-white">
+<body class="bg-[#05161A] text-[#F1F7F7] font-sans antialiased min-h-screen flex selection:bg-[#0C7075] selection:text-white transition-colors duration-200">
 
-    <!-- Top Navigation -->
-    <nav class="border-b border-slate-800 bg-slate-900/60 sticky top-0 z-50 backdrop-blur-md">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center shadow-lg shadow-indigo-500/20">
-                    <i class="fa-solid fa-chart-line text-white text-lg"></i>
-                </div>
-                <div>
-                    <span class="text-xl font-bold tracking-tight text-white">SitePulse <span class="gradient-text font-extrabold">AI</span></span>
-                    <span class="ml-2 text-xs px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 font-medium">v1.0.0</span>
-                </div>
-            </div>
-            <div class="flex items-center space-x-4 text-sm font-medium">
-                <a href="/docs" target="_blank" class="text-slate-400 hover:text-white transition flex items-center gap-1.5">
-                    <i class="fa-solid fa-book-open text-xs"></i> Swagger Docs
-                </a>
-                <a href="/health" target="_blank" class="text-slate-400 hover:text-white transition flex items-center gap-1.5">
-                    <i class="fa-solid fa-heart-pulse text-xs text-emerald-400"></i> Health
-                </a>
-                <a href="https://github.com" target="_blank" class="text-slate-400 hover:text-white transition">
-                    <i class="fa-brands fa-github text-lg"></i>
-                </a>
-            </div>
-        </div>
-    </nav>
+    <!-- Mobile Navigation Backdrop -->
+    <div id="mobileBackdrop" onclick="toggleSidebar(false)" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-40 hidden md:hidden transition-opacity"></div>
 
-    <!-- Main Content Container -->
-    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10">
-
-        <!-- Hero Section -->
-        <div class="text-center max-w-3xl mx-auto mb-10">
-            <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-800/80 border border-slate-700 text-xs text-slate-300 mb-5">
-                <span class="flex h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                Real-Time Website Content Extraction & LLM Intelligence
-            </div>
-            <h1 class="text-4xl sm:text-5xl font-extrabold tracking-tight mb-4">
-                Turn Any Website URL into <br/><span class="gradient-text">Actionable Business Intelligence</span>
-            </h1>
-            <p class="text-slate-400 text-base sm:text-lg">
-                Extract live content, audit SEO health, identify competitors, discover target search queries, and uncover customer profiles in seconds.
-            </p>
-        </div>
-
-        <!-- Analyzer Input Form Card -->
-        <div class="max-w-3xl mx-auto glass-panel p-4 sm:p-6 rounded-2xl shadow-2xl shadow-indigo-950/40 mb-10">
-            <form id="analyzeForm" class="flex flex-col sm:flex-row gap-3">
-                <div class="relative flex-grow">
-                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-500">
-                        <i class="fa-solid fa-globe"></i>
+    <!-- ========================================================================= -->
+    <!-- 1. LEFT SIDEBAR -->
+    <!-- ========================================================================= -->
+    <aside id="sidebar" class="fixed md:static inset-y-0 left-0 z-50 w-64 bg-[#072E33] border-r border-[#294D61] flex flex-col justify-between transition-all duration-300 transform -translate-x-full md:translate-x-0 shadow-teal-lg md:shadow-none">
+        
+        <!-- Sidebar Header -->
+        <div>
+            <div class="h-16 px-5 border-b border-[#294D61] flex items-center justify-between">
+                <div class="flex items-center space-x-3 overflow-hidden">
+                    <div class="w-9 h-9 rounded-lg bg-[#0C7075] border border-[#0F969C] flex items-center justify-center shadow-teal-glow flex-shrink-0">
+                        <i data-lucide="activity" class="w-5 h-5 text-[#F1F7F7]"></i>
                     </div>
-                    <input 
-                        type="url" 
-                        id="urlInput" 
-                        required 
-                        placeholder="https://example.com" 
-                        value="https://example.com"
-                        class="w-full pl-11 pr-4 py-3.5 bg-slate-900 border border-slate-700 rounded-xl text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm transition"
-                    >
-                </div>
-                <button 
-                    type="submit" 
-                    id="submitBtn"
-                    class="px-6 py-3.5 bg-gradient-to-r from-indigo-600 via-indigo-500 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-semibold rounded-xl text-sm transition shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2 whitespace-nowrap active:scale-95"
-                >
-                    <i class="fa-solid fa-wand-magic-sparkles"></i>
-                    <span>Analyze Website</span>
-                </button>
-            </form>
-
-            <!-- Quick Pill Suggestions -->
-            <div class="mt-4 flex flex-wrap items-center gap-2 text-xs text-slate-400">
-                <span class="font-medium text-slate-500">Try sample:</span>
-                <button onclick="setSample('https://example.com')" class="px-2.5 py-1 bg-slate-800/80 hover:bg-slate-800 text-slate-300 rounded-lg border border-slate-700/60 transition">example.com</button>
-                <button onclick="setSample('https://stripe.com')" class="px-2.5 py-1 bg-slate-800/80 hover:bg-slate-800 text-slate-300 rounded-lg border border-slate-700/60 transition">stripe.com</button>
-                <button onclick="setSample('https://github.com')" class="px-2.5 py-1 bg-slate-800/80 hover:bg-slate-800 text-slate-300 rounded-lg border border-slate-700/60 transition">github.com</button>
-            </div>
-        </div>
-
-        <!-- Loading State -->
-        <div id="loadingState" class="hidden max-w-2xl mx-auto py-12 text-center">
-            <div class="inline-block relative w-16 h-16 mb-4">
-                <div class="absolute inset-0 rounded-full border-4 border-indigo-500/20"></div>
-                <div class="absolute inset-0 rounded-full border-4 border-indigo-500 border-t-transparent animate-spin"></div>
-            </div>
-            <h3 class="text-lg font-semibold text-white mb-2" id="loadingStage">Fetching website content...</h3>
-            <p class="text-sm text-slate-400" id="loadingSubtext">Performing SSRF security checks and parsing HTML DOM...</p>
-        </div>
-
-        <!-- Error State Banner -->
-        <div id="errorState" class="hidden max-w-3xl mx-auto mb-8 p-5 bg-rose-950/40 border border-rose-800/50 rounded-2xl text-rose-200">
-            <div class="flex items-start gap-3">
-                <i class="fa-solid fa-triangle-exclamation text-rose-400 text-xl mt-0.5"></i>
-                <div class="flex-grow">
-                    <h4 class="font-bold text-rose-300" id="errorTitle">Analysis Failed</h4>
-                    <p class="text-sm text-rose-200/90 mt-1" id="errorMessage"></p>
-                    <div id="errorTip" class="mt-3 text-xs bg-rose-900/30 p-2.5 rounded-lg border border-rose-800/40 text-rose-300 hidden"></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Results Section -->
-        <div id="resultsSection" class="hidden space-y-8">
-
-            <!-- Brand Summary Banner -->
-            <div class="glass-panel p-6 sm:p-8 rounded-2xl border-l-4 border-l-indigo-500">
-                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800 pb-6 mb-6">
-                    <div>
-                        <div class="flex items-center gap-3 mb-1">
-                            <h2 class="text-2xl sm:text-3xl font-extrabold text-white" id="brandName"></h2>
-                            <span class="text-xs px-2.5 py-1 rounded-full bg-indigo-500/10 text-indigo-300 border border-indigo-500/30 font-semibold" id="brandCategory"></span>
+                    <div class="sidebar-text">
+                        <div class="flex items-center space-x-1.5">
+                            <span class="font-display font-bold text-base tracking-tight text-[#F1F7F7]">SitePulse</span>
+                            <span class="text-xs px-1.5 py-0.2 rounded font-mono font-bold bg-[#0C7075]/40 text-[#6DA5C0] border border-[#0F969C]/40">AI</span>
                         </div>
-                        <p class="text-slate-400 text-sm mt-1" id="analyzedWebsite"></p>
-                    </div>
-                    <div class="flex flex-wrap items-center gap-3 text-xs text-slate-400">
-                        <span class="px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 flex items-center gap-1.5">
-                            <i class="fa-solid fa-microchip text-indigo-400"></i> Model: <strong class="text-slate-200" id="metaModel"></strong>
-                        </span>
-                        <span class="px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 flex items-center gap-1.5">
-                            <i class="fa-solid fa-layer-group text-violet-400"></i> Pages: <strong class="text-slate-200" id="metaPages"></strong>
-                        </span>
-                        <span class="px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 flex items-center gap-1.5">
-                            <i class="fa-solid fa-bolt text-amber-400"></i> Time: <strong class="text-slate-200" id="metaTime"></strong>
-                        </span>
+                        <span class="text-[10px] text-[#BDD7D8] font-medium tracking-wide block uppercase">Intelligence Suite</span>
                     </div>
                 </div>
-                <p class="text-slate-300 text-sm sm:text-base leading-relaxed" id="brandSummary"></p>
-            </div>
 
-            <!-- Tab Navigation for Modules -->
-            <div class="flex border-b border-slate-800 space-x-2 sm:space-x-4 overflow-x-auto pb-1 text-sm font-semibold">
-                <button onclick="switchTab('competitors')" id="tabBtn-competitors" class="tab-btn px-4 py-2.5 rounded-xl transition text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 flex items-center gap-2">
-                    <i class="fa-solid fa-chess text-xs"></i> 1. Competitors
+                <!-- Collapse / Mobile Close Button -->
+                <button onclick="toggleSidebarCollapse()" class="hidden md:flex p-1.5 rounded-md text-[#BDD7D8] hover:text-[#F1F7F7] hover:bg-[#294D61]/50 transition" title="Toggle Sidebar">
+                    <i data-lucide="chevrons-left" id="collapseIcon" class="w-4 h-4"></i>
                 </button>
-                <button onclick="switchTab('queries')" id="tabBtn-queries" class="tab-btn px-4 py-2.5 rounded-xl transition text-slate-400 hover:text-slate-200 flex items-center gap-2">
-                    <i class="fa-solid fa-magnifying-glass text-xs"></i> 2. Top Queries
-                </button>
-                <button onclick="switchTab('seo')" id="tabBtn-seo" class="tab-btn px-4 py-2.5 rounded-xl transition text-slate-400 hover:text-slate-200 flex items-center gap-2">
-                    <i class="fa-solid fa-arrow-trend-up text-xs"></i> 3. SEO Improvements
-                </button>
-                <button onclick="switchTab('services')" id="tabBtn-services" class="tab-btn px-4 py-2.5 rounded-xl transition text-slate-400 hover:text-slate-200 flex items-center gap-2">
-                    <i class="fa-solid fa-briefcase text-xs"></i> 4. Top 5 Services
-                </button>
-                <button onclick="switchTab('audience')" id="tabBtn-audience" class="tab-btn px-4 py-2.5 rounded-xl transition text-slate-400 hover:text-slate-200 flex items-center gap-2">
-                    <i class="fa-solid fa-bullseye text-xs"></i> 5. Target Audience
-                </button>
-                <button onclick="switchTab('json')" id="tabBtn-json" class="tab-btn px-4 py-2.5 rounded-xl transition text-slate-400 hover:text-slate-200 flex items-center gap-2">
-                    <i class="fa-solid fa-code text-xs"></i> Raw JSON
+                <button onclick="toggleSidebar(false)" class="md:hidden p-1.5 rounded-md text-[#BDD7D8] hover:text-[#F1F7F7] hover:bg-[#294D61]/50">
+                    <i data-lucide="x" class="w-5 h-5"></i>
                 </button>
             </div>
 
-            <!-- TAB 1: COMPETITOR ANALYSIS -->
-            <div id="tabContent-competitors" class="tab-content space-y-6">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="glass-panel p-5 rounded-xl border border-emerald-500/20">
-                        <h4 class="text-sm font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-2 mb-3">
-                            <i class="fa-solid fa-shield-halved"></i> Brand Strengths
-                        </h4>
-                        <ul id="brandStrengths" class="space-y-2 text-sm text-slate-300"></ul>
-                    </div>
-                    <div class="glass-panel p-5 rounded-xl border border-indigo-500/20">
-                        <h4 class="text-sm font-bold uppercase tracking-wider text-indigo-400 flex items-center gap-2 mb-3">
-                            <i class="fa-solid fa-lightbulb"></i> Market Positioning Opportunities
-                        </h4>
-                        <ul id="brandOpportunities" class="space-y-2 text-sm text-slate-300"></ul>
-                    </div>
-                </div>
+            <!-- Navigation Links -->
+            <div class="p-3 space-y-1">
+                <div class="px-3 pt-3 pb-1 text-[11px] font-semibold text-[#6DA5C0] uppercase tracking-wider sidebar-text">Core Platform</div>
 
-                <div class="glass-panel p-6 rounded-2xl">
-                    <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                        <i class="fa-solid fa-users-viewfinder text-indigo-400"></i> Identified Competitors
-                    </h3>
-                    <div id="competitorsList" class="grid grid-cols-1 md:grid-cols-3 gap-5"></div>
-                </div>
+                <a href="#dashboard" onclick="navigateToSection('dashboard')" id="nav-dashboard" class="nav-item active flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium text-[#F1F7F7] hover:bg-[#294D61]/40 transition group">
+                    <i data-lucide="layout-dashboard" class="w-4 h-4 text-[#0F969C] group-hover:scale-110 transition-transform"></i>
+                    <span class="sidebar-text">Dashboard</span>
+                </a>
+
+                <a href="#new-analysis" onclick="focusUrlInput()" id="nav-new" class="nav-item flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium text-[#BDD7D8] hover:text-[#F1F7F7] hover:bg-[#294D61]/40 transition group">
+                    <i data-lucide="plus-circle" class="w-4 h-4 text-[#6DA5C0] group-hover:scale-110 transition-transform"></i>
+                    <span class="sidebar-text">New Website Analysis</span>
+                </a>
+
+                <a href="#history" onclick="toggleHistoryDrawer(true)" id="nav-history" class="nav-item flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium text-[#BDD7D8] hover:text-[#F1F7F7] hover:bg-[#294D61]/40 transition group">
+                    <div class="flex items-center space-x-3">
+                        <i data-lucide="history" class="w-4 h-4 text-[#6DA5C0] group-hover:scale-110 transition-transform"></i>
+                        <span class="sidebar-text">Analysis History</span>
+                    </div>
+                    <span id="historyBadge" class="sidebar-text text-[10px] px-1.5 py-0.5 rounded-full bg-[#294D61] text-[#BDD7D8] font-mono">0</span>
+                </a>
+
+                <div class="px-3 pt-5 pb-1 text-[11px] font-semibold text-[#6DA5C0] uppercase tracking-wider sidebar-text">Intelligence Modules</div>
+
+                <a href="#results" onclick="switchTab('competitors')" id="nav-competitors" class="nav-item flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium text-[#BDD7D8] hover:text-[#F1F7F7] hover:bg-[#294D61]/40 transition group">
+                    <i data-lucide="swords" class="w-4 h-4 text-[#6DA5C0]"></i>
+                    <span class="sidebar-text">Competitor Analysis</span>
+                </a>
+
+                <a href="#results" onclick="switchTab('seo')" id="nav-seo" class="nav-item flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium text-[#BDD7D8] hover:text-[#F1F7F7] hover:bg-[#294D61]/40 transition group">
+                    <i data-lucide="trending-up" class="w-4 h-4 text-[#6DA5C0]"></i>
+                    <span class="sidebar-text">SEO Intelligence</span>
+                </a>
+
+                <a href="#results" onclick="switchTab('queries')" id="nav-queries" class="nav-item flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium text-[#BDD7D8] hover:text-[#F1F7F7] hover:bg-[#294D61]/40 transition group">
+                    <i data-lucide="search" class="w-4 h-4 text-[#6DA5C0]"></i>
+                    <span class="sidebar-text">Search Query Research</span>
+                </a>
+
+                <a href="#results" onclick="switchTab('services')" id="nav-services" class="nav-item flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium text-[#BDD7D8] hover:text-[#F1F7F7] hover:bg-[#294D61]/40 transition group">
+                    <i data-lucide="briefcase" class="w-4 h-4 text-[#6DA5C0]"></i>
+                    <span class="sidebar-text">Business Services</span>
+                </a>
+
+                <a href="#results" onclick="switchTab('audience')" id="nav-audience" class="nav-item flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium text-[#BDD7D8] hover:text-[#F1F7F7] hover:bg-[#294D61]/40 transition group">
+                    <i data-lucide="target" class="w-4 h-4 text-[#6DA5C0]"></i>
+                    <span class="sidebar-text">Audience Insights</span>
+                </a>
             </div>
-
-            <!-- TAB 2: TARGET SEARCH QUERIES -->
-            <div id="tabContent-queries" class="tab-content hidden space-y-4">
-                <div class="text-sm text-slate-400 mb-2">Exactly 5 high-intent queries mapped across Google, LinkedIn, X, Instagram, and Facebook:</div>
-                <div id="queriesList" class="grid grid-cols-1 gap-4"></div>
-            </div>
-
-            <!-- TAB 3: SEO IMPROVEMENTS -->
-            <div id="tabContent-seo" class="tab-content hidden space-y-6">
-                <!-- Keywords & Headings -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-                    <div class="glass-panel p-5 rounded-xl">
-                        <span class="text-xs font-semibold uppercase tracking-wider text-indigo-400">Primary Keyword</span>
-                        <div class="mt-2 text-lg font-bold text-white" id="seoPrimaryKeyword"></div>
-                    </div>
-                    <div class="glass-panel p-5 rounded-xl md:col-span-2">
-                        <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Secondary & Long-Tail Keywords</span>
-                        <div class="mt-2 flex flex-wrap gap-2" id="seoKeywordsList"></div>
-                    </div>
-                </div>
-
-                <!-- Title & Meta Comparison -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="glass-panel p-5 rounded-xl space-y-3">
-                        <span class="text-xs font-bold uppercase tracking-wider text-violet-400">SEO Title Recommendation</span>
-                        <div class="text-xs text-slate-400">Current: <span id="currentTitle" class="text-slate-300"></span></div>
-                        <div class="text-sm font-semibold text-emerald-400 bg-emerald-950/30 p-3 rounded-lg border border-emerald-800/40" id="recommendedTitle"></div>
-                        <p class="text-xs text-slate-400 leading-relaxed" id="titleReason"></p>
-                    </div>
-
-                    <div class="glass-panel p-5 rounded-xl space-y-3">
-                        <span class="text-xs font-bold uppercase tracking-wider text-violet-400">Meta Description Recommendation</span>
-                        <div class="text-xs text-slate-400">Current: <span id="currentMeta" class="text-slate-300"></span></div>
-                        <div class="text-sm font-semibold text-emerald-400 bg-emerald-950/30 p-3 rounded-lg border border-emerald-800/40" id="recommendedMeta"></div>
-                    </div>
-                </div>
-
-                <!-- SEO Health Observations & Content Strategy -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="glass-panel p-5 rounded-xl">
-                        <h4 class="text-sm font-bold text-white mb-3 flex items-center gap-2">
-                            <i class="fa-solid fa-stethoscope text-amber-400"></i> Technical SEO Observations
-                        </h4>
-                        <ul id="seoObservationsList" class="space-y-2 text-xs text-slate-300"></ul>
-                    </div>
-                    <div class="glass-panel p-5 rounded-xl">
-                        <h4 class="text-sm font-bold text-white mb-3 flex items-center gap-2">
-                            <i class="fa-solid fa-file-circle-plus text-indigo-400"></i> Recommended Supporting Content
-                        </h4>
-                        <div id="supportingContentList" class="space-y-3"></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- TAB 4: TOP 5 SERVICES -->
-            <div id="tabContent-services" class="tab-content hidden space-y-4">
-                <div id="servicesList" class="grid grid-cols-1 md:grid-cols-2 gap-5"></div>
-            </div>
-
-            <!-- TAB 5: TARGET AUDIENCE -->
-            <div id="tabContent-audience" class="tab-content hidden space-y-6">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-                    <div class="glass-panel p-5 rounded-xl">
-                        <span class="text-xs font-bold uppercase tracking-wider text-indigo-400">Primary Audience</span>
-                        <ul id="audiencePrimary" class="mt-2 space-y-1.5 text-sm text-slate-200"></ul>
-                    </div>
-                    <div class="glass-panel p-5 rounded-xl">
-                        <span class="text-xs font-bold uppercase tracking-wider text-violet-400">Target Industries</span>
-                        <ul id="audienceIndustries" class="mt-2 space-y-1.5 text-sm text-slate-200"></ul>
-                    </div>
-                    <div class="glass-panel p-5 rounded-xl">
-                        <span class="text-xs font-bold uppercase tracking-wider text-pink-400">Geographical Focus</span>
-                        <ul id="audienceGeo" class="mt-2 space-y-1.5 text-sm text-slate-200"></ul>
-                    </div>
-                </div>
-
-                <!-- Customer Needs & Pain Points -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="glass-panel p-5 rounded-xl">
-                        <h4 class="text-sm font-bold text-emerald-400 mb-3 flex items-center gap-2">
-                            <i class="fa-solid fa-circle-check"></i> Customer Needs Addressed
-                        </h4>
-                        <ul id="customerNeeds" class="space-y-2 text-sm text-slate-300"></ul>
-                    </div>
-                    <div class="glass-panel p-5 rounded-xl">
-                        <h4 class="text-sm font-bold text-rose-400 mb-3 flex items-center gap-2">
-                            <i class="fa-solid fa-circle-exclamation"></i> Customer Pain Points Solved
-                        </h4>
-                        <ul id="customerChallenges" class="space-y-2 text-sm text-slate-300"></ul>
-                    </div>
-                </div>
-
-                <!-- Detailed Marketing Segments -->
-                <div class="glass-panel p-6 rounded-2xl">
-                    <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                        <i class="fa-solid fa-bullhorn text-indigo-400"></i> Strategic Marketing Segments
-                    </h3>
-                    <div id="marketingSegmentsList" class="grid grid-cols-1 md:grid-cols-2 gap-5"></div>
-                </div>
-            </div>
-
-            <!-- TAB 6: RAW JSON -->
-            <div id="tabContent-json" class="tab-content hidden">
-                <div class="glass-panel p-4 rounded-2xl relative">
-                    <button onclick="copyJson()" class="absolute top-4 right-4 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs rounded-lg text-slate-300 flex items-center gap-1.5 border border-slate-700 transition">
-                        <i class="fa-regular fa-copy"></i> Copy JSON
-                    </button>
-                    <pre id="rawJsonBlock" class="p-4 text-xs font-mono text-emerald-400 overflow-x-auto max-h-[600px]"></pre>
-                </div>
-            </div>
-
         </div>
 
-    </main>
+        <!-- Sidebar Footer & System Status -->
+        <div class="p-4 border-t border-[#294D61] bg-[#072E33]/90 space-y-3">
+            <div class="sidebar-text p-2.5 rounded-lg bg-[#05161A] border border-[#294D61] text-xs">
+                <div class="flex items-center justify-between mb-1">
+                    <span class="text-[#BDD7D8] font-medium">Engine API</span>
+                    <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-[#0F969C]">
+                        <span class="w-2 h-2 rounded-full bg-[#0F969C] animate-pulse"></span> Operational
+                    </span>
+                </div>
+                <div class="text-[11px] text-[#6DA5C0] font-mono truncate" id="sidebarModelInfo">gemini-3.5-flash</div>
+            </div>
 
-    <!-- Footer -->
-    <footer class="border-t border-slate-800 bg-slate-900/50 py-6 text-center text-xs text-slate-500">
-        SitePulse AI • Enterprise Website Intelligence & Growth Advisory REST API • Powered by Google Gemini Flash
-    </footer>
+            <div class="flex items-center justify-between text-xs text-[#BDD7D8] pt-1">
+                <a href="/docs" target="_blank" class="hover:text-[#F1F7F7] transition flex items-center gap-1 sidebar-text">
+                    <i data-lucide="book-open" class="w-3.5 h-3.5 text-[#6DA5C0]"></i> Swagger
+                </a>
+                <button onclick="toggleSettingsModal(true)" class="hover:text-[#F1F7F7] transition flex items-center gap-1" title="Platform Settings">
+                    <i data-lucide="settings" class="w-4 h-4 text-[#BDD7D8]"></i>
+                    <span class="sidebar-text">Settings</span>
+                </button>
+            </div>
+        </div>
+    </aside>
 
-    <!-- Client-side Logic -->
+    <!-- ========================================================================= -->
+    <!-- 2. MAIN APPLICATION CONTENT WRAPPER -->
+    <!-- ========================================================================= -->
+    <div class="flex-1 flex flex-col min-w-0 overflow-y-auto">
+
+        <!-- Top Navigation Bar -->
+        <header class="h-16 px-4 sm:px-8 border-b border-[#294D61] bg-[#072E33]/80 backdrop-blur-md sticky top-0 z-30 flex items-center justify-between">
+            <div class="flex items-center space-x-3 sm:space-x-4">
+                <button onclick="toggleSidebar()" class="md:hidden p-2 rounded-lg text-[#BDD7D8] hover:text-[#F1F7F7] hover:bg-[#294D61]/50 focus:outline-none">
+                    <i data-lucide="menu" class="w-5 h-5"></i>
+                </button>
+                <div class="flex items-center space-x-2 text-xs sm:text-sm text-[#BDD7D8]">
+                    <span class="font-medium text-[#6DA5C0]">SitePulse AI</span>
+                    <span class="text-[#294D61]">/</span>
+                    <span id="breadcrumbCurrent" class="text-[#F1F7F7] font-semibold">Dashboard Overview</span>
+                </div>
+                <div id="activeDomainBadge" class="hidden text-xs px-2.5 py-1 rounded-full bg-[#0C7075]/25 border border-[#0F969C]/40 text-[#6DA5C0] font-mono items-center gap-1.5">
+                    <i data-lucide="globe" class="w-3 h-3 text-[#0F969C]"></i>
+                    <span id="activeDomainText"></span>
+                </div>
+            </div>
+
+            <!-- Top Nav Actions -->
+            <div class="flex items-center space-x-2 sm:space-x-3 text-sm">
+                <!-- Theme Toggle Button -->
+                <button onclick="toggleTheme()" class="p-2 rounded-lg text-[#BDD7D8] hover:text-[#F1F7F7] hover:bg-[#294D61]/50 transition" title="Toggle Light/Dark Theme">
+                    <i data-lucide="moon" id="themeIcon" class="w-4 h-4"></i>
+                </button>
+
+                <!-- Health Check Link -->
+                <a href="/health" target="_blank" class="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-[#294D61] bg-[#05161A] hover:bg-[#294D61]/40 text-xs text-[#BDD7D8] hover:text-[#F1F7F7] transition">
+                    <i data-lucide="shield-check" class="w-3.5 h-3.5 text-[#0F969C]"></i>
+                    <span>Health Status</span>
+                </a>
+
+                <!-- API Docs Link -->
+                <a href="/docs" target="_blank" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#0C7075] hover:bg-[#0F969C] text-xs font-semibold text-[#F1F7F7] shadow-teal-sm transition">
+                    <i data-lucide="code-2" class="w-3.5 h-3.5"></i>
+                    <span class="hidden sm:inline">REST API Docs</span>
+                </a>
+            </div>
+        </header>
+
+        <!-- Main Body -->
+        <main class="flex-1 p-4 sm:p-8 max-w-7xl w-full mx-auto space-y-8">
+
+            <!-- ========================================================================= -->
+            <!-- 3. DASHBOARD HERO & URL ANALYZER INPUT -->
+            <!-- ========================================================================= -->
+            <section id="heroSection" class="relative">
+                <div class="bg-gradient-to-b from-[#072E33] to-[#072E33]/70 border border-[#294D61] rounded-2xl p-6 sm:p-10 shadow-teal-md relative overflow-hidden">
+                    
+                    <!-- Subtle background decoration lines -->
+                    <div class="absolute -right-20 -top-20 w-80 h-80 rounded-full bg-[#0C7075]/10 blur-3xl pointer-events-none"></div>
+                    <div class="absolute -left-20 -bottom-20 w-80 h-80 rounded-full bg-[#0F969C]/10 blur-3xl pointer-events-none"></div>
+
+                    <div class="max-w-3xl relative z-10">
+                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#05161A] border border-[#294D61] text-xs font-medium text-[#6DA5C0] mb-4">
+                            <span class="w-2 h-2 rounded-full bg-[#0F969C] animate-ping"></span>
+                            Live Multi-Page Extraction & LLM Synthesis
+                        </div>
+
+                        <h1 class="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold text-[#F1F7F7] tracking-tight leading-tight mb-3">
+                            Turn websites into <span class="text-[#0F969C]">business intelligence</span>.
+                        </h1>
+
+                        <p class="text-[#BDD7D8] text-sm sm:text-base leading-relaxed mb-8 max-w-2xl">
+                            Discover competitors, uncover SEO opportunities, and understand your ideal customers using AI. Input any commercial website URL to generate deep, multi-vector growth intelligence.
+                        </p>
+
+                        <!-- URL Input Form Component -->
+                        <form id="analyzeForm" class="space-y-4">
+                            <div class="flex flex-col sm:flex-row gap-3">
+                                <div class="relative flex-1">
+                                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-[#6DA5C0]">
+                                        <i data-lucide="globe" class="w-5 h-5"></i>
+                                    </div>
+                                    <input 
+                                        type="url" 
+                                        id="urlInput" 
+                                        required 
+                                        placeholder="Enter your website URL (https://example.com)" 
+                                        value="https://example.com"
+                                        class="w-full pl-11 pr-10 py-3.5 bg-[#05161A] border border-[#294D61] rounded-xl text-[#F1F7F7] placeholder-[#6DA5C0]/60 text-sm font-medium focus:outline-none focus:border-[#0F969C] focus:ring-2 focus:ring-[#0C7075]/30 transition shadow-inner"
+                                    >
+                                    <button type="button" onclick="clearInput()" id="clearInputBtn" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-[#6DA5C0] hover:text-[#F1F7F7] transition" title="Clear input">
+                                        <i data-lucide="x" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
+                                <button 
+                                    type="submit" 
+                                    id="submitBtn"
+                                    class="px-7 py-3.5 bg-[#0C7075] hover:bg-[#0F969C] text-[#F1F7F7] font-semibold text-sm rounded-xl shadow-teal-md hover:shadow-teal-glow transition-all flex items-center justify-center gap-2.5 whitespace-nowrap active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                                >
+                                    <i data-lucide="sparkles" class="w-4 h-4"></i>
+                                    <span>Analyze Website</span>
+                                </button>
+                            </div>
+
+                            <!-- Sample Quick Pills -->
+                            <div class="flex flex-wrap items-center gap-2 pt-1 text-xs text-[#BDD7D8]">
+                                <span class="text-[#6DA5C0] font-medium">Try verified sample:</span>
+                                <button type="button" onclick="setSample('https://example.com')" class="px-2.5 py-1 bg-[#05161A] hover:bg-[#294D61]/50 border border-[#294D61] text-[#F1F7F7] rounded-lg transition">example.com</button>
+                                <button type="button" onclick="setSample('https://stripe.com')" class="px-2.5 py-1 bg-[#05161A] hover:bg-[#294D61]/50 border border-[#294D61] text-[#F1F7F7] rounded-lg transition">stripe.com</button>
+                                <button type="button" onclick="setSample('https://github.com')" class="px-2.5 py-1 bg-[#05161A] hover:bg-[#294D61]/50 border border-[#294D61] text-[#F1F7F7] rounded-lg transition">github.com</button>
+                                <button type="button" onclick="setSample('https://linear.app')" class="px-2.5 py-1 bg-[#05161A] hover:bg-[#294D61]/50 border border-[#294D61] text-[#F1F7F7] rounded-lg transition">linear.app</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ========================================================================= -->
+            <!-- 4. KEY SUMMARY METRICS CARDS (Always visible) -->
+            <!-- ========================================================================= -->
+            <section class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bg-[#072E33] border border-[#294D61] p-4 sm:p-5 rounded-xl shadow-teal-sm">
+                    <div class="flex items-center justify-between text-[#6DA5C0] mb-2">
+                        <span class="text-xs font-semibold uppercase tracking-wider">AI Intelligence</span>
+                        <i data-lucide="cpu" class="w-4 h-4 text-[#0F969C]"></i>
+                    </div>
+                    <div class="text-xl sm:text-2xl font-bold font-display text-[#F1F7F7]" id="statModelName">Gemini Flash</div>
+                    <p class="text-xs text-[#BDD7D8] mt-1">Multi-turn structured reasoning</p>
+                </div>
+
+                <div class="bg-[#072E33] border border-[#294D61] p-4 sm:p-5 rounded-xl shadow-teal-sm">
+                    <div class="flex items-center justify-between text-[#6DA5C0] mb-2">
+                        <span class="text-xs font-semibold uppercase tracking-wider">Security Layer</span>
+                        <i data-lucide="shield" class="w-4 h-4 text-[#0F969C]"></i>
+                    </div>
+                    <div class="text-xl sm:text-2xl font-bold font-display text-[#F1F7F7]">SSRF Shield</div>
+                    <p class="text-xs text-[#BDD7D8] mt-1">Private IP & DNS verified</p>
+                </div>
+
+                <div class="bg-[#072E33] border border-[#294D61] p-4 sm:p-5 rounded-xl shadow-teal-sm">
+                    <div class="flex items-center justify-between text-[#6DA5C0] mb-2">
+                        <span class="text-xs font-semibold uppercase tracking-wider">Growth Vectors</span>
+                        <i data-lucide="layers" class="w-4 h-4 text-[#0F969C]"></i>
+                    </div>
+                    <div class="text-xl sm:text-2xl font-bold font-display text-[#F1F7F7]">5 Modules</div>
+                    <p class="text-xs text-[#BDD7D8] mt-1">Competitors, SEO, Queries, ICP</p>
+                </div>
+
+                <div class="bg-[#072E33] border border-[#294D61] p-4 sm:p-5 rounded-xl shadow-teal-sm">
+                    <div class="flex items-center justify-between text-[#6DA5C0] mb-2">
+                        <span class="text-xs font-semibold uppercase tracking-wider">Cache Layer</span>
+                        <i data-lucide="database" class="w-4 h-4 text-[#0F969C]"></i>
+                    </div>
+                    <div class="text-xl sm:text-2xl font-bold font-display text-[#F1F7F7]">TTL 3600s</div>
+                    <p class="text-xs text-[#BDD7D8] mt-1">In-memory instant recall</p>
+                </div>
+            </section>
+
+            <!-- ========================================================================= -->
+            <!-- 5. WEBSITE ANALYSIS LOADING EXPERIENCE (Section 4 Requirements) -->
+            <!-- ========================================================================= -->
+            <section id="loadingState" class="hidden bg-[#072E33] border border-[#294D61] rounded-2xl p-8 sm:p-12 shadow-teal-md text-center max-w-2xl mx-auto">
+                <div class="relative w-20 h-20 mx-auto mb-6">
+                    <!-- Concentric animated spinners -->
+                    <div class="absolute inset-0 rounded-full border-4 border-[#294D61]"></div>
+                    <div class="absolute inset-0 rounded-full border-4 border-[#0F969C] border-t-transparent animate-spin"></div>
+                    <div class="absolute inset-3 rounded-full bg-[#05161A] flex items-center justify-center">
+                        <i data-lucide="scan" class="w-6 h-6 text-[#0F969C] animate-pulse"></i>
+                    </div>
+                </div>
+
+                <h3 class="font-display text-xl font-bold text-[#F1F7F7] mb-2" id="loadingStageTitle">Validating website URL...</h3>
+                <p class="text-sm text-[#BDD7D8] mb-6 max-w-md mx-auto" id="loadingStageSubtext">Running security heuristics and inspecting DNS resolution...</p>
+
+                <!-- Animated Progress Bar -->
+                <div class="w-full bg-[#05161A] h-2.5 rounded-full overflow-hidden border border-[#294D61] mb-6">
+                    <div id="loadingProgressBar" class="h-full bg-gradient-to-r from-[#0C7075] via-[#0F969C] to-[#6DA5C0] transition-all duration-500 rounded-full" style="width: 14%;"></div>
+                </div>
+
+                <!-- 7 Meaningful Progress Stages Checklist -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-left max-w-lg mx-auto text-xs" id="stagesChecklist">
+                    <div id="stage-1" class="flex items-center gap-2 text-[#0F969C] font-medium"><i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin"></i> 1. Validating website URL</div>
+                    <div id="stage-2" class="flex items-center gap-2 text-[#294D61]"><i data-lucide="circle" class="w-3.5 h-3.5"></i> 2. Extracting website content</div>
+                    <div id="stage-3" class="flex items-center gap-2 text-[#294D61]"><i data-lucide="circle" class="w-3.5 h-3.5"></i> 3. Understanding business info</div>
+                    <div id="stage-4" class="flex items-center gap-2 text-[#294D61]"><i data-lucide="circle" class="w-3.5 h-3.5"></i> 4. Identifying competitors</div>
+                    <div id="stage-5" class="flex items-center gap-2 text-[#294D61]"><i data-lucide="circle" class="w-3.5 h-3.5"></i> 5. Generating SEO recommendations</div>
+                    <div id="stage-6" class="flex items-center gap-2 text-[#294D61]"><i data-lucide="circle" class="w-3.5 h-3.5"></i> 6. Identifying target customers</div>
+                    <div id="stage-7" class="flex items-center gap-2 text-[#294D61] sm:col-span-2"><i data-lucide="circle" class="w-3.5 h-3.5"></i> 7. Preparing final intelligence dossier</div>
+                </div>
+            </section>
+
+            <!-- ========================================================================= -->
+            <!-- 6. ERROR STATE CARD -->
+            <!-- ========================================================================= -->
+            <section id="errorState" class="hidden bg-[#072E33] border border-rose-900/60 rounded-2xl p-6 sm:p-8 text-rose-200 shadow-teal-md max-w-3xl mx-auto">
+                <div class="flex items-start gap-4">
+                    <div class="p-2.5 rounded-xl bg-rose-950/80 border border-rose-800 text-rose-400 flex-shrink-0">
+                        <i data-lucide="alert-octagon" class="w-6 h-6"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center justify-between gap-2">
+                            <h4 class="font-display font-bold text-lg text-rose-300" id="errorTitle">Analysis Interrupted</h4>
+                            <span id="errorCodeBadge" class="text-[10px] font-mono px-2 py-0.5 rounded bg-rose-950 border border-rose-800 text-rose-300 uppercase"></span>
+                        </div>
+                        <p class="text-sm text-rose-200/90 mt-1.5 leading-relaxed" id="errorMessage">An unexpected error occurred while analyzing the target website.</p>
+                        <div id="errorTip" class="mt-4 text-xs bg-rose-950/60 p-3.5 rounded-xl border border-rose-800/50 text-rose-200 font-sans hidden"></div>
+                        <div class="mt-4 pt-3 border-t border-rose-900/40 flex items-center justify-between">
+                            <button onclick="dismissError()" class="text-xs font-semibold text-rose-300 hover:text-white transition flex items-center gap-1">
+                                <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i> Dismiss & Try Another URL
+                            </button>
+                            <a href="/docs" target="_blank" class="text-xs text-rose-400 hover:underline">API Error Codes Docs &rarr;</a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ========================================================================= -->
+            <!-- 7. ANALYSIS RESULTS DASHBOARD (All 5 Modules + Overview) -->
+            <!-- ========================================================================= -->
+            <section id="resultsSection" class="hidden space-y-8">
+
+                <!-- Brand Header Overview Banner -->
+                <div class="bg-[#072E33] border border-[#294D61] rounded-2xl p-6 sm:p-8 shadow-teal-md relative overflow-hidden">
+                    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6 border-b border-[#294D61] pb-6 mb-6">
+                        <div>
+                            <div class="flex flex-wrap items-center gap-3 mb-2">
+                                <h2 class="font-display text-2xl sm:text-3xl font-extrabold text-[#F1F7F7]" id="brandName">Example Brand</h2>
+                                <span class="text-xs px-3 py-1 rounded-full bg-[#0C7075]/30 text-[#6DA5C0] border border-[#0F969C]/40 font-semibold" id="brandCategory">Technology Services</span>
+                            </div>
+                            <div class="flex items-center gap-2 text-xs sm:text-sm text-[#BDD7D8]">
+                                <i data-lucide="link-2" class="w-4 h-4 text-[#0F969C]"></i>
+                                <a id="analyzedWebsiteLink" href="#" target="_blank" class="hover:text-[#F1F7F7] hover:underline font-mono text-[#6DA5C0]">https://example.com</a>
+                                <span class="text-[#294D61]">•</span>
+                                <span id="analyzedTimestamp" class="text-xs text-[#BDD7D8]">Analyzed today</span>
+                            </div>
+                        </div>
+
+                        <!-- Run Metadata & Export -->
+                        <div class="flex flex-wrap items-center gap-2.5">
+                            <span class="px-3 py-1.5 rounded-lg bg-[#05161A] border border-[#294D61] text-xs text-[#BDD7D8] flex items-center gap-1.5">
+                                <i data-lucide="cpu" class="w-3.5 h-3.5 text-[#0F969C]"></i>
+                                <span id="metaModel">gemini-3.5-flash</span>
+                            </span>
+                            <span class="px-3 py-1.5 rounded-lg bg-[#05161A] border border-[#294D61] text-xs text-[#BDD7D8] flex items-center gap-1.5">
+                                <i data-lucide="layers" class="w-3.5 h-3.5 text-[#6DA5C0]"></i>
+                                <span id="metaPages">1 page</span>
+                            </span>
+                            <span class="px-3 py-1.5 rounded-lg bg-[#05161A] border border-[#294D61] text-xs text-[#BDD7D8] flex items-center gap-1.5">
+                                <i data-lucide="timer" class="w-3.5 h-3.5 text-[#0F969C]"></i>
+                                <span id="metaTime">1.3s</span>
+                            </span>
+                            <button onclick="copyRawJson()" class="px-3 py-1.5 rounded-lg bg-[#0C7075] hover:bg-[#0F969C] text-[#F1F7F7] text-xs font-semibold flex items-center gap-1.5 transition shadow-teal-sm">
+                                <i data-lucide="copy" class="w-3.5 h-3.5"></i> Copy JSON
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Business Summary -->
+                    <p class="text-[#BDD7D8] text-sm sm:text-base leading-relaxed" id="brandSummary">
+                        Business overview and positioning summary.
+                    </p>
+                </div>
+
+                <!-- Navigation Tabs for Analysis Modules -->
+                <div class="border-b border-[#294D61] flex items-center space-x-1 sm:space-x-2 overflow-x-auto pb-1 text-sm font-semibold">
+                    <button onclick="switchTab('overview')" id="tabBtn-overview" class="tab-btn active px-4 py-2.5 rounded-xl transition flex items-center gap-2 text-xs sm:text-sm whitespace-nowrap cursor-pointer">
+                        <i data-lucide="layout-grid" class="w-4 h-4"></i> Overview
+                    </button>
+                    <button onclick="switchTab('competitors')" id="tabBtn-competitors" class="tab-btn px-4 py-2.5 rounded-xl text-[#BDD7D8] hover:text-[#F1F7F7] hover:bg-[#072E33] transition flex items-center gap-2 text-xs sm:text-sm whitespace-nowrap cursor-pointer">
+                        <i data-lucide="swords" class="w-4 h-4"></i> Competitors
+                    </button>
+                    <button onclick="switchTab('seo')" id="tabBtn-seo" class="tab-btn px-4 py-2.5 rounded-xl text-[#BDD7D8] hover:text-[#F1F7F7] hover:bg-[#072E33] transition flex items-center gap-2 text-xs sm:text-sm whitespace-nowrap cursor-pointer">
+                        <i data-lucide="trending-up" class="w-4 h-4"></i> SEO Intelligence
+                    </button>
+                    <button onclick="switchTab('queries')" id="tabBtn-queries" class="tab-btn px-4 py-2.5 rounded-xl text-[#BDD7D8] hover:text-[#F1F7F7] hover:bg-[#072E33] transition flex items-center gap-2 text-xs sm:text-sm whitespace-nowrap cursor-pointer">
+                        <i data-lucide="search" class="w-4 h-4"></i> Target Queries (5)
+                    </button>
+                    <button onclick="switchTab('services')" id="tabBtn-services" class="tab-btn px-4 py-2.5 rounded-xl text-[#BDD7D8] hover:text-[#F1F7F7] hover:bg-[#072E33] transition flex items-center gap-2 text-xs sm:text-sm whitespace-nowrap cursor-pointer">
+                        <i data-lucide="briefcase" class="w-4 h-4"></i> Top Services (5)
+                    </button>
+                    <button onclick="switchTab('audience')" id="tabBtn-audience" class="tab-btn px-4 py-2.5 rounded-xl text-[#BDD7D8] hover:text-[#F1F7F7] hover:bg-[#072E33] transition flex items-center gap-2 text-xs sm:text-sm whitespace-nowrap cursor-pointer">
+                        <i data-lucide="target" class="w-4 h-4"></i> Target Audience
+                    </button>
+                    <button onclick="switchTab('json')" id="tabBtn-json" class="tab-btn px-4 py-2.5 rounded-xl text-[#BDD7D8] hover:text-[#F1F7F7] hover:bg-[#072E33] transition flex items-center gap-2 text-xs sm:text-sm whitespace-nowrap cursor-pointer">
+                        <i data-lucide="terminal" class="w-4 h-4"></i> Raw JSON
+                    </button>
+                </div>
+
+                <!-- ================================================================= -->
+                <!-- TAB 1: OVERVIEW -->
+                <!-- ================================================================= -->
+                <div id="tabContent-overview" class="tab-content space-y-6">
+                    <!-- Brand Strategic Highlights -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="bg-[#072E33] border border-[#294D61] p-6 rounded-2xl shadow-teal-sm">
+                            <h4 class="text-xs font-bold uppercase tracking-wider text-[#0F969C] flex items-center gap-2 mb-4">
+                                <i data-lucide="award" class="w-4 h-4"></i> Competitive Advantages
+                            </h4>
+                            <ul id="overviewAdvantages" class="space-y-2.5 text-sm text-[#BDD7D8]"></ul>
+                        </div>
+                        <div class="bg-[#072E33] border border-[#294D61] p-6 rounded-2xl shadow-teal-sm">
+                            <h4 class="text-xs font-bold uppercase tracking-wider text-[#6DA5C0] flex items-center gap-2 mb-4">
+                                <i data-lucide="lightbulb" class="w-4 h-4"></i> Market Positioning Opportunities
+                            </h4>
+                            <ul id="overviewOpportunities" class="space-y-2.5 text-sm text-[#BDD7D8]"></ul>
+                        </div>
+                    </div>
+
+                    <!-- 4 Snapshot Cards -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div class="bg-[#072E33] border border-[#294D61] p-5 rounded-xl">
+                            <div class="text-xs font-semibold text-[#6DA5C0] uppercase mb-1">Target Market</div>
+                            <div class="text-sm font-bold text-[#F1F7F7]" id="overviewTargetMarket">—</div>
+                        </div>
+                        <div class="bg-[#072E33] border border-[#294D61] p-5 rounded-xl">
+                            <div class="text-xs font-semibold text-[#6DA5C0] uppercase mb-1">Primary Keyword</div>
+                            <div class="text-sm font-bold text-[#F1F7F7] truncate" id="overviewPrimaryKeyword">—</div>
+                        </div>
+                        <div class="bg-[#072E33] border border-[#294D61] p-5 rounded-xl">
+                            <div class="text-xs font-semibold text-[#6DA5C0] uppercase mb-1">Core Positioning</div>
+                            <div class="text-sm font-bold text-[#F1F7F7] truncate" id="overviewPositioning">—</div>
+                        </div>
+                        <div class="bg-[#072E33] border border-[#294D61] p-5 rounded-xl">
+                            <div class="text-xs font-semibold text-[#6DA5C0] uppercase mb-1">Primary ICP</div>
+                            <div class="text-sm font-bold text-[#F1F7F7] truncate" id="overviewPrimaryIcp">—</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ================================================================= -->
+                <!-- TAB 2: COMPETITOR INTELLIGENCE (Module 1) -->
+                <!-- ================================================================= -->
+                <div id="tabContent-competitors" class="tab-content hidden space-y-6">
+                    <!-- Brand Strengths vs Competitor Opportunities -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="bg-[#072E33] border border-[#294D61] p-6 rounded-2xl">
+                            <h4 class="text-xs font-bold uppercase tracking-wider text-[#0F969C] flex items-center gap-2 mb-3">
+                                <i data-lucide="shield-check" class="w-4 h-4"></i> Where Submitted Brand Outperforms
+                            </h4>
+                            <ul id="brandStrengths" class="space-y-2 text-sm text-[#BDD7D8]"></ul>
+                        </div>
+                        <div class="bg-[#072E33] border border-[#294D61] p-6 rounded-2xl">
+                            <h4 class="text-xs font-bold uppercase tracking-wider text-[#6DA5C0] flex items-center gap-2 mb-3">
+                                <i data-lucide="compass" class="w-4 h-4"></i> Market Gaps & Positioning Opportunities
+                            </h4>
+                            <ul id="brandOpportunities" class="space-y-2 text-sm text-[#BDD7D8]"></ul>
+                        </div>
+                    </div>
+
+                    <!-- Competitor Cards -->
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="font-display text-lg font-bold text-[#F1F7F7] flex items-center gap-2">
+                                <i data-lucide="users" class="w-5 h-5 text-[#0F969C]"></i> Identified Competitors
+                            </h3>
+                            <span class="text-xs text-[#6DA5C0]">Badges strictly differentiate verified vs. AI-suggested</span>
+                        </div>
+                        <div id="competitorsList" class="grid grid-cols-1 md:grid-cols-3 gap-5"></div>
+                    </div>
+                </div>
+
+                <!-- ================================================================= -->
+                <!-- TAB 3: SEO INTELLIGENCE (Module 3) -->
+                <!-- ================================================================= -->
+                <div id="tabContent-seo" class="tab-content hidden space-y-6">
+                    <!-- Keywords Overview -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                        <div class="bg-[#072E33] border border-[#294D61] p-5 rounded-2xl flex flex-col justify-between">
+                            <div>
+                                <span class="text-xs font-semibold uppercase tracking-wider text-[#0F969C]">Primary Target Keyword</span>
+                                <div class="mt-2 text-lg font-bold text-[#F1F7F7]" id="seoPrimaryKeyword">—</div>
+                            </div>
+                            <button onclick="copyElementText('seoPrimaryKeyword')" class="mt-4 px-3 py-1.5 bg-[#05161A] hover:bg-[#294D61]/50 border border-[#294D61] text-xs text-[#BDD7D8] hover:text-[#F1F7F7] rounded-lg flex items-center justify-center gap-1.5 transition">
+                                <i data-lucide="copy" class="w-3.5 h-3.5"></i> Copy Keyword
+                            </button>
+                        </div>
+                        <div class="bg-[#072E33] border border-[#294D61] p-5 rounded-2xl md:col-span-2">
+                            <span class="text-xs font-semibold uppercase tracking-wider text-[#6DA5C0]">Secondary & Long-Tail Keywords</span>
+                            <div class="mt-3 flex flex-wrap gap-2" id="seoKeywordsList"></div>
+                        </div>
+                    </div>
+
+                    <!-- Title & Meta Recommendations -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="bg-[#072E33] border border-[#294D61] p-6 rounded-2xl space-y-3">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-bold uppercase tracking-wider text-[#0F969C]">Recommended SEO Title</span>
+                                <button onclick="copyElementText('recommendedTitle')" class="text-xs text-[#6DA5C0] hover:text-[#F1F7F7] flex items-center gap-1 transition">
+                                    <i data-lucide="copy" class="w-3.5 h-3.5"></i> Copy
+                                </button>
+                            </div>
+                            <div class="text-xs text-[#BDD7D8]">Existing Title: <span id="currentTitle" class="text-[#F1F7F7] font-mono">None</span></div>
+                            <div class="text-sm font-semibold text-[#F1F7F7] bg-[#05161A] p-3.5 rounded-xl border border-[#0F969C]/50" id="recommendedTitle"></div>
+                            <p class="text-xs text-[#BDD7D8] leading-relaxed" id="titleReason"></p>
+                        </div>
+
+                        <div class="bg-[#072E33] border border-[#294D61] p-6 rounded-2xl space-y-3">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-bold uppercase tracking-wider text-[#0F969C]">Recommended Meta Description</span>
+                                <button onclick="copyElementText('recommendedMeta')" class="text-xs text-[#6DA5C0] hover:text-[#F1F7F7] flex items-center gap-1 transition">
+                                    <i data-lucide="copy" class="w-3.5 h-3.5"></i> Copy
+                                </button>
+                            </div>
+                            <div class="text-xs text-[#BDD7D8]">Existing Description: <span id="currentMeta" class="text-[#F1F7F7] font-mono">None</span></div>
+                            <div class="text-sm font-semibold text-[#F1F7F7] bg-[#05161A] p-3.5 rounded-xl border border-[#0F969C]/50" id="recommendedMeta"></div>
+                        </div>
+                    </div>
+
+                    <!-- Deterministic SEO Health & Supporting Content Strategy -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="bg-[#072E33] border border-[#294D61] p-6 rounded-2xl">
+                            <h4 class="text-sm font-bold text-[#F1F7F7] mb-4 flex items-center gap-2">
+                                <i data-lucide="stethoscope" class="w-4 h-4 text-[#0F969C]"></i> Technical SEO Observations
+                            </h4>
+                            <ul id="seoObservationsList" class="space-y-2.5 text-xs text-[#BDD7D8]"></ul>
+                        </div>
+                        <div class="bg-[#072E33] border border-[#294D61] p-6 rounded-2xl">
+                            <h4 class="text-sm font-bold text-[#F1F7F7] mb-4 flex items-center gap-2">
+                                <i data-lucide="file-plus-2" class="w-4 h-4 text-[#6DA5C0]"></i> Supporting Content Recommendations
+                            </h4>
+                            <div id="supportingContentList" class="space-y-3"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ================================================================= -->
+                <!-- TAB 4: TARGET SEARCH QUERIES (Module 2) -->
+                <!-- ================================================================= -->
+                <div id="tabContent-queries" class="tab-content hidden space-y-4">
+                    <div class="text-xs text-[#BDD7D8] flex items-center justify-between">
+                        <span>Exactly 5 multi-platform high-intent queries mapped across Google, LinkedIn, X, Instagram, and Facebook:</span>
+                        <span class="text-[#6DA5C0] font-mono">Non-benchmark AI recommendations</span>
+                    </div>
+                    <div id="queriesList" class="grid grid-cols-1 gap-4"></div>
+                </div>
+
+                <!-- ================================================================= -->
+                <!-- TAB 5: BUSINESS SERVICES (Module 4) -->
+                <!-- ================================================================= -->
+                <div id="tabContent-services" class="tab-content hidden space-y-4">
+                    <div class="text-xs text-[#BDD7D8] flex items-center justify-between">
+                        <span>Top 5 identified business offerings prioritized from actual site content:</span>
+                        <span class="text-[#0F969C] font-semibold">Strict Extracted / Inferred Provenance</span>
+                    </div>
+                    <div id="servicesList" class="grid grid-cols-1 md:grid-cols-2 gap-5"></div>
+                </div>
+
+                <!-- ================================================================= -->
+                <!-- TAB 6: AUDIENCE INTELLIGENCE (Module 5) -->
+                <!-- ================================================================= -->
+                <div id="tabContent-audience" class="tab-content hidden space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                        <div class="bg-[#072E33] border border-[#294D61] p-5 rounded-2xl">
+                            <span class="text-xs font-bold uppercase tracking-wider text-[#0F969C]">Primary Audience</span>
+                            <ul id="audiencePrimary" class="mt-3 space-y-1.5 text-sm text-[#F1F7F7]"></ul>
+                        </div>
+                        <div class="bg-[#072E33] border border-[#294D61] p-5 rounded-2xl">
+                            <span class="text-xs font-bold uppercase tracking-wider text-[#6DA5C0]">Target Industries</span>
+                            <ul id="audienceIndustries" class="mt-3 space-y-1.5 text-sm text-[#F1F7F7]"></ul>
+                        </div>
+                        <div class="bg-[#072E33] border border-[#294D61] p-5 rounded-2xl">
+                            <span class="text-xs font-bold uppercase tracking-wider text-[#0F969C]">Geographical Focus</span>
+                            <ul id="audienceGeo" class="mt-3 space-y-1.5 text-sm text-[#F1F7F7]"></ul>
+                        </div>
+                    </div>
+
+                    <!-- Customer Needs & Pain Points -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="bg-[#072E33] border border-[#294D61] p-6 rounded-2xl">
+                            <h4 class="text-sm font-bold text-[#0F969C] mb-3 flex items-center gap-2">
+                                <i data-lucide="check-circle-2" class="w-4 h-4"></i> Customer Needs Addressed
+                            </h4>
+                            <ul id="customerNeeds" class="space-y-2 text-sm text-[#BDD7D8]"></ul>
+                        </div>
+                        <div class="bg-[#072E33] border border-[#294D61] p-6 rounded-2xl">
+                            <h4 class="text-sm font-bold text-rose-400 mb-3 flex items-center gap-2">
+                                <i data-lucide="alert-circle" class="w-4 h-4"></i> Customer Pain Points Solved
+                            </h4>
+                            <ul id="customerChallenges" class="space-y-2 text-sm text-[#BDD7D8]"></ul>
+                        </div>
+                    </div>
+
+                    <!-- Marketing Segments -->
+                    <div class="bg-[#072E33] border border-[#294D61] p-6 sm:p-8 rounded-2xl">
+                        <h3 class="font-display text-lg font-bold text-[#F1F7F7] mb-5 flex items-center gap-2">
+                            <i data-lucide="share-2" class="w-5 h-5 text-[#0F969C]"></i> Strategic Marketing Segments
+                        </h3>
+                        <div id="marketingSegmentsList" class="grid grid-cols-1 md:grid-cols-2 gap-5"></div>
+                    </div>
+                </div>
+
+                <!-- ================================================================= -->
+                <!-- TAB 7: RAW JSON -->
+                <!-- ================================================================= -->
+                <div id="tabContent-json" class="tab-content hidden">
+                    <div class="bg-[#05161A] border border-[#294D61] p-5 rounded-2xl relative shadow-inner">
+                        <div class="flex items-center justify-between mb-3 border-b border-[#294D61] pb-3">
+                            <span class="text-xs font-mono text-[#6DA5C0]">Structured JSON Payload (Section 7 Schema)</span>
+                            <button onclick="copyRawJson()" class="px-3 py-1 bg-[#072E33] hover:bg-[#294D61] text-xs font-medium text-[#F1F7F7] rounded-lg border border-[#294D61] flex items-center gap-1.5 transition">
+                                <i data-lucide="copy" class="w-3.5 h-3.5"></i> Copy JSON
+                            </button>
+                        </div>
+                        <pre id="rawJsonBlock" class="p-2 text-xs font-mono text-[#BDD7D8] overflow-x-auto max-h-[600px] leading-relaxed"></pre>
+                    </div>
+                </div>
+
+            </section>
+
+        </main>
+
+        <!-- Footer -->
+        <footer class="border-t border-[#294D61] bg-[#072E33]/60 py-6 px-4 text-center text-xs text-[#BDD7D8] mt-auto">
+            SitePulse AI • Enterprise Website Intelligence & Growth Advisor REST API • Powered by Google Gemini Flash & FastAPI
+        </footer>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- 8. ANALYSIS HISTORY DRAWER (Real browser-persisted history) -->
+    <!-- ========================================================================= -->
+    <div id="historyDrawer" class="fixed inset-y-0 right-0 z-50 w-80 bg-[#072E33] border-l border-[#294D61] shadow-teal-lg transform translate-x-full transition-transform duration-300 flex flex-col justify-between hidden">
+        <div class="p-5 border-b border-[#294D61] flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <i data-lucide="history" class="w-5 h-5 text-[#0F969C]"></i>
+                <h3 class="font-display font-bold text-base text-[#F1F7F7]">Analysis History</h3>
+            </div>
+            <button onclick="toggleHistoryDrawer(false)" class="p-1 rounded-md text-[#BDD7D8] hover:text-[#F1F7F7] hover:bg-[#294D61]/50">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+        </div>
+
+        <div class="p-4 flex-1 overflow-y-auto space-y-3" id="historyListContainer">
+            <p class="text-xs text-[#BDD7D8] text-center py-8">No past analyses recorded on this device yet.</p>
+        </div>
+
+        <div class="p-4 border-t border-[#294D61] bg-[#05161A] flex items-center justify-between">
+            <button onclick="clearHistory()" class="text-xs text-rose-400 hover:text-rose-300 flex items-center gap-1 transition">
+                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Clear History
+            </button>
+            <span class="text-[11px] text-[#6DA5C0]">Saved locally</span>
+        </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- 9. SETTINGS MODAL -->
+    <!-- ========================================================================= -->
+    <div id="settingsModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-[#072E33] border border-[#294D61] rounded-2xl max-w-md w-full p-6 shadow-teal-lg space-y-5">
+            <div class="flex items-center justify-between border-b border-[#294D61] pb-4">
+                <h3 class="font-display font-bold text-lg text-[#F1F7F7] flex items-center gap-2">
+                    <i data-lucide="sliders" class="w-5 h-5 text-[#0F969C]"></i> Platform Settings
+                </h3>
+                <button onclick="toggleSettingsModal(false)" class="text-[#BDD7D8] hover:text-[#F1F7F7]">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <div class="space-y-4 text-xs text-[#BDD7D8]">
+                <div>
+                    <label class="block font-semibold text-[#F1F7F7] mb-1.5">Color Palette Theme</label>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button onclick="setThemeMode('dark')" id="btnThemeDark" class="p-2.5 rounded-lg border border-[#0F969C] bg-[#0C7075]/30 text-[#F1F7F7] flex items-center justify-center gap-2 font-medium">
+                            <i data-lucide="moon" class="w-4 h-4"></i> Dark Teal (Default)
+                        </button>
+                        <button onclick="setThemeMode('light')" id="btnThemeLight" class="p-2.5 rounded-lg border border-[#294D61] bg-[#05161A] text-[#BDD7D8] flex items-center justify-center gap-2 font-medium">
+                            <i data-lucide="sun" class="w-4 h-4"></i> Light Palette
+                        </button>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-[#F1F7F7] mb-1">Configured Gemini Model</label>
+                    <div class="p-2.5 rounded-lg bg-[#05161A] border border-[#294D61] font-mono text-xs text-[#6DA5C0] flex items-center justify-between">
+                        <span id="settingsModelText">gemini-3.5-flash</span>
+                        <span class="text-[10px] text-[#0F969C] uppercase font-semibold">Active</span>
+                    </div>
+                    <span class="text-[10px] text-[#6DA5C0] mt-1 block">Configured via <code>GEMINI_MODEL</code> in <code>.env</code></span>
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-[#F1F7F7] mb-1">Server Endpoint</label>
+                    <div class="p-2.5 rounded-lg bg-[#05161A] border border-[#294D61] font-mono text-xs text-[#BDD7D8]">
+                        POST /link-analysis (Port 4000)
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-4 border-t border-[#294D61] flex justify-end">
+                <button onclick="toggleSettingsModal(false)" class="px-4 py-2 bg-[#0C7075] hover:bg-[#0F969C] text-[#F1F7F7] rounded-lg text-xs font-semibold transition">
+                    Done
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- 10. TOAST NOTIFICATION COMPONENT -->
+    <!-- ========================================================================= -->
+    <div id="toastNotification" class="fixed bottom-6 right-6 z-50 bg-[#072E33] border border-[#0F969C] text-[#F1F7F7] px-4 py-3 rounded-xl shadow-teal-glow text-xs font-semibold flex items-center gap-2.5 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
+        <i data-lucide="check-circle" class="w-4 h-4 text-[#0F969C]"></i>
+        <span id="toastMessage">Copied to clipboard!</span>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- 11. CLIENT-SIDE LOGIC -->
+    <!-- ========================================================================= -->
     <script>
         let currentAnalysisData = null;
+        let isSidebarCollapsed = false;
+        const HISTORY_KEY = "sitepulse_analysis_history";
 
-        function setSample(url) {
-            document.getElementById('urlInput').value = url;
+        // Initialize icons on DOM ready
+        document.addEventListener("DOMContentLoaded", () => {
+            lucide.createIcons();
+            loadHistoryBadge();
+            fetchServerHealth();
+        });
+
+        async function fetchServerHealth() {
+            try {
+                const res = await fetch("/health");
+                if (res.ok) {
+                    const h = await res.json();
+                    if (h.ai_model) {
+                        document.getElementById("sidebarModelInfo").textContent = h.ai_model;
+                        document.getElementById("statModelName").textContent = h.ai_model.replace("gemini-", "").replace("-flash", " Flash");
+                        document.getElementById("settingsModelText").textContent = h.ai_model;
+                    }
+                }
+            } catch (e) {
+                console.warn("Health probe skipped", e);
+            }
         }
 
+        function toggleSidebar(forceState) {
+            const sidebar = document.getElementById("sidebar");
+            const backdrop = document.getElementById("mobileBackdrop");
+            const isHidden = sidebar.classList.contains("-translate-x-full");
+            const shouldOpen = forceState !== undefined ? forceState : isHidden;
+
+            if (shouldOpen) {
+                sidebar.classList.remove("-translate-x-full");
+                backdrop.classList.remove("hidden");
+            } else {
+                sidebar.classList.add("-translate-x-full");
+                backdrop.classList.add("hidden");
+            }
+        }
+
+        function toggleSidebarCollapse() {
+            isSidebarCollapsed = !isSidebarCollapsed;
+            const sidebar = document.getElementById("sidebar");
+            const collapseIcon = document.getElementById("collapseIcon");
+            const textElements = document.querySelectorAll(".sidebar-text");
+
+            if (isSidebarCollapsed) {
+                sidebar.classList.remove("w-64");
+                sidebar.classList.add("w-20");
+                textElements.forEach(el => el.classList.add("hidden"));
+                collapseIcon.setAttribute("data-lucide", "chevrons-right");
+            } else {
+                sidebar.classList.remove("w-20");
+                sidebar.classList.add("w-64");
+                textElements.forEach(el => el.classList.remove("hidden"));
+                collapseIcon.setAttribute("data-lucide", "chevrons-left");
+            }
+            lucide.createIcons();
+        }
+
+        function setSample(url) {
+            document.getElementById("urlInput").value = url;
+            focusUrlInput();
+        }
+
+        function clearInput() {
+            document.getElementById("urlInput").value = "";
+            focusUrlInput();
+        }
+
+        function focusUrlInput() {
+            const input = document.getElementById("urlInput");
+            input.focus();
+            input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        function navigateToSection(section) {
+            if (section === 'dashboard') {
+                document.getElementById('breadcrumbCurrent').textContent = 'Dashboard Overview';
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        // ==========================================
+        // Tab Switching
+        // ==========================================
         function switchTab(tabKey) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.remove('text-indigo-400', 'bg-indigo-500/10', 'border', 'border-indigo-500/20');
-                btn.classList.add('text-slate-400');
+            document.querySelectorAll(".tab-content").forEach(el => el.classList.add("hidden"));
+            document.querySelectorAll(".tab-btn").forEach(btn => {
+                btn.classList.remove("active", "bg-[#0C7075]", "text-[#F1F7F7]", "border-[#0F969C]");
+                btn.classList.add("text-[#BDD7D8]");
             });
 
             const content = document.getElementById(`tabContent-${tabKey}`);
             const btn = document.getElementById(`tabBtn-${tabKey}`);
             if (content && btn) {
-                content.classList.remove('hidden');
-                btn.classList.add('text-indigo-400', 'bg-indigo-500/10', 'border', 'border-indigo-500/20');
-                btn.classList.remove('text-slate-400');
+                content.classList.remove("hidden");
+                btn.classList.add("active");
+                btn.classList.remove("text-[#BDD7D8]");
             }
+
+            // Update breadcrumb
+            const tabNames = {
+                'overview': 'Executive Overview',
+                'competitors': 'Competitor Intelligence',
+                'seo': 'SEO Intelligence',
+                'queries': 'Search Query Research',
+                'services': 'Business Services',
+                'audience': 'Target Audience Insights',
+                'json': 'Raw JSON Dossier'
+            };
+            if (tabNames[tabKey]) {
+                document.getElementById('breadcrumbCurrent').textContent = tabNames[tabKey];
+            }
+
+            lucide.createIcons();
         }
 
-        document.getElementById('analyzeForm').addEventListener('submit', async (e) => {
+        // ==========================================
+        // Website Analysis Submission
+        // ==========================================
+        document.getElementById("analyzeForm").addEventListener("submit", async (e) => {
             e.preventDefault();
-            const url = document.getElementById('urlInput').value.trim();
+            const urlInput = document.getElementById("urlInput");
+            const url = urlInput.value.trim();
             if (!url) return;
 
-            // UI State
-            document.getElementById('resultsSection').classList.add('hidden');
-            document.getElementById('errorState').classList.add('hidden');
-            document.getElementById('loadingState').classList.remove('hidden');
-            document.getElementById('submitBtn').disabled = true;
+            // UI State updates
+            document.getElementById("resultsSection").classList.add("hidden");
+            document.getElementById("errorState").classList.add("hidden");
+            document.getElementById("loadingState").classList.remove("hidden");
+            document.getElementById("submitBtn").disabled = true;
 
+            // Scroll to loader
+            document.getElementById("loadingState").scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+            // 7 Meaningful Progress Stages (Section 4)
             const stages = [
-                { stage: "Inspecting URL & SSRF Security...", sub: "Validating against loopback, private IP, and DNS security..." },
-                { stage: "Extracting Website Content...", sub: "Fetching HTML, headings, meta tags, and subpages via HTTPX..." },
-                { stage: "Analyzing with Google Gemini Flash...", sub: "Reasoning over business model, SEO, competitors, and audiences..." }
+                { id: "stage-1", title: "Validating website URL...", sub: "Verifying scheme, DNS resolution, and enforcing SSRF protection..." },
+                { id: "stage-2", title: "Extracting website content...", sub: "Fetching HTML, parsing headings, links, and subpages via HTTPX..." },
+                { id: "stage-3", title: "Understanding business information...", sub: "Identifying core business category, offerings, and brand positioning..." },
+                { id: "stage-4", title: "Identifying competitors...", sub: "Searching external competitors and evaluating head-to-head advantages..." },
+                { id: "stage-5", title: "Generating SEO recommendations...", sub: "Auditing technical meta signals, primary keywords, and title optimizations..." },
+                { id: "stage-6", title: "Identifying target customers...", sub: "Segmenting customer profiles, pain points, and commercial requirements..." },
+                { id: "stage-7", title: "Preparing final analysis...", sub: "Assembling verified JSON intelligence container with Pydantic validation..." }
             ];
 
             let stageIdx = 0;
-            const stageInterval = setInterval(() => {
-                stageIdx = (stageIdx + 1) % stages.length;
-                document.getElementById('loadingStage').textContent = stages[stageIdx].stage;
-                document.getElementById('loadingSubtext').textContent = stages[stageIdx].sub;
-            }, 1800);
+            const progressBar = document.getElementById("loadingProgressBar");
+
+            function updateStageUI(idx) {
+                const s = stages[idx];
+                document.getElementById("loadingStageTitle").textContent = s.title;
+                document.getElementById("loadingStageSubtext").textContent = s.sub;
+                progressBar.style.width = `${Math.min(96, Math.round(((idx + 1) / stages.length) * 100))}%`;
+
+                // Update checklist items
+                stages.forEach((st, i) => {
+                    const el = document.getElementById(st.id);
+                    if (!el) return;
+                    if (i < idx) {
+                        el.className = "flex items-center gap-2 text-emerald-400 font-medium";
+                        el.innerHTML = `<i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i> ${el.textContent.trim().replace(/^[\d\.\s\w\W]+?\s/, '')}`;
+                    } else if (i === idx) {
+                        el.className = "flex items-center gap-2 text-[#0F969C] font-semibold";
+                        el.innerHTML = `<i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin"></i> ${el.textContent.trim().replace(/^[\d\.\s\w\W]+?\s/, '')}`;
+                    } else {
+                        el.className = "flex items-center gap-2 text-[#294D61]";
+                        el.innerHTML = `<i data-lucide="circle" class="w-3.5 h-3.5"></i> ${el.textContent.trim().replace(/^[\d\.\s\w\W]+?\s/, '')}`;
+                    }
+                });
+                lucide.createIcons();
+            }
+
+            updateStageUI(0);
+
+            const stageTimer = setInterval(() => {
+                if (stageIdx < stages.length - 1) {
+                    stageIdx++;
+                    updateStageUI(stageIdx);
+                }
+            }, 1900);
 
             try {
-                const response = await fetch('/link-analysis', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                const response = await fetch("/link-analysis", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ url: url })
                 });
 
                 const data = await response.json();
-                clearInterval(stageInterval);
-                document.getElementById('loadingState').classList.add('hidden');
-                document.getElementById('submitBtn').disabled = false;
+                clearInterval(stageTimer);
+                progressBar.style.width = "100%";
+
+                document.getElementById("loadingState").classList.add("hidden");
+                document.getElementById("submitBtn").disabled = false;
 
                 if (!response.ok || !data.success) {
                     showError(data);
@@ -401,187 +1038,456 @@
                 }
 
                 currentAnalysisData = data;
+                saveToHistory(url, data.brand?.name || "Business", data.brand?.category || "Website Analysis");
                 renderResults(data);
 
             } catch (err) {
-                clearInterval(stageInterval);
-                document.getElementById('loadingState').classList.add('hidden');
-                document.getElementById('submitBtn').disabled = false;
-                showError({ error: "Network connection error", detail: err.message });
+                clearInterval(stageTimer);
+                document.getElementById("loadingState").classList.add("hidden");
+                document.getElementById("submitBtn").disabled = false;
+                showError({
+                    error_code: "CONNECTION_FAILURE",
+                    error: "Network connection error",
+                    detail: err.message || "Failed to reach SitePulse AI API endpoint."
+                });
             }
         });
 
+        // ==========================================
+        // Error Handling Display
+        // ==========================================
         function showError(data) {
-            const errBox = document.getElementById('errorState');
-            const errTitle = document.getElementById('errorTitle');
-            const errMsg = document.getElementById('errorMessage');
-            const errTip = document.getElementById('errorTip');
+            const errBox = document.getElementById("errorState");
+            const errTitle = document.getElementById("errorTitle");
+            const errMsg = document.getElementById("errorMessage");
+            const errCode = document.getElementById("errorCodeBadge");
+            const errTip = document.getElementById("errorTip");
 
-            errTitle.textContent = data.error_code || "Analysis Error";
+            errCode.textContent = data.error_code || "ERROR";
+            errTitle.textContent = data.error_code ? data.error_code.replace(/_/g, ' ') : "Analysis Encountered an Error";
             errMsg.textContent = data.error || data.detail || "Unable to complete website analysis.";
-            
-            if (data.error_code === "LLM_CONFIGURATION_ERROR") {
-                errTip.classList.remove('hidden');
-                errTip.innerHTML = "<strong>Tip:</strong> Add your Google Gemini API key to <code>.env</code> file: <br><code>GEMINI_API_KEY=your_key_here</code> then re-run.";
-            } else if (data.error_code === "SSRF_PROTECTION_VIOLATION" || data.error_code === "VALIDATION_ERROR") {
-                errTip.classList.remove('hidden');
-                errTip.innerHTML = "<strong>Security Notice:</strong> The requested URL was blocked because it resolves to an internal/private address or localhost.";
+
+            if (data.error_code === "SSRF_PROTECTION_VIOLATION") {
+                errTip.classList.remove("hidden");
+                errTip.innerHTML = "<strong>Security Guardrail:</strong> Target URL points to an internal, loopback (localhost), or private IP network address. Only public accessible web addresses are permitted.";
+            } else if (data.error_code === "LLM_CONFIGURATION_ERROR") {
+                errTip.classList.remove("hidden");
+                errTip.innerHTML = "<strong>Configuration Notice:</strong> Gemini API key is missing or invalid. Verify <code>GEMINI_API_KEY</code> in your <code>.env</code> file.";
+            } else if (data.error_code === "WEBSITE_EXTRACTION_ERROR") {
+                errTip.classList.remove("hidden");
+                errTip.innerHTML = "<strong>Extraction Notice:</strong> Target website could not be reached, returned an HTTP error, or blocked HTML access. Verify the URL is live and publicly accessible.";
             } else {
-                errTip.classList.add('hidden');
+                errTip.classList.add("hidden");
             }
 
-            errBox.classList.remove('hidden');
+            errBox.classList.remove("hidden");
+            errBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            lucide.createIcons();
         }
 
+        function dismissError() {
+            document.getElementById("errorState").classList.add("hidden");
+            focusUrlInput();
+        }
+
+        // ==========================================
+        // Render Full Results (5 Modules)
+        // ==========================================
         function renderResults(data) {
             const a = data.analysis;
             const b = data.brand;
             const m = data.metadata;
 
-            // Brand Banner
-            document.getElementById('brandName').textContent = b.name || "Analyzed Business";
-            document.getElementById('brandCategory').textContent = b.category || "General Business";
-            document.getElementById('analyzedWebsite').innerHTML = `<i class="fa-solid fa-link text-xs mr-1 text-slate-500"></i> ${data.website}`;
-            document.getElementById('brandSummary').textContent = b.summary || "";
-            document.getElementById('metaModel').textContent = m.ai_model || "Gemini Flash";
-            document.getElementById('metaPages').textContent = `${m.pages_analyzed} pages`;
-            document.getElementById('metaTime').textContent = `${m.execution_time_seconds || 1.2}s`;
+            // Update Active Domain Badge
+            const domainBadge = document.getElementById("activeDomainBadge");
+            domainBadge.classList.remove("hidden");
+            domainBadge.classList.add("flex");
+            document.getElementById("activeDomainText").textContent = data.website.replace(/^https?:\/\//, '').replace(/\/$/, '');
 
-            // Tab 1: Competitors
+            // Brand Banner Overview
+            document.getElementById("brandName").textContent = b.name || "Analyzed Business";
+            document.getElementById("brandCategory").textContent = b.category || "Commercial Entity";
+            document.getElementById("analyzedWebsiteLink").textContent = data.website;
+            document.getElementById("analyzedWebsiteLink").href = data.website;
+            document.getElementById("brandSummary").textContent = b.summary || "Summary of analyzed company services and strategic focus.";
+            document.getElementById("analyzedTimestamp").textContent = new Date(m.analyzed_at || Date.now()).toLocaleString();
+
+            document.getElementById("metaModel").textContent = m.ai_model || "gemini-3.5-flash";
+            document.getElementById("metaPages").textContent = `${m.pages_analyzed || 1} ${m.pages_analyzed === 1 ? 'page' : 'pages'}`;
+            document.getElementById("metaTime").textContent = `${m.execution_time_seconds || 1.3}s`;
+
+            // Tab 1: Overview Highlights
             const comp = a.competitor_analysis;
-            const strList = document.getElementById('brandStrengths');
-            strList.innerHTML = (comp.strengths || []).map(s => `<li class="flex items-start gap-2"><i class="fa-solid fa-check text-emerald-400 mt-1 text-xs"></i><span>${s}</span></li>`).join('');
+            const brandOverview = comp.brand_overview || {};
 
-            const oppList = document.getElementById('brandOpportunities');
-            oppList.innerHTML = (comp.opportunities || []).map(o => `<li class="flex items-start gap-2"><i class="fa-solid fa-arrow-right text-indigo-400 mt-1 text-xs"></i><span>${o}</span></li>`).join('');
+            document.getElementById("overviewTargetMarket").textContent = brandOverview.target_market || "Global / Regional";
+            document.getElementById("overviewPrimaryKeyword").textContent = a.seo_improvements?.primary_keyword || "Not specified";
+            document.getElementById("overviewPositioning").textContent = brandOverview.market_positioning || "Commercial Service";
+            document.getElementById("overviewPrimaryIcp").textContent = a.target_audience?.primary_audience?.[0] || "Business Decision Makers";
 
-            const compList = document.getElementById('competitorsList');
-            compList.innerHTML = (comp.competitors || []).map(c => `
-                <div class="p-4 rounded-xl bg-slate-900 border border-slate-800 flex flex-col justify-between">
+            const advList = document.getElementById("overviewAdvantages");
+            advList.innerHTML = (brandOverview.competitive_advantages || []).map(adv => `
+                <li class="flex items-start gap-2.5">
+                    <i data-lucide="check" class="w-4 h-4 text-[#0F969C] mt-0.5 flex-shrink-0"></i>
+                    <span>${adv}</span>
+                </li>
+            `).join('');
+
+            const oppOverList = document.getElementById("overviewOpportunities");
+            oppOverList.innerHTML = (brandOverview.improvement_opportunities || []).map(opp => `
+                <li class="flex items-start gap-2.5">
+                    <i data-lucide="arrow-up-right" class="w-4 h-4 text-[#6DA5C0] mt-0.5 flex-shrink-0"></i>
+                    <span>${opp}</span>
+                </li>
+            `).join('');
+
+            // Tab 2: Competitors
+            const strList = document.getElementById("brandStrengths");
+            strList.innerHTML = (comp.strengths || []).map(s => `
+                <li class="flex items-start gap-2.5">
+                    <i data-lucide="check-circle-2" class="w-4 h-4 text-[#0F969C] mt-0.5 flex-shrink-0"></i>
+                    <span>${s}</span>
+                </li>
+            `).join('');
+
+            const oppList = document.getElementById("brandOpportunities");
+            oppList.innerHTML = (comp.opportunities || []).map(o => `
+                <li class="flex items-start gap-2.5">
+                    <i data-lucide="lightbulb" class="w-4 h-4 text-[#6DA5C0] mt-0.5 flex-shrink-0"></i>
+                    <span>${o}</span>
+                </li>
+            `).join('');
+
+            const compList = document.getElementById("competitorsList");
+            compList.innerHTML = (comp.competitors || []).map((c, i) => `
+                <div class="bg-[#05161A] border border-[#294D61] rounded-xl p-5 flex flex-col justify-between hover:border-[#0F969C]/60 transition-colors shadow-teal-sm">
                     <div>
-                        <div class="flex items-center justify-between mb-1">
-                            <h5 class="font-bold text-white">${c.name}</h5>
-                            <span class="text-[10px] uppercase font-bold px-1.5 py-0.5 rounded ${c.is_verified ? 'bg-emerald-500/20 text-emerald-300' : 'bg-slate-800 text-slate-400'}">
+                        <div class="flex items-center justify-between gap-2 mb-2">
+                            <h5 class="font-display font-bold text-base text-[#F1F7F7]">${c.name}</h5>
+                            <span class="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full ${c.is_verified ? 'bg-[#0C7075]/30 text-[#0F969C] border border-[#0F969C]/40' : 'bg-[#294D61]/50 text-[#BDD7D8] border border-[#294D61]'}">
                                 ${c.verification_status === 'verified_external_search' ? 'Verified Search' : 'AI Suggested'}
                             </span>
                         </div>
-                        <p class="text-xs text-indigo-400 font-medium mb-2">${c.category}</p>
-                        <p class="text-xs text-slate-300 mb-3">${c.comparison}</p>
+                        <div class="text-xs text-[#0F969C] font-semibold mb-2.5">${c.category}</div>
+                        <p class="text-xs text-[#BDD7D8] leading-relaxed mb-3">${c.comparison}</p>
                     </div>
-                    <div class="pt-2 border-t border-slate-800 text-[11px] text-slate-400">
-                        ${c.website_url ? `<a href="${c.website_url}" target="_blank" class="text-indigo-400 hover:underline flex items-center gap-1"><i class="fa-solid fa-arrow-up-right-from-square text-[9px]"></i> ${c.website_url}</a>` : '<span>URL unverified</span>'}
-                    </div>
-                </div>
-            `).join('');
 
-            // Tab 2: Queries
-            const queriesList = document.getElementById('queriesList');
-            queriesList.innerHTML = (a.target_search_queries || []).map((q, idx) => `
-                <div class="glass-panel p-4 rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-3">
-                    <div class="flex items-start gap-3">
-                        <span class="w-6 h-6 rounded-full bg-indigo-500/20 text-indigo-400 font-bold text-xs flex items-center justify-center flex-shrink-0 mt-0.5">#${idx + 1}</span>
+                    <div class="pt-3 border-t border-[#294D61] space-y-2 text-xs">
                         <div>
-                            <div class="font-semibold text-white text-base">"${q.query}"</div>
-                            <div class="text-xs text-slate-400 mt-1">${q.business_relevance}</div>
+                            <span class="text-[#6DA5C0] font-semibold">Strengths:</span> 
+                            <span class="text-[#BDD7D8]">${(c.strengths || []).slice(0, 2).join(', ')}</span>
                         </div>
-                    </div>
-                    <div class="flex flex-wrap items-center gap-2 self-start md:self-auto">
-                        <span class="text-xs px-2.5 py-1 rounded-md bg-slate-800 border border-slate-700 text-slate-300 font-medium">${q.search_intent}</span>
-                        <div class="flex items-center gap-1.5 text-xs text-slate-400">
-                            ${(q.recommended_platforms || []).map(p => `<span class="px-2 py-0.5 rounded bg-indigo-950/60 border border-indigo-800/50 text-indigo-300">${p}</span>`).join('')}
+                        <div class="flex items-center justify-between pt-1">
+                            ${c.website_url ? `
+                                <a href="${c.website_url}" target="_blank" class="text-xs text-[#6DA5C0] hover:text-[#F1F7F7] flex items-center gap-1">
+                                    <i data-lucide="external-link" class="w-3 h-3"></i> Visit site
+                                </a>
+                            ` : `<span class="text-[11px] text-[#6DA5C0]/60 italic">Domain unverified</span>`}
+                            <span class="text-[10px] text-[#6DA5C0] font-mono">Competitor #${i + 1}</span>
                         </div>
                     </div>
                 </div>
             `).join('');
 
-            // Tab 3: SEO
-            const seo = a.seo_improvements;
-            document.getElementById('seoPrimaryKeyword').textContent = seo.primary_keyword || "Not specified";
-            const kwList = document.getElementById('seoKeywordsList');
-            kwList.innerHTML = [...(seo.secondary_keywords || []), ...(seo.long_tail_keywords || [])].map(k => `
-                <span class="text-xs px-2.5 py-1 rounded-lg bg-slate-800 border border-slate-700 text-slate-300">${k}</span>
+            // Tab 3: SEO Intelligence
+            const seo = a.seo_improvements || {};
+            document.getElementById("seoPrimaryKeyword").textContent = seo.primary_keyword || "Not specified";
+
+            const kwList = document.getElementById("seoKeywordsList");
+            const allKws = [...(seo.secondary_keywords || []), ...(seo.long_tail_keywords || [])];
+            kwList.innerHTML = allKws.map(k => `
+                <button onclick="copyText('${k.replace(/'/g, "\\'")}')" class="text-xs px-2.5 py-1.5 rounded-lg bg-[#05161A] hover:bg-[#0C7075]/30 border border-[#294D61] hover:border-[#0F969C]/50 text-[#BDD7D8] hover:text-[#F1F7F7] flex items-center gap-1.5 transition">
+                    <span>${k}</span>
+                    <i data-lucide="copy" class="w-3 h-3 text-[#6DA5C0]"></i>
+                </button>
             `).join('');
 
-            document.getElementById('currentTitle').textContent = seo.existing_title || "None detected";
-            document.getElementById('recommendedTitle').textContent = seo.recommended_title || "";
-            document.getElementById('titleReason').textContent = seo.title_improvement_reason || "";
+            document.getElementById("currentTitle").textContent = seo.existing_title || "None detected on homepage";
+            document.getElementById("recommendedTitle").textContent = seo.recommended_title || "";
+            document.getElementById("titleReason").textContent = seo.title_improvement_reason || "";
 
-            document.getElementById('currentMeta').textContent = seo.existing_meta_description || "None detected";
-            document.getElementById('recommendedMeta').textContent = seo.meta_description || "";
+            document.getElementById("currentMeta").textContent = seo.existing_meta_description || "None detected on homepage";
+            document.getElementById("recommendedMeta").textContent = seo.meta_description || "";
 
-            const obsList = document.getElementById('seoObservationsList');
-            obsList.innerHTML = (seo.seo_observations || []).map(o => `<li class="flex items-start gap-2"><i class="fa-solid fa-circle-dot text-amber-400 mt-1 text-[8px]"></i><span>${o}</span></li>`).join('');
+            const obsList = document.getElementById("seoObservationsList");
+            obsList.innerHTML = (seo.seo_observations || []).map(o => `
+                <li class="flex items-start gap-2">
+                    <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-[#0F969C] mt-0.5 flex-shrink-0"></i>
+                    <span>${o}</span>
+                </li>
+            `).join('');
 
-            const suppList = document.getElementById('supportingContentList');
-            suppList.innerHTML = (seo.supporting_content || []).map(c => `
-                <div class="p-2.5 rounded-lg bg-slate-900 border border-slate-800 text-xs">
-                    <div class="flex items-center justify-between mb-1">
-                        <span class="font-bold text-slate-200">${c.topic}</span>
-                        <span class="text-[10px] px-1.5 py-0.5 rounded bg-indigo-900/40 text-indigo-300">${c.content_type}</span>
+            const suppList = document.getElementById("supportingContentList");
+            suppList.innerHTML = (seo.supporting_content || []).map(sc => `
+                <div class="p-3 rounded-xl bg-[#05161A] border border-[#294D61] text-xs">
+                    <div class="flex items-center justify-between gap-2 mb-1">
+                        <span class="font-bold text-[#F1F7F7]">${sc.topic}</span>
+                        <span class="text-[10px] px-2 py-0.5 rounded bg-[#0C7075]/30 text-[#6DA5C0] font-semibold">${sc.content_type}</span>
                     </div>
-                    <div class="text-slate-400">${c.purpose}</div>
+                    <div class="text-[#BDD7D8] text-[11px]">${sc.purpose}</div>
+                    <div class="text-[10px] text-[#0F969C] mt-1 font-mono">Target: ${sc.target_keyword}</div>
                 </div>
             `).join('');
 
-            // Tab 4: Top 5 Services
-            const sList = document.getElementById('servicesList');
+            // Tab 4: Search Queries (Exactly 5)
+            const queriesList = document.getElementById("queriesList");
+            queriesList.innerHTML = (a.target_search_queries || []).map((q, idx) => `
+                <div class="bg-[#072E33] border border-[#294D61] p-5 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-teal-sm">
+                    <div class="flex items-start gap-3.5">
+                        <span class="w-7 h-7 rounded-lg bg-[#0C7075] text-[#F1F7F7] font-bold text-xs flex items-center justify-center flex-shrink-0 mt-0.5 shadow-teal-sm">
+                            0${idx + 1}
+                        </span>
+                        <div>
+                            <div class="font-display font-bold text-base text-[#F1F7F7] flex items-center gap-2">
+                                "${q.query}"
+                                <button onclick="copyText('${q.query.replace(/'/g, "\\'")}')" class="text-[#6DA5C0] hover:text-[#F1F7F7] transition" title="Copy query">
+                                    <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+                                </button>
+                            </div>
+                            <div class="text-xs text-[#BDD7D8] mt-1 leading-relaxed">${q.business_relevance}</div>
+                            <div class="text-[11px] text-[#6DA5C0] mt-1">Target ICP: ${q.target_audience}</div>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-wrap items-center gap-2 self-start md:self-auto flex-shrink-0">
+                        <span class="text-xs px-2.5 py-1 rounded-md bg-[#05161A] border border-[#294D61] text-[#0F969C] font-semibold">${q.search_intent}</span>
+                        <div class="flex items-center gap-1.5 text-xs">
+                            ${(q.recommended_platforms || []).map(p => `
+                                <span class="px-2 py-0.5 rounded bg-[#0C7075]/25 border border-[#0F969C]/40 text-[#6DA5C0] text-[11px] font-medium">${p}</span>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            // Tab 5: Services (Exactly 5)
+            const sList = document.getElementById("servicesList");
             sList.innerHTML = (a.top_services || []).map((s, idx) => `
-                <div class="glass-panel p-5 rounded-xl border border-slate-800 flex flex-col justify-between">
+                <div class="bg-[#072E33] border border-[#294D61] p-6 rounded-2xl flex flex-col justify-between shadow-teal-sm">
                     <div>
-                        <div class="flex items-center justify-between mb-2">
-                            <h4 class="text-base font-bold text-white flex items-center gap-2">
-                                <span class="text-xs text-indigo-400 font-mono font-bold">0${idx + 1}.</span> ${s.service_name}
+                        <div class="flex items-center justify-between gap-2 mb-2">
+                            <h4 class="font-display text-base font-bold text-[#F1F7F7] flex items-center gap-2">
+                                <span class="text-xs text-[#0F969C] font-mono font-bold">#${idx + 1}</span> ${s.service_name}
                             </h4>
-                            <span class="text-[10px] uppercase font-bold px-2 py-0.5 rounded ${s.identification_type === 'extracted' ? 'bg-emerald-500/20 text-emerald-300' : 'bg-amber-500/20 text-amber-300'}">
+                            <span class="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full ${s.identification_type === 'extracted' ? 'bg-[#0C7075]/30 text-[#0F969C] border border-[#0F969C]/40' : 'bg-amber-950/40 text-amber-400 border border-amber-800/40'}">
                                 ${s.identification_type}
                             </span>
                         </div>
-                        <p class="text-xs text-slate-300 mb-3 leading-relaxed">${s.description}</p>
+                        <p class="text-xs text-[#BDD7D8] leading-relaxed mb-4">${s.description}</p>
                     </div>
-                    <div class="pt-3 border-t border-slate-800/80 space-y-1.5 text-xs text-slate-400">
-                        <div><strong class="text-slate-300">Target Industry:</strong> ${s.target_industry}</div>
-                        <div><strong class="text-slate-300">Core Benefit:</strong> ${s.main_benefit}</div>
-                        <div class="text-[11px] text-slate-500 truncate"><strong class="text-slate-400">Evidence:</strong> ${s.source_evidence}</div>
+
+                    <div class="pt-3 border-t border-[#294D61] space-y-1.5 text-xs">
+                        <div class="flex items-center justify-between text-[#BDD7D8]">
+                            <span class="text-[#6DA5C0]">Target Industry:</span>
+                            <span class="font-medium text-[#F1F7F7]">${s.target_industry}</span>
+                        </div>
+                        <div class="flex items-center justify-between text-[#BDD7D8]">
+                            <span class="text-[#6DA5C0]">Core Benefit:</span>
+                            <span class="font-medium text-[#F1F7F7]">${s.main_benefit}</span>
+                        </div>
+                        <div class="text-[11px] text-[#6DA5C0] pt-1 truncate">
+                            <span class="text-[#BDD7D8]">Evidence:</span> ${s.source_evidence}
+                        </div>
                     </div>
                 </div>
             `).join('');
 
-            // Tab 5: Target Audience
-            const aud = a.target_audience;
-            document.getElementById('audiencePrimary').innerHTML = (aud.primary_audience || []).map(p => `<li>• ${p}</li>`).join('');
-            document.getElementById('audienceIndustries').innerHTML = (aud.industries || []).map(i => `<li>• ${i}</li>`).join('');
-            document.getElementById('audienceGeo').innerHTML = (aud.geographical_focus || []).map(g => `<li>• ${g}</li>`).join('');
+            // Tab 6: Audience Intelligence
+            const aud = a.target_audience || {};
+            document.getElementById("audiencePrimary").innerHTML = (aud.primary_audience || []).map(p => `<li>• ${p}</li>`).join('');
+            document.getElementById("audienceIndustries").innerHTML = (aud.industries || []).map(i => `<li>• ${i}</li>`).join('');
+            document.getElementById("audienceGeo").innerHTML = (aud.geographical_focus || []).map(g => `<li>• ${g}</li>`).join('');
 
-            document.getElementById('customerNeeds').innerHTML = (aud.customer_needs || []).map(n => `<li class="flex items-start gap-2"><i class="fa-solid fa-check text-emerald-400 mt-1 text-xs"></i><span>${n}</span></li>`).join('');
-            document.getElementById('customerChallenges').innerHTML = (aud.customer_challenges || []).map(c => `<li class="flex items-start gap-2"><i class="fa-solid fa-xmark text-rose-400 mt-1 text-xs"></i><span>${c}</span></li>`).join('');
+            document.getElementById("customerNeeds").innerHTML = (aud.customer_needs || []).map(n => `
+                <li class="flex items-start gap-2">
+                    <i data-lucide="check" class="w-4 h-4 text-[#0F969C] mt-0.5 flex-shrink-0"></i>
+                    <span>${n}</span>
+                </li>
+            `).join('');
 
-            const segList = document.getElementById('marketingSegmentsList');
+            document.getElementById("customerChallenges").innerHTML = (aud.customer_challenges || []).map(c => `
+                <li class="flex items-start gap-2">
+                    <i data-lucide="x" class="w-4 h-4 text-rose-400 mt-0.5 flex-shrink-0"></i>
+                    <span>${c}</span>
+                </li>
+            `).join('');
+
+            const segList = document.getElementById("marketingSegmentsList");
             segList.innerHTML = (aud.marketing_segments || []).map(m => `
-                <div class="p-4 rounded-xl bg-slate-900 border border-slate-800">
-                    <div class="flex items-center justify-between mb-2">
-                        <h5 class="font-bold text-white text-sm">${m.audience_name}</h5>
-                        <span class="text-[10px] px-2 py-0.5 rounded bg-violet-500/20 text-violet-300 font-semibold">${m.business_type}</span>
+                <div class="p-5 rounded-xl bg-[#05161A] border border-[#294D61]">
+                    <div class="flex items-center justify-between gap-2 mb-2">
+                        <h5 class="font-bold text-[#F1F7F7] text-sm">${m.audience_name}</h5>
+                        <span class="text-[10px] px-2 py-0.5 rounded bg-[#0C7075]/30 text-[#6DA5C0] font-semibold">${m.business_type}</span>
                     </div>
-                    <p class="text-xs text-slate-300 mb-2">${m.business_relevance}</p>
-                    <div class="text-xs text-slate-400 pt-2 border-t border-slate-800">
-                        <strong class="text-indigo-400">Recommended Channel:</strong> ${m.suggested_marketing_channel}
+                    <p class="text-xs text-[#BDD7D8] leading-relaxed mb-3">${m.business_relevance}</p>
+                    <div class="text-xs text-[#6DA5C0] pt-2 border-t border-[#294D61] flex items-center justify-between">
+                        <span>Channel: <strong class="text-[#0F969C]">${m.suggested_marketing_channel}</strong></span>
+                        <span class="text-[10px] uppercase font-mono">${m.segment_type || 'primary'}</span>
                     </div>
                 </div>
             `).join('');
 
-            // Tab 6: Raw JSON
-            document.getElementById('rawJsonBlock').textContent = JSON.stringify(data, null, 2);
+            // Tab 7: Raw JSON
+            document.getElementById("rawJsonBlock").textContent = JSON.stringify(data, null, 2);
 
-            // Reveal results
-            document.getElementById('resultsSection').classList.remove('hidden');
-            switchTab('competitors');
+            // Display results container and reset to overview tab
+            document.getElementById("resultsSection").classList.remove("hidden");
+            switchTab("overview");
+
+            // Scroll smoothly to results
+            document.getElementById("resultsSection").scrollIntoView({ behavior: 'smooth', block: 'start' });
+            lucide.createIcons();
         }
 
-        function copyJson() {
+        // ==========================================
+        // Clipboard & Toast Notification Utilities
+        // ==========================================
+        function copyText(text) {
+            navigator.clipboard.writeText(text);
+            showToast("Copied to clipboard!");
+        }
+
+        function copyElementText(elementId) {
+            const el = document.getElementById(elementId);
+            if (el) {
+                copyText(el.textContent.trim());
+            }
+        }
+
+        function copyRawJson() {
             if (!currentAnalysisData) return;
             navigator.clipboard.writeText(JSON.stringify(currentAnalysisData, null, 2));
-            alert("Analysis JSON copied to clipboard!");
+            showToast("Full Analysis JSON copied!");
         }
+
+        function showToast(message) {
+            const toast = document.getElementById("toastNotification");
+            document.getElementById("toastMessage").textContent = message;
+            toast.classList.remove("translate-y-20", "opacity-0");
+            toast.classList.add("translate-y-0", "opacity-100");
+
+            setTimeout(() => {
+                toast.classList.remove("translate-y-0", "opacity-100");
+                toast.classList.add("translate-y-20", "opacity-0");
+            }, 2500);
+        }
+
+        // ==========================================
+        // LocalStorage History Operations
+        // ==========================================
+        function saveToHistory(url, brandName, category) {
+            try {
+                let history = JSON.parse(localStorage.getItem(HISTORY_KEY) || "[]");
+                history = history.filter(item => item.url.toLowerCase() !== url.toLowerCase());
+                history.unshift({
+                    url: url,
+                    brandName: brandName,
+                    category: category,
+                    timestamp: new Date().toISOString()
+                });
+                history = history.slice(0, 15); // keep latest 15
+                localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+                loadHistoryBadge();
+            } catch (e) {
+                console.warn("Storage error", e);
+            }
+        }
+
+        function loadHistoryBadge() {
+            try {
+                const history = JSON.parse(localStorage.getItem(HISTORY_KEY) || "[]");
+                const badge = document.getElementById("historyBadge");
+                if (badge) badge.textContent = history.length;
+            } catch (e) {}
+        }
+
+        function toggleHistoryDrawer(show) {
+            const drawer = document.getElementById("historyDrawer");
+            const container = document.getElementById("historyListContainer");
+
+            if (show) {
+                const history = JSON.parse(localStorage.getItem(HISTORY_KEY) || "[]");
+                if (history.length === 0) {
+                    container.innerHTML = '<p class="text-xs text-[#BDD7D8] text-center py-8">No past analyses recorded on this device yet.</p>';
+                } else {
+                    container.innerHTML = history.map(item => `
+                        <div onclick="selectHistoryItem('${item.url}')" class="p-3 rounded-xl bg-[#05161A] hover:bg-[#294D61]/40 border border-[#294D61] cursor-pointer transition">
+                            <div class="font-bold text-sm text-[#F1F7F7] truncate">${item.brandName}</div>
+                            <div class="text-xs text-[#0F969C] truncate">${item.category}</div>
+                            <div class="text-[11px] font-mono text-[#6DA5C0] truncate mt-1">${item.url}</div>
+                            <div class="text-[10px] text-[#BDD7D8] mt-1">${new Date(item.timestamp).toLocaleDateString()}</div>
+                        </div>
+                    `).join('');
+                }
+                drawer.classList.remove("hidden");
+                setTimeout(() => drawer.classList.remove("translate-x-full"), 10);
+            } else {
+                drawer.classList.add("translate-x-full");
+                setTimeout(() => drawer.classList.add("hidden"), 300);
+            }
+            lucide.createIcons();
+        }
+
+        function selectHistoryItem(url) {
+            toggleHistoryDrawer(false);
+            setSample(url);
+            document.getElementById("submitBtn").click();
+        }
+
+        function clearHistory() {
+            localStorage.removeItem(HISTORY_KEY);
+            loadHistoryBadge();
+            toggleHistoryDrawer(true);
+            showToast("Analysis history cleared");
+        }
+
+        // ==========================================
+        // Settings Modal & Theme Switching
+        // ==========================================
+        function toggleSettingsModal(show) {
+            const modal = document.getElementById("settingsModal");
+            if (show) {
+                modal.classList.remove("hidden");
+            } else {
+                modal.classList.add("hidden");
+            }
+            lucide.createIcons();
+        }
+
+        function setThemeMode(mode) {
+            const html = document.documentElement;
+            const btnDark = document.getElementById("btnThemeDark");
+            const btnLight = document.getElementById("btnThemeLight");
+            const icon = document.getElementById("themeIcon");
+
+            if (mode === 'light') {
+                html.classList.remove("dark");
+                btnLight.className = "p-2.5 rounded-lg border border-[#0C7075] bg-[#0C7075]/20 text-[#05161A] flex items-center justify-center gap-2 font-medium";
+                btnDark.className = "p-2.5 rounded-lg border border-[#D5E5E5] bg-[#FFFFFF] text-[#5D6B6B] flex items-center justify-center gap-2 font-medium";
+                icon.setAttribute("data-lucide", "sun");
+                localStorage.setItem("sitepulse_theme", "light");
+            } else {
+                html.classList.add("dark");
+                btnDark.className = "p-2.5 rounded-lg border border-[#0F969C] bg-[#0C7075]/30 text-[#F1F7F7] flex items-center justify-center gap-2 font-medium";
+                btnLight.className = "p-2.5 rounded-lg border border-[#294D61] bg-[#05161A] text-[#BDD7D8] flex items-center justify-center gap-2 font-medium";
+                icon.setAttribute("data-lucide", "moon");
+                localStorage.setItem("sitepulse_theme", "dark");
+            }
+            lucide.createIcons();
+        }
+
+        function toggleTheme() {
+            const isDark = document.documentElement.classList.contains("dark");
+            setThemeMode(isDark ? 'light' : 'dark');
+        }
+
+        // Initialize saved theme preference
+        (function() {
+            const savedTheme = localStorage.getItem("sitepulse_theme");
+            if (savedTheme === 'light') {
+                setThemeMode('light');
+            }
+        })();
     </script>
 </body>
 </html>
